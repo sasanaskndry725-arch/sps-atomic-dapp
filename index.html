@@ -9,161 +9,303 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
     
     <style>
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            min-height: 100vh;
+        /* ==================== RESET & ROOT ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #6366f1; --primary-glow: #818cf8; --secondary: #10b981;
+            --accent: #f59e0b; --accent-glow: #fbbf24; --dark: #0f172a; --darker: #020617;
+            --light: #f8fafc; --glass: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.15);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
         }
-        .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        button {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 18px;
-            margin: 12px 0;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        .connected {
-            background: linear-gradient(135deg, #10b981, #34d399);
-        }
-        .address {
-            background: rgba(0,0,0,0.4);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-family: monospace;
-            word-break: break-all;
-            border: 1px solid rgba(96, 165, 250, 0.4);
-            color: #60a5fa;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 25px 0;
-        }
-        .stat-box {
-            background: rgba(30, 41, 59, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .stat-value {
-            font-size: 28px;
-            font-weight: 900;
-            color: #6366f1;
-            margin: 10px 0;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #6366f1;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: none;
-        }
-        .notification.success { background: linear-gradient(135deg, #10b981, #34d399); }
-        .notification.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .notification.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
         
-        .loader {
-            border: 3px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            border-top: 3px solid white;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
+        body {
+            font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            background: var(--darker); color: var(--light); min-height: 100vh;
+            overflow-x: hidden; position: relative;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        /* ==================== 3D GALAXY BACKGROUND ==================== */
+        #galaxyCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        
+        /* ==================== GLASS MORPHISM ==================== */
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(30px); border-radius: 24px;
+            padding: 30px; margin: 20px auto; max-width: 500px; border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transition: all 0.4s ease;
+        }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(99, 102, 241, 0.5); }
+        
+        /* ==================== ATOMIC BUTTONS ==================== */
+        .atomic-btn {
+            width: 100%; padding: 22px; border: none; border-radius: 18px; font-size: 20px;
+            font-weight: 800; margin: 15px 0; cursor: pointer; transition: all 0.5s ease;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            background: var(--gradient-primary); color: white; position: relative; overflow: hidden;
+        }
+        .atomic-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(99, 102, 241, 0.7); }
+        .atomic-btn:active { transform: translateY(-1px); }
+        .atomic-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        
+        /* ==================== WALLET DISPLAY ==================== */
+        .wallet-display { display: none; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .address-box {
+            background: rgba(0, 0, 0, 0.4); padding: 18px; border-radius: 16px; margin: 20px 0;
+            word-break: break-all; font-family: 'Courier New', monospace; color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.4); text-align: center; font-size: 16px;
+        }
+        
+        /* ==================== STATS GRID ==================== */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 25px 0; }
+        .stat-orb {
+            background: rgba(30, 41, 59, 0.7); border-radius: 20px; padding: 25px; text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.4s ease;
+        }
+        .stat-orb:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .stat-value { font-size: 32px; font-weight: 900; color: var(--primary); margin: 10px 0; }
+        .stat-label { font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; }
+        
+        /* ==================== FORMS ==================== */
+        .form-input {
+            width: 100%; padding: 20px; border: 2px solid #334155; border-radius: 16px;
+            background: rgba(15, 23, 42, 0.8); color: white; font-size: 18px; font-family: inherit;
+            margin: 15px 0; transition: all 0.4s ease;
+        }
+        .form-input:focus { border-color: var(--primary); outline: none; background: rgba(15, 23, 42, 0.95); }
+        
+        /* ==================== LOADERS & NOTIFICATIONS ==================== */
+        .atomic-loader { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .notification {
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            padding: 20px 30px; border-radius: 16px; color: white; font-weight: 800; z-index: 1000;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.6s ease; opacity: 0;
+            max-width: 90%; text-align: center;
+        }
+        .notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .notification.success { background: linear-gradient(135deg, rgba(16, 185, 129, 0.97) 0%, rgba(5, 150, 105, 0.97) 100%); }
+        .notification.error { background: linear-gradient(135deg, rgba(239, 68, 68, 0.97) 0%, rgba(220, 38, 38, 0.97) 100%); }
+        .notification.info { background: linear-gradient(135deg, rgba(99, 102, 241, 0.97) 0%, rgba(79, 70, 229, 0.97) 100%); }
+        .notification.warning { background: linear-gradient(135deg, rgba(245, 158, 11, 0.97) 0%, rgba(217, 119, 6, 0.97) 100%); }
+        
+        /* ==================== DEBUG PANEL ==================== */
+        .debug-panel {
+            position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8);
+            padding: 10px; border-radius: 8px; font-size: 12px; z-index: 9999;
+            max-width: 300px; max-height: 200px; overflow: auto; display: none;
+            border: 1px solid var(--primary);
+        }
+        
+        /* ==================== WALLET TEST ==================== */
+        .wallet-test-btn {
+            background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid var(--primary);
+            padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px;
+            width: 100%; margin-bottom: 10px; transition: all 0.3s ease;
+        }
+        .wallet-test-btn:hover {
+            background: rgba(99, 102, 241, 0.3); transform: translateY(-2px);
+        }
+        .test-result {
+            font-size: 12px; color: #94a3b8; margin-top: 10px; text-align: right;
+            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;
+            max-height: 150px; overflow-y: auto; direction: ltr;
+        }
+        
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 480px) {
+            .glass-card { padding: 25px 20px; margin: 15px; }
+            .atomic-btn { padding: 20px; font-size: 18px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 28px; }
+        }
+        
+        /* ==================== MAIN CONTAINER ==================== */
+        .main-container {
+            max-width: 500px; margin: 0 auto; padding: 20px; position: relative; z-index: 1;
         }
     </style>
 </head>
 <body>
+    <!-- 3D Galaxy Canvas -->
+    <canvas id="galaxyCanvas"></canvas>
     
-    <div class="notification" id="notification"></div>
+    <!-- Notification System -->
+    <div id="notification" class="notification"></div>
     
-    <div class="card">
-        <h1 style="font-size: 36px; margin-bottom: 10px;">
-            <i class="fas fa-rocket"></i> SPS MATRIX ATOMIC
-        </h1>
-        <p style="color: #94a3b8; margin-bottom: 25px;">دی‌اپ اتمی - نسخه اتصال کامل</p>
+    <!-- Debug Panel (فعلاً مخفی) -->
+    <div id="debugPanel" class="debug-panel"></div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
         
-        <!-- دکمه اتصال اصلی -->
-        <button id="connectBtn">
-            <i class="fas fa-wallet"></i> اتصال کیف پول
-        </button>
+        <!-- Header -->
+        <div class="glass-card" style="text-align: center; margin-top: 20px;">
+            <div style="font-size: 48px; margin-bottom: 10px;">🚀</div>
+            <h1 style="font-size: 36px; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;">
+                SPS MATRIX ATOMIC
+            </h1>
+            <p style="color: #94a3b8; font-size: 16px; margin-bottom: 20px;">دی‌اپ اتمی نسل آینده - نسخه اصلاح شده</p>
+            <div style="display: inline-block; background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 10px 25px; border-radius: 50px; font-size: 14px; font-weight: 700;">
+                <i class="fas fa-bolt"></i> SafePal Optimized • Polygon
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">
+                <i class="fas fa-code-branch"></i> v2.1 - رفع کامل خطای اتصال
+            </div>
+        </div>
         
-        <div id="walletInfo" style="display:none;">
-            <!-- آدرس کیف پول -->
-            <div class="address" id="walletAddress"></div>
+        <!-- Wallet Connection -->
+        <div class="glass-card">
+            <h2 style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-size: 24px;">
+                <i class="fas fa-plug"></i> اتصال اتمی
+            </h2>
             
-            <!-- موجودی -->
-            <div style="font-size: 28px; margin: 25px 0;">
-                <i class="fas fa-coins"></i> موجودی: 
-                <span id="balance" style="color: #10b981; font-weight: bold;">0.00</span> MATIC
+            <!-- دکمه تست کیف پول -->
+            <button onclick="testWalletDetection()" class="wallet-test-btn">
+                <i class="fas fa-search"></i> تشخیص کیف پول
+            </button>
+            <div id="walletTestResult" class="test-result"></div>
+            
+            <button id="connectBtn" class="atomic-btn">
+                <i class="fas fa-wallet"></i>
+                <span id="connectText">اتصال کیف پول</span>
+            </button>
+            
+            <div id="walletPanel" class="wallet-display">
+                <div class="address-box" id="walletAddress"></div>
+                
+                <div style="text-align: center; margin: 25px 0;">
+                    <div style="color: #e2e8f0; margin-bottom: 10px; font-size: 18px;">
+                        <i class="fas fa-coins"></i> موجودی حساب:
+                    </div>
+                    <div style="font-size: 48px; font-weight: 900; color: var(--secondary);" id="balance">0.00</div>
+                    <div style="color: #94a3b8; margin-top: 5px;">MATIC</div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-orb">
+                        <div class="stat-label">شبکه</div>
+                        <div class="stat-value" id="network">Polygon</div>
+                    </div>
+                    <div class="stat-orb">
+                        <div class="stat-label">وضعیت</div>
+                        <div class="stat-value" id="status" style="color: var(--secondary);">متصل</div>
+                    </div>
+                </div>
+                
+                <button id="disconnectBtn" class="atomic-btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 20px;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    قطع اتصال
+                </button>
+            </div>
+        </div>
+        
+        <!-- User Registration -->
+        <div class="glass-card">
+            <h2 style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-size: 24px;">
+                <i class="fas fa-user-plus"></i> ثبت‌نام جدید
+            </h2>
+            
+            <input type="number" id="uplineId" class="form-input" placeholder="آیدی آپلاین (مثال: 1)" min="1">
+            
+            <select id="position" class="form-input" style="appearance: none;">
+                <option value="true">👈 سمت چپ (Left)</option>
+                <option value="false">👉 سمت راست (Right)</option>
+            </select>
+            
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%); border-radius: 20px; padding: 25px; text-align: center; margin: 20px 0; border: 1px solid rgba(245, 158, 11, 0.4);">
+                <div style="font-size: 20px; color: #fbbf24; margin-bottom: 10px; font-weight: 800;">
+                    <i class="fas fa-gem"></i> کارمزد ثبت‌نام
+                </div>
+                <div style="font-size: 52px; font-weight: 900; color: #f59e0b; margin: 15px 0;" id="entryFeeDisplay">
+                    در حال بارگذاری...
+                </div>
+                <div style="color: #94a3b8; font-size: 14px;">
+                    <i class="fas fa-info-circle"></i> +10% برای هزینه گس
+                </div>
             </div>
             
-            <!-- آمار شبکه -->
-            <div class="stats">
-                <div class="stat-box">
-                    <div style="color: #94a3b8; font-size: 14px;">کاربران کل</div>
+            <button id="registerBtn" class="atomic-btn" style="background: linear-gradient(135deg, var(--secondary) 0%, #34d399 100%);">
+                <i class="fas fa-check-circle"></i>
+                ثبت‌نام در سیستم
+            </button>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="glass-card">
+            <h2 style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-size: 24px;">
+                <i class="fas fa-bolt"></i> عملیات سریع
+            </h2>
+            
+            <div class="stats-grid">
+                <button id="withdrawPoolBtn" class="atomic-btn" style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-glow) 100%);">
+                    <i class="fas fa-money-bill-wave"></i>
+                    برداشت از پول
+                </button>
+                
+                <button id="withdrawSpecialBtn" class="atomic-btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);">
+                    <i class="fas fa-crown"></i>
+                    برداشت ویژه
+                </button>
+            </div>
+            
+            <input type="number" id="contributeAmount" class="form-input" placeholder="مقدار کمک به ماینر (MATIC)" step="0.001" min="0.001">
+            
+            <button id="contributeBtn" class="atomic-btn">
+                <i class="fas fa-donate"></i>
+                ارسال کمک
+            </button>
+        </div>
+        
+        <!-- Network Stats -->
+        <div class="glass-card">
+            <h2 style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-size: 24px;">
+                <i class="fas fa-chart-line"></i> آمار شبکه
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-orb">
+                    <div class="stat-label">کاربران کل</div>
                     <div class="stat-value" id="totalUsers">0</div>
                 </div>
-                <div class="stat-box">
-                    <div style="color: #94a3b8; font-size: 14px;">موجودی پول</div>
+                <div class="stat-orb">
+                    <div class="stat-label">موجودی پول</div>
                     <div class="stat-value" id="poolBalance">0</div>
-                    <div style="color: #94a3b8; font-size: 12px;">MATIC</div>
+                    <div class="stat-label">MATIC</div>
+                </div>
+                <div class="stat-orb">
+                    <div class="stat-label">پول ویژه</div>
+                    <div class="stat-value" id="specialPool">0</div>
+                    <div class="stat-label">MATIC</div>
+                </div>
+                <div class="stat-orb">
+                    <div class="stat-label">ماینرها</div>
+                    <div class="stat-value" id="minerCount">0</div>
                 </div>
             </div>
-            
-            <!-- دکمه‌های عملیات -->
-            <button id="refreshBtn">
-                <i class="fas fa-sync-alt"></i> به‌روزرسانی اطلاعات
-            </button>
-            
-            <button id="registerBtn">
-                <i class="fas fa-user-plus"></i> ثبت‌نام جدید (به زودی)
-            </button>
-            
-            <button id="disconnectBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                <i class="fas fa-sign-out-alt"></i> قطع اتصال
-            </button>
+        </div>
+        
+        <!-- Footer -->
+        <div class="glass-card" style="text-align: center; color: #64748b; font-size: 14px; margin-bottom: 30px;">
+            <div style="margin-bottom: 15px;">
+                <div style="font-size: 16px; color: #e2e8f0; margin-bottom: 10px;">
+                    <i class="fas fa-link"></i> اطلاعات قرارداد
+                </div>
+                <div style="font-family: 'Courier New', monospace; background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 12px; color: #94a3b8; font-size: 12px; word-break: break-all;">
+                    0x7a7b06D49129B34976D07B3854d4D72D01588191
+                </div>
+            </div>
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px; margin-top: 20px;">
+                <p>SPS Matrix Atomic DApp • شبکه Polygon Mainnet</p>
+                <p style="margin-top: 8px; font-size: 12px;">
+                    <i class="fas fa-mobile-alt"></i> برای بهترین تجربه از مرورگر داخلی SafePal استفاده کنید
+                </p>
+                <p style="margin-top: 5px; font-size: 11px; color: #475569;">
+                    <i class="fas fa-code"></i> نسخه: 2.1 | ABI: تطبیق‌یافته | رفع خطای اتصال
+                </p>
+            </div>
         </div>
     </div>
 
@@ -171,181 +313,350 @@
         // ==================== CONFIGURATION ====================
         const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
         
-        // ABI ضروری
-        const CONTRACT_ABI = [
-            "function totalUsers() view returns (uint256)",
-            "function poolBalance() view returns (uint256)",
-            "function specialRewardPool() view returns (uint256)",
-            "function eligiblePoolUserCount() view returns (uint256)",
-            "function ENTRY_FEE() view returns (uint256)"
-        ];
-        
+        const CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+        const NETWORK_CONFIG = {
+            chainId: "0x89",
+            chainName: "Polygon Mainnet",
+            nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+            rpcUrls: ["https://polygon-rpc.com"],
+            blockExplorerUrls: ["https://polygonscan.com/"]
+        };
+
         // ==================== GLOBAL VARIABLES ====================
         let provider = null;
         let signer = null;
         let contract = null;
         let userAddress = null;
         let isConnected = false;
-        
+        let entryFee = null;
+
         // ==================== HELPER FUNCTIONS ====================
-        function showNotification(message, type = 'info') {
+        function showNotification(message, type = 'success', duration = 4000) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            setTimeout(() => notification.style.display = 'none', 4000);
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => notification.classList.remove('show'), duration);
         }
-        
-        // ==================== اتصال کیف پول ====================
+
+        function formatAddress(address) {
+            if (!address) return '---';
+            return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+        }
+
+        function formatMatic(value) {
+            if (!value) return '0.00';
+            const num = parseFloat(ethers.utils.formatEther(value));
+            return num < 0.001 ? '< 0.001' : num.toFixed(3);
+        }
+
+        function logDebug(message) {
+            console.log(`[DEBUG] ${message}`);
+            const debugPanel = document.getElementById('debugPanel');
+            debugPanel.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            debugPanel.scrollTop = debugPanel.scrollHeight;
+        }
+
+        // ==================== تابع تشخیص کیف پول ====================
+        function testWalletDetection() {
+            const resultDiv = document.getElementById('walletTestResult');
+            resultDiv.innerHTML = '<div style="text-align: center; color: #f59e0b;"><div class="atomic-loader" style="width: 16px; height: 16px; display: inline-block;"></div> در حال بررسی...</div>';
+            
+            setTimeout(() => {
+                let html = '<div style="text-align: right;">';
+                
+                const checks = [
+                    { name: 'window.ethereum', exists: !!window.ethereum, object: window.ethereum },
+                    { name: 'window.safepalProvider', exists: !!window.safepalProvider, object: window.safepalProvider },
+                    { name: 'window.safepalwallet', exists: !!window.safepalwallet, object: window.safepalwallet },
+                    { name: 'window.web3', exists: !!window.web3, object: window.web3 },
+                    { name: 'window.safepal', exists: !!window.safepal, object: window.safepal },
+                ];
+                
+                checks.forEach(check => {
+                    if (check.exists) {
+                        html += `<div style="color: #10b981; margin-bottom: 5px;">
+                            <i class="fas fa-check-circle"></i> ${check.name} پیدا شد`;
+                        
+                        if (check.object && check.object.request && typeof check.object.request === 'function') {
+                            html += ' <span style="color: #60a5fa;">(دارای متد request)</span>';
+                        } else {
+                            html += ' <span style="color: #f59e0b;">(فاقد متد request)</span>';
+                        }
+                        
+                        html += '</div>';
+                    } else {
+                        html += `<div style="color: #ef4444; margin-bottom: 5px;">
+                            <i class="fas fa-times-circle"></i> ${check.name} پیدا نشد
+                        </div>`;
+                    }
+                });
+                
+                if (window.ethereum && window.ethereum.request) {
+                    html += '<div style="margin-top: 15px; color: #60a5fa;">در حال بررسی حساب‌ها...</div>';
+                    
+                    window.ethereum.request({ method: 'eth_accounts' })
+                        .then(accounts => {
+                            let accountsHtml = '';
+                            if (accounts.length > 0) {
+                                accountsHtml = `<div style="color: #10b981; margin-top: 10px;">
+                                    <i class="fas fa-user-check"></i> حساب‌های فعال: ${accounts.length}
+                                    <div style="font-size: 10px; word-break: break-all; margin-top: 5px;">${accounts[0]}</div>
+                                </div>`;
+                            } else {
+                                accountsHtml = `<div style="color: #f59e0b; margin-top: 10px;">
+                                    <i class="fas fa-user-times"></i> هیچ حساب فعالی پیدا نشد
+                                </div>`;
+                            }
+                            resultDiv.innerHTML += accountsHtml;
+                        })
+                        .catch(err => {
+                            resultDiv.innerHTML += `<div style="color: #ef4444; margin-top: 10px;">
+                                <i class="fas fa-exclamation-triangle"></i> خطا در دریافت حساب‌ها: ${err.message}
+                            </div>`;
+                        });
+                    
+                    window.ethereum.request({ method: 'eth_chainId' })
+                        .then(chainId => {
+                            resultDiv.innerHTML += `<div style="color: #60a5fa; margin-top: 10px;">
+                                <i class="fas fa-network-wired"></i> Chain ID: ${chainId} (${parseInt(chainId)})
+                            </div>`;
+                        })
+                        .catch(err => {
+                            resultDiv.innerHTML += `<div style="color: #ef4444; margin-top: 10px;">
+                                <i class="fas fa-exclamation-triangle"></i> خطا در دریافت Chain ID: ${err.message}
+                            </div>`;
+                        });
+                }
+                
+                html += '</div>';
+                resultDiv.innerHTML = html;
+            }, 300);
+        }
+
+        // ==================== SAFEPAL PROVIDER DETECTION ====================
+        function getEthereumProvider() {
+            logDebug('=== شروع تشخیص کیف پول ===');
+            
+            const relevantObjects = Object.keys(window).filter(key => {
+                const obj = window[key];
+                return typeof obj === 'object' && obj !== null && (
+                    key.toLowerCase().includes('wallet') ||
+                    key.toLowerCase().includes('ethereum') ||
+                    key.toLowerCase().includes('web3') ||
+                    key.toLowerCase().includes('provider') ||
+                    key.toLowerCase().includes('safepal')
+                );
+            });
+            
+            logDebug('Objectهای مرتبط: ' + relevantObjects.join(', '));
+            
+            if (window.ethereum) {
+                logDebug('✅ window.ethereum موجود است');
+                
+                if (window.ethereum.request && typeof window.ethereum.request === 'function') {
+                    logDebug('✅ window.ethereum معتبر است و متد request دارد');
+                    return window.ethereum;
+                }
+            }
+            
+            if (window.safepalProvider) {
+                logDebug('✅ window.safepalProvider موجود است');
+                
+                if (!window.ethereum) {
+                    window.ethereum = window.safepalProvider;
+                    logDebug('window.ethereum با safepalProvider تنظیم شد');
+                }
+                return window.safepalProvider;
+            }
+            
+            if (window.safepalwallet) {
+                logDebug('✅ window.safepalwallet (حروف کوچک) موجود است');
+                
+                if (!window.ethereum) {
+                    window.ethereum = window.safepalwallet;
+                    logDebug('window.ethereum با safepalwallet تنظیم شد');
+                }
+                return window.safepalwallet;
+            }
+            
+            if (window.web3 && window.web3.currentProvider) {
+                logDebug('✅ window.web3.currentProvider موجود است');
+                if (!window.ethereum) {
+                    window.ethereum = window.web3.currentProvider;
+                    logDebug('window.ethereum با web3.currentProvider تنظیم شد');
+                }
+                return window.web3.currentProvider;
+            }
+            
+            logDebug('❌ هیچ provider معتبری پیدا نشد');
+            return null;
+        }
+
+        // ==================== WALLET CONNECTION ====================
         async function connectWallet() {
             try {
-                console.log('🔄 شروع فرآیند اتصال...');
-                
                 const connectBtn = document.getElementById('connectBtn');
-                connectBtn.innerHTML = '<span class="loader"></span> در حال اتصال...';
+                connectBtn.innerHTML = '<div class="atomic-loader"></div> در حال اتصال...';
                 connectBtn.disabled = true;
                 
-                // 1. تشخیص کیف پول
-                const ethereumProvider = window.ethereum || window.safepalProvider;
+                logDebug('=== شروع فرآیند اتصال ===');
+                
+                const ethereumProvider = getEthereumProvider();
                 if (!ethereumProvider) {
-                    showNotification('❌ لطفاً SafePal را نصب کنید', 'error');
+                    showNotification('❌ کیف پول یافت نشد', 'error');
                     resetConnectButton();
                     return;
                 }
                 
-                console.log('✅ Provider شناسایی شد');
+                logDebug('Provider شناسایی شد: ' + ethereumProvider.constructor.name);
                 
-                // 2. نمایش درخواست تایید به کاربر
-                showNotification('⌛ لطفاً در کیف پول تأیید کنید...', 'warning');
+                if (!ethereumProvider.request || typeof ethereumProvider.request !== 'function') {
+                    logDebug('❌ Provider فاقد متد request است');
+                    throw new Error('این کیف پول از استاندارد EIP-1193 پشتیبانی نمی‌کند');
+                }
                 
-                // 3. درخواست دسترسی کامل
-                console.log('📋 درخواست دسترسی به حساب‌ها...');
-                const accounts = await ethereumProvider.request({ 
-                    method: 'eth_requestAccounts'
-                });
+                try {
+                    const currentAccounts = await ethereumProvider.request({ method: 'eth_accounts' });
+                    logDebug(`حساب‌های فعلی: ${currentAccounts.length}`);
+                    
+                    if (currentAccounts.length > 0) {
+                        userAddress = currentAccounts[0];
+                        logDebug(`✅ از قبل متصل به: ${userAddress}`);
+                        await setupProviderAndContract(ethereumProvider);
+                        return;
+                    }
+                } catch (e) {
+                    logDebug(`خطا در eth_accounts: ${e.message}`);
+                }
                 
-                if (accounts.length === 0) {
-                    throw new Error('❌ هیچ حسابی انتخاب نشد');
+                logDebug('درخواست اتصال جدید...');
+                showNotification('⌛ لطفاً در کیف پول تأیید کنید', 'info');
+                
+                let accounts;
+                try {
+                    accounts = await ethereumProvider.request({ 
+                        method: 'eth_requestAccounts'
+                    });
+                    logDebug(`پاسخ eth_requestAccounts: ${accounts.length} حساب`);
+                } catch (requestError) {
+                    logDebug(`❌ خطا در eth_requestAccounts: ${requestError.message}`);
+                    logDebug(`کد خطا: ${requestError.code}`);
+                    
+                    if (requestError.code === 4001 || requestError.code === -32603) {
+                        throw new Error('کاربر درخواست اتصال را رد کرد');
+                    } else if (requestError.message.includes('already pending')) {
+                        throw new Error('یک درخواست اتصال در حال پردازش است');
+                    } else {
+                        throw requestError;
+                    }
+                }
+                
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('هیچ حسابی انتخاب نشد');
                 }
                 
                 userAddress = accounts[0];
-                console.log('✅ آدرس کیف پول:', userAddress);
+                logDebug(`✅ متصل به: ${userAddress}`);
                 
-                // 4. تنظیم provider و signer
-                provider = new ethers.providers.Web3Provider(ethereumProvider);
-                signer = provider.getSigner();
-                
-                // 5. ایجاد قرارداد
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                console.log('✅ قرارداد متصل شد');
-                
-                // 6. نمایش اطلاعات
-                document.getElementById('walletInfo').style.display = 'block';
-                document.getElementById('walletAddress').textContent = userAddress;
-                
-                // 7. به‌روزرسانی دکمه
-                connectBtn.innerHTML = '<i class="fas fa-check"></i> متصل شد';
-                connectBtn.className = 'connected';
-                connectBtn.disabled = false;
-                
-                // 8. دریافت اطلاعات
-                await updateBalance();
-                await updateContractInfo();
-                
-                showNotification('🎉 اتصال موفقیت‌آمیز! دسترسی کامل فعال شد', 'success');
-                isConnected = true;
-                
-                console.log('✅ اتصال کامل شد');
+                await setupProviderAndContract(ethereumProvider);
                 
             } catch (error) {
-                console.error('❌ خطای اتصال:', error);
+                console.error('خطای اتصال:', error);
+                logDebug(`❌ خطای اتصال: ${error.message}`);
                 
                 let errorMsg = 'خطا در اتصال';
-                if (error.code === 4001) {
-                    errorMsg = 'کاربر درخواست اتصال را رد کرد';
-                } else if (error.message.includes('rejected')) {
+                if (error.message.includes('رد کرد') || error.code === 4001) {
                     errorMsg = 'اتصال توسط کاربر رد شد';
+                } else if (error.message.includes('pending')) {
+                    errorMsg = 'لطفاً صبر کنید، درخواست قبلی در حال پردازش است';
+                } else if (error.message.includes('EIP-1193')) {
+                    errorMsg = 'کیف پول از استاندارد لازم پشتیبانی نمی‌کند';
                 }
                 
                 showNotification(`❌ ${errorMsg}`, 'error');
                 resetConnectButton();
             }
         }
-        
+
+        async function setupProviderAndContract(ethereumProvider) {
+            try {
+                logDebug('=== تنظیم Provider و Contract ===');
+                
+                window.ethereum = ethereumProvider;
+                
+                provider = new ethers.providers.Web3Provider(ethereumProvider);
+                logDebug('✅ Provider اترز ایجاد شد');
+                
+                signer = provider.getSigner();
+                
+                try {
+                    const signerAddress = await signer.getAddress();
+                    logDebug(`✅ آدرس Signer: ${signerAddress}`);
+                    
+                    if (signerAddress.toLowerCase() !== userAddress.toLowerCase()) {
+                        logDebug(`⚠️ هشدار: آدرس signer با آدرس کاربر متفاوت است`);
+                    }
+                } catch (signerError) {
+                    logDebug(`⚠️ خطا در دریافت آدرس signer: ${signerError.message}`);
+                }
+                
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                logDebug('✅ Contract ایجاد شد');
+                
+                try {
+                    const chainId = await ethereumProvider.request({ method: 'eth_chainId' });
+                    logDebug(`شبکه فعلی: ${chainId} (${parseInt(chainId)})`);
+                    
+                    if (chainId !== '0x89') {
+                        logDebug('⚠️ شبکه Polygon نیست، اما ادامه می‌دهیم');
+                        showNotification('⚠️ شبکه Polygon نیست، اما اتصال برقرار شد', 'warning');
+                    } else {
+                        logDebug('✅ شبکه Polygon فعال است');
+                    }
+                } catch (networkError) {
+                    logDebug(`⚠️ خطا در بررسی شبکه: ${networkError.message}`);
+                }
+                
+                document.getElementById('walletPanel').style.display = 'block';
+                document.getElementById('walletAddress').textContent = userAddress;
+                document.getElementById('status').textContent = 'متصل';
+                document.getElementById('status').style.color = 'var(--secondary)';
+                
+                const connectBtn = document.getElementById('connectBtn');
+                connectBtn.innerHTML = '<i class="fas fa-check"></i> <span>متصل شد</span>';
+                connectBtn.style.background = 'linear-gradient(135deg, var(--secondary), #34d399)';
+                
+                await updateContractData();
+                await updateEntryFeeFromContract();
+                
+                showNotification('🎉 اتصال موفقیت‌آمیز!', 'success');
+                isConnected = true;
+                logDebug('=== اتصال کامل شد ===');
+                
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error('خطا در تنظیم provider:', error);
+                logDebug(`❌ خطا در setupProviderAndContract: ${error.message}`);
+                throw error;
+            }
+        }
+
         function resetConnectButton() {
             const connectBtn = document.getElementById('connectBtn');
             connectBtn.innerHTML = '<i class="fas fa-wallet"></i> اتصال کیف پول';
-            connectBtn.className = '';
+            connectBtn.style.background = 'var(--gradient-primary)';
             connectBtn.disabled = false;
         }
-        
-        // ==================== دریافت موجودی ====================
-        async function updateBalance() {
-            if (!provider || !userAddress) return;
-            
-            try {
-                const balance = await provider.getBalance(userAddress);
-                const balanceMatic = ethers.utils.formatEther(balance);
-                document.getElementById('balance').textContent = parseFloat(balanceMatic).toFixed(2);
-                console.log('💰 موجودی:', balanceMatic, 'MATIC');
-            } catch (error) {
-                console.error('❌ خطا در دریافت موجودی:', error);
-            }
-        }
-        
-        // ==================== دریافت اطلاعات قرارداد ====================
-        async function updateContractInfo() {
-            if (!contract) return;
-            
-            try {
-                console.log('📊 دریافت اطلاعات قرارداد...');
-                
-                const [totalUsers, poolBalance] = await Promise.all([
-                    contract.totalUsers(),
-                    contract.poolBalance()
-                ]);
-                
-                document.getElementById('totalUsers').textContent = totalUsers.toString();
-                const poolMatic = ethers.utils.formatEther(poolBalance);
-                document.getElementById('poolBalance').textContent = parseFloat(poolMatic).toFixed(2);
-                
-                console.log('✅ اطلاعات قرارداد دریافت شد');
-                
-            } catch (error) {
-                console.error('❌ خطا در دریافت اطلاعات قرارداد:', error);
-            }
-        }
-        
-        // ==================== به‌روزرسانی اطلاعات ====================
-        async function refreshInfo() {
-            if (!isConnected) {
-                showNotification('❌ لطفاً اول کیف پول را متصل کنید', 'error');
-                return;
-            }
-            
-            try {
-                const refreshBtn = document.getElementById('refreshBtn');
-                refreshBtn.innerHTML = '<span class="loader"></span> در حال به‌روزرسانی...';
-                refreshBtn.disabled = true;
-                
-                await updateBalance();
-                await updateContractInfo();
-                
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> به‌روزرسانی اطلاعات';
-                refreshBtn.disabled = false;
-                
-                showNotification('✅ اطلاعات به‌روزرسانی شد', 'success');
-                
-            } catch (error) {
-                console.error('❌ خطا در به‌روزرسانی:', error);
-                showNotification('❌ خطا در به‌روزرسانی', 'error');
-            }
-        }
-        
-        // ==================== قطع اتصال ====================
+
         function disconnectWallet() {
-            document.getElementById('walletInfo').style.display = 'none';
-            resetConnectButton();
+            document.getElementById('walletPanel').style.display = 'none';
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.innerHTML = '<i class="fas fa-wallet"></i> اتصال کیف پول';
+            connectBtn.style.background = 'var(--gradient-primary)';
+            connectBtn.disabled = false;
             
             provider = null;
             signer = null;
@@ -354,73 +665,397 @@
             isConnected = false;
             
             showNotification('🔌 کیف پول قطع شد', 'info');
-            console.log('کیف پول قطع شد');
+            logDebug('کیف پول قطع شد');
         }
-        
-        // ==================== اتصال خودکار ====================
-        async function autoConnect() {
-            console.log('🔍 بررسی اتصال خودکار...');
+
+        function setupEventListeners() {
+            if (!window.ethereum) return;
             
-            try {
-                const ethereumProvider = window.ethereum || window.safepalProvider;
-                if (!ethereumProvider) return;
-                
-                // بررسی حساب‌های فعال
-                const accounts = await ethereumProvider.request({ 
-                    method: 'eth_accounts' 
-                }).catch(() => []);
-                
-                if (accounts.length > 0) {
-                    console.log('✅ حساب فعال پیدا شد:', accounts[0]);
-                    
-                    // اتصال خودکار
-                    userAddress = accounts[0];
-                    provider = new ethers.providers.Web3Provider(ethereumProvider);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                    
-                    // نمایش اطلاعات
-                    document.getElementById('walletInfo').style.display = 'block';
+            window.ethereum.on('accountsChanged', (newAccounts) => {
+                logDebug(`تغییر حساب: ${newAccounts.length} حساب`);
+                if (newAccounts.length > 0) {
+                    userAddress = newAccounts[0];
                     document.getElementById('walletAddress').textContent = userAddress;
-                    
-                    const connectBtn = document.getElementById('connectBtn');
-                    connectBtn.innerHTML = '<i class="fas fa-check"></i> متصل شد';
-                    connectBtn.className = 'connected';
-                    connectBtn.disabled = false;
-                    
-                    isConnected = true;
-                    
-                    // دریافت اطلاعات
-                    await updateBalance();
-                    await updateContractInfo();
-                    
-                    console.log('✅ اتصال خودکار موفق');
-                    showNotification('✅ اتصال خودکار فعال شد', 'success');
+                    updateContractData();
+                    showNotification('🔄 حساب کاربری تغییر کرد', 'info');
+                } else {
+                    disconnectWallet();
                 }
-                
-            } catch (error) {
-                console.log('⚠️ اتصال خودکار امکان‌پذیر نبود:', error);
-            }
-        }
-        
-        // ==================== INITIALIZATION ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 SPS Matrix Atomic DApp راه‌اندازی شد');
-            
-            // اتصال event listeners
-            document.getElementById('connectBtn').addEventListener('click', connectWallet);
-            document.getElementById('refreshBtn').addEventListener('click', refreshInfo);
-            document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
-            document.getElementById('registerBtn').addEventListener('click', function() {
-                showNotification('⏳ این قابلیت به زودی فعال می‌شود', 'info');
             });
             
-            // اتصال خودکار
-            setTimeout(autoConnect, 1000);
+            window.ethereum.on('chainChanged', (chainId) => {
+                logDebug(`تغییر شبکه: ${chainId}`);
+                if (chainId === '0x89') {
+                    showNotification('✅ شبکه Polygon فعال شد', 'success');
+                    setTimeout(() => updateContractData(), 1000);
+                } else {
+                    showNotification('⚠️ لطفاً به شبکه Polygon برگردید', 'warning');
+                }
+            });
+        }
+
+        async function updateContractData() {
+            if (!contract || !userAddress || !provider) return;
             
-            // خوش‌آمدگویی
+            try {
+                logDebug('در حال به‌روزرسانی اطلاعات قرارداد...');
+                
+                const balance = await provider.getBalance(userAddress);
+                document.getElementById('balance').textContent = formatMatic(balance);
+                logDebug(`موجودی: ${formatMatic(balance)} MATIC`);
+                
+                try {
+                    const totalUsers = await contract.totalUsers();
+                    document.getElementById('totalUsers').textContent = totalUsers.toString();
+                    logDebug(`کاربران کل: ${totalUsers}`);
+                } catch (e) { 
+                    console.warn('Could not get totalUsers:', e);
+                    logDebug(`خطا در دریافت totalUsers: ${e.message}`);
+                }
+                
+                try {
+                    const poolBalance = await contract.poolBalance();
+                    document.getElementById('poolBalance').textContent = formatMatic(poolBalance);
+                    logDebug(`موجودی پول: ${formatMatic(poolBalance)} MATIC`);
+                } catch (e) { 
+                    console.warn('Could not get poolBalance:', e);
+                    logDebug(`خطا در دریافت poolBalance: ${e.message}`);
+                }
+                
+                try {
+                    const specialPool = await contract.specialRewardPool();
+                    document.getElementById('specialPool').textContent = formatMatic(specialPool);
+                    logDebug(`پول ویژه: ${formatMatic(specialPool)} MATIC`);
+                } catch (e) { 
+                    console.warn('Could not get specialPool:', e);
+                    logDebug(`خطا در دریافت specialPool: ${e.message}`);
+                }
+                
+                try {
+                    const eligibleUsers = await contract.eligiblePoolUserCount();
+                    document.getElementById('minerCount').textContent = eligibleUsers.toString();
+                    logDebug(`ماینرها: ${eligibleUsers}`);
+                } catch (e) { 
+                    console.warn('Could not get eligibleUsers:', e);
+                    logDebug(`خطا در دریافت eligibleUsers: ${e.message}`);
+                }
+                
+                logDebug('✅ اطلاعات قرارداد به‌روزرسانی شد');
+            } catch (error) {
+                console.warn('Error updating contract data:', error);
+                logDebug(`خطا در به‌روزرسانی: ${error.message}`);
+            }
+        }
+
+        async function updateEntryFeeFromContract() {
+            if (!contract) return;
+            
+            try {
+                const feeWei = await contract.ENTRY_FEE();
+                entryFee = feeWei;
+                const feeMatic = ethers.utils.formatEther(feeWei);
+                document.getElementById('entryFeeDisplay').textContent = `${parseFloat(feeMatic).toFixed(0)} MATIC`;
+                logDebug(`کارمزد ثبت‌نام: ${parseFloat(feeMatic).toFixed(0)} MATIC`);
+            } catch (error) {
+                console.error('Error getting entry fee:', error);
+                document.getElementById('entryFeeDisplay').textContent = '350 MATIC';
+                entryFee = ethers.utils.parseEther('350');
+                logDebug('استفاده از مقدار پیش‌فرض 350 MATIC');
+            }
+        }
+
+        async function registerUser() {
+            if (!isConnected || !contract) {
+                showNotification('❌ لطفاً اول کیف پول را متصل کنید', 'error');
+                return;
+            }
+            
+            const uplineId = document.getElementById('uplineId').value;
+            const position = document.getElementById('position').value === 'true';
+            
+            if (!uplineId) {
+                showNotification('❌ لطفاً آیدی آپلاین را وارد کنید', 'error');
+                return;
+            }
+            
+            if (!provider || !userAddress || !entryFee) return false;
+            
+            try {
+                const balance = await provider.getBalance(userAddress);
+                const required = parseFloat(ethers.utils.formatEther(entryFee)) * 1.1;
+                const hasBalance = parseFloat(ethers.utils.formatEther(balance)) >= required;
+                
+                if (!hasBalance) {
+                    showNotification(`❌ موجودی کافی نیست. نیاز: ${required.toFixed(2)} MATIC`, 'error');
+                    logDebug(`موجودی ناکافی. نیاز: ${required.toFixed(2)}، موجود: ${ethers.utils.formatEther(balance)}`);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking balance:', error);
+                return;
+            }
+            
+            try {
+                const btn = document.getElementById('registerBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<div class="atomic-loader"></div> در حال ثبت‌نام...';
+                btn.disabled = true;
+                
+                showNotification('⏳ ارسال تراکنش ثبت‌نام...', 'info');
+                logDebug(`ثبت‌نام با آپلاین: ${uplineId}, موقعیت: ${position}`);
+                
+                const tx = await contract.register(uplineId, position, {
+                    value: entryFee,
+                    gasLimit: 500000
+                });
+                
+                showNotification('✅ تراکنش ارسال شد! منتظر تایید...', 'success');
+                logDebug(`تراکنش ارسال شد: ${tx.hash}`);
+                
+                const receipt = await tx.wait();
+                logDebug(`تراکنش تایید شد: ${receipt.transactionHash}`);
+                
+                showNotification('🎉 ثبت‌نام با موفقیت انجام شد!', 'success');
+                document.getElementById('uplineId').value = '';
+                await updateContractData();
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                logDebug(`خطای ثبت‌نام: ${error.message}`);
+                
+                let errorMsg = 'خطا در ثبت‌نام';
+                if (error.message.includes('insufficient funds')) {
+                    errorMsg = 'موجودی کافی نیست';
+                } else if (error.message.includes('Upline does not exist')) {
+                    errorMsg = 'آپلاین وجود ندارد';
+                } else if (error.message.includes('User already registered')) {
+                    errorMsg = 'کاربر قبلاً ثبت‌نام کرده است';
+                } else if (error.message.includes('user rejected')) {
+                    errorMsg = 'کاربر تراکنش را رد کرد';
+                }
+                
+                showNotification(`❌ ${errorMsg}`, 'error');
+            } finally {
+                const btn = document.getElementById('registerBtn');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> ثبت‌نام در سیستم';
+                btn.disabled = false;
+            }
+        }
+
+        async function withdrawPool() {
+            if (!isConnected || !contract) {
+                showNotification('❌ کیف پول متصل نیست', 'error');
+                return;
+            }
+            
+            try {
+                const btn = document.getElementById('withdrawPoolBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<div class="atomic-loader"></div> در حال برداشت...';
+                btn.disabled = true;
+                
+                showNotification('⏳ در حال برداشت از پول...', 'info');
+                logDebug('شروع برداشت از پول');
+                
+                const isWithdrawable = await contract.isPoolWithdrawable();
+                if (!isWithdrawable) {
+                    throw new Error('پول در حال حاضر قابل برداشت نیست');
+                }
+                
+                const tx = await contract.withdrawPool({ gasLimit: 300000 });
+                logDebug(`تراکنش برداشت: ${tx.hash}`);
+                
+                await tx.wait();
+                showNotification('✅ برداشت موفقیت‌آمیز بود!', 'success');
+                await updateContractData();
+                
+            } catch (error) {
+                console.error('Withdraw error:', error);
+                logDebug(`خطای برداشت: ${error.message}`);
+                showNotification(`❌ خطا: ${error.message}`, 'error');
+            } finally {
+                const btn = document.getElementById('withdrawPoolBtn');
+                btn.innerHTML = '<i class="fas fa-money-bill-wave"></i> برداشت از پول';
+                btn.disabled = false;
+            }
+        }
+
+        async function withdrawSpecial() {
+            if (!isConnected || !contract) {
+                showNotification('❌ کیف پول متصل نیست', 'error');
+                return;
+            }
+            
+            try {
+                const btn = document.getElementById('withdrawSpecialBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<div class="atomic-loader"></div> در حال برداشت...';
+                btn.disabled = true;
+                
+                showNotification('⏳ در حال برداشت از پول ویژه...', 'info');
+                logDebug('شروع برداشت ویژه');
+                
+                const tx = await contract.withdrawSpecials({ gasLimit: 300000 });
+                logDebug(`تراکنش برداشت ویژه: ${tx.hash}`);
+                
+                await tx.wait();
+                showNotification('✅ برداشت ویژه موفقیت‌آمیز بود!', 'success');
+                await updateContractData();
+                
+            } catch (error) {
+                console.error('Special withdraw error:', error);
+                logDebug(`خطای برداشت ویژه: ${error.message}`);
+                showNotification(`❌ خطا: ${error.message}`, 'error');
+            } finally {
+                const btn = document.getElementById('withdrawSpecialBtn');
+                btn.innerHTML = '<i class="fas fa-crown"></i> برداشت ویژه';
+                btn.disabled = false;
+            }
+        }
+
+        async function contributeToMiner() {
+            const amount = document.getElementById('contributeAmount').value;
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                showNotification('❌ لطفاً مقدار معتبر وارد کنید', 'error');
+                return;
+            }
+            
+            if (!isConnected || !contract) {
+                showNotification('❌ کیف پول متصل نیست', 'error');
+                return;
+            }
+            
+            try {
+                const btn = document.getElementById('contributeBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<div class="atomic-loader"></div> در حال ارسال...';
+                btn.disabled = true;
+                
+                const value = ethers.utils.parseEther(amount);
+                showNotification(`⏳ در حال ارسال ${amount} MATIC...`, 'info');
+                logDebug(`ارسال کمک به ماینر: ${amount} MATIC`);
+                
+                const tx = await contract.contributeToMinerPool({ 
+                    value,
+                    gasLimit: 200000
+                });
+                
+                logDebug(`تراکنش کمک: ${tx.hash}`);
+                await tx.wait();
+                
+                showNotification('✅ کمک شما با موفقیت ثبت شد!', 'success');
+                document.getElementById('contributeAmount').value = '';
+                await updateContractData();
+                
+            } catch (error) {
+                console.error('Contribution error:', error);
+                logDebug(`خطای کمک: ${error.message}`);
+                showNotification(`❌ خطا: ${error.message}`, 'error');
+            } finally {
+                const btn = document.getElementById('contributeBtn');
+                btn.innerHTML = '<i class="fas fa-donate"></i> ارسال کمک';
+                btn.disabled = false;
+            }
+        }
+
+        // ==================== 3D GALAXY BACKGROUND ====================
+        function init3DGalaxy() {
+            const canvas = document.getElementById('galaxyCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            const particles = [];
+            const particleCount = 150;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    color: Math.random() > 0.5 ? 'rgba(99, 102, 241, 0.8)' : 'rgba(139, 92, 246, 0.8)'
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    
+                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    
+                    particles.forEach(other => {
+                        const dx = p.x - other.x;
+                        const dy = p.y - other.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 100) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(99, 102, 241, ${0.2 * (1 - distance/100)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(other.x, other.y);
+                            ctx.stroke();
+                        }
+                    });
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 SPS Matrix Atomic DApp v2.1 Initialized');
+            logDebug('برنامه راه‌اندازی شد');
+            
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.getElementById('debugPanel').style.display = 'block';
+            }
+            
+            init3DGalaxy();
+            
+            document.getElementById('connectBtn').addEventListener('click', connectWallet);
+            document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
+            document.getElementById('registerBtn').addEventListener('click', registerUser);
+            document.getElementById('withdrawPoolBtn').addEventListener('click', withdrawPool);
+            document.getElementById('withdrawSpecialBtn').addEventListener('click', withdrawSpecial);
+            document.getElementById('contributeBtn').addEventListener('click', contributeToMiner);
+            
+            setTimeout(async () => {
+                const ethereumProvider = getEthereumProvider();
+                if (ethereumProvider) {
+                    try {
+                        const accounts = await ethereumProvider.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            logDebug('اتصال خودکار با حساب موجود');
+                            setTimeout(() => connectWallet(), 500);
+                        }
+                    } catch (error) {
+                        console.warn('Auto-connect error:', error);
+                    }
+                }
+            }, 1000);
+            
             setTimeout(() => {
-                showNotification('🚀 به دی‌اپ اتمی SPS MATRIX خوش آمدید!', 'info');
+                showNotification('🚀 به دی‌اپ اتمی SPS MATRIX خوش آمدید!', 'info', 3000);
             }, 1500);
         });
     </script>
