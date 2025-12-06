@@ -1,1 +1,428 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 SPS MATRIX ATOMIC | دی‌اپ اتمی</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        button {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            margin: 12px 0;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .connected {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+        .address {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            word-break: break-all;
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            color: #60a5fa;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .stat-box {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #6366f1;
+            margin: 10px 0;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #6366f1;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .notification.success { background: linear-gradient(135deg, #10b981, #34d399); }
+        .notification.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .notification.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        
+        .loader {
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="notification" id="notification"></div>
+    
+    <div class="card">
+        <h1 style="font-size: 36px; margin-bottom: 10px;">
+            <i class="fas fa-rocket"></i> SPS MATRIX ATOMIC
+        </h1>
+        <p style="color: #94a3b8; margin-bottom: 25px;">دی‌اپ اتمی - نسخه اتصال کامل</p>
+        
+        <!-- دکمه اتصال اصلی -->
+        <button id="connectBtn">
+            <i class="fas fa-wallet"></i> اتصال کیف پول
+        </button>
+        
+        <div id="walletInfo" style="display:none;">
+            <!-- آدرس کیف پول -->
+            <div class="address" id="walletAddress"></div>
+            
+            <!-- موجودی -->
+            <div style="font-size: 28px; margin: 25px 0;">
+                <i class="fas fa-coins"></i> موجودی: 
+                <span id="balance" style="color: #10b981; font-weight: bold;">0.00</span> MATIC
+            </div>
+            
+            <!-- آمار شبکه -->
+            <div class="stats">
+                <div class="stat-box">
+                    <div style="color: #94a3b8; font-size: 14px;">کاربران کل</div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                </div>
+                <div class="stat-box">
+                    <div style="color: #94a3b8; font-size: 14px;">موجودی پول</div>
+                    <div class="stat-value" id="poolBalance">0</div>
+                    <div style="color: #94a3b8; font-size: 12px;">MATIC</div>
+                </div>
+            </div>
+            
+            <!-- دکمه‌های عملیات -->
+            <button id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> به‌روزرسانی اطلاعات
+            </button>
+            
+            <button id="registerBtn">
+                <i class="fas fa-user-plus"></i> ثبت‌نام جدید (به زودی)
+            </button>
+            
+            <button id="disconnectBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-sign-out-alt"></i> قطع اتصال
+            </button>
+        </div>
+    </div>
 
+    <script>
+        // ==================== CONFIGURATION ====================
+        const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+        
+        // ABI ضروری
+        const CONTRACT_ABI = [
+            "function totalUsers() view returns (uint256)",
+            "function poolBalance() view returns (uint256)",
+            "function specialRewardPool() view returns (uint256)",
+            "function eligiblePoolUserCount() view returns (uint256)",
+            "function ENTRY_FEE() view returns (uint256)"
+        ];
+        
+        // ==================== GLOBAL VARIABLES ====================
+        let provider = null;
+        let signer = null;
+        let contract = null;
+        let userAddress = null;
+        let isConnected = false;
+        
+        // ==================== HELPER FUNCTIONS ====================
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            setTimeout(() => notification.style.display = 'none', 4000);
+        }
+        
+        // ==================== اتصال کیف پول ====================
+        async function connectWallet() {
+            try {
+                console.log('🔄 شروع فرآیند اتصال...');
+                
+                const connectBtn = document.getElementById('connectBtn');
+                connectBtn.innerHTML = '<span class="loader"></span> در حال اتصال...';
+                connectBtn.disabled = true;
+                
+                // 1. تشخیص کیف پول
+                const ethereumProvider = window.ethereum || window.safepalProvider;
+                if (!ethereumProvider) {
+                    showNotification('❌ لطفاً SafePal را نصب کنید', 'error');
+                    resetConnectButton();
+                    return;
+                }
+                
+                console.log('✅ Provider شناسایی شد');
+                
+                // 2. نمایش درخواست تایید به کاربر
+                showNotification('⌛ لطفاً در کیف پول تأیید کنید...', 'warning');
+                
+                // 3. درخواست دسترسی کامل
+                console.log('📋 درخواست دسترسی به حساب‌ها...');
+                const accounts = await ethereumProvider.request({ 
+                    method: 'eth_requestAccounts'
+                });
+                
+                if (accounts.length === 0) {
+                    throw new Error('❌ هیچ حسابی انتخاب نشد');
+                }
+                
+                userAddress = accounts[0];
+                console.log('✅ آدرس کیف پول:', userAddress);
+                
+                // 4. تنظیم provider و signer
+                provider = new ethers.providers.Web3Provider(ethereumProvider);
+                signer = provider.getSigner();
+                
+                // 5. ایجاد قرارداد
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                console.log('✅ قرارداد متصل شد');
+                
+                // 6. نمایش اطلاعات
+                document.getElementById('walletInfo').style.display = 'block';
+                document.getElementById('walletAddress').textContent = userAddress;
+                
+                // 7. به‌روزرسانی دکمه
+                connectBtn.innerHTML = '<i class="fas fa-check"></i> متصل شد';
+                connectBtn.className = 'connected';
+                connectBtn.disabled = false;
+                
+                // 8. دریافت اطلاعات
+                await updateBalance();
+                await updateContractInfo();
+                
+                showNotification('🎉 اتصال موفقیت‌آمیز! دسترسی کامل فعال شد', 'success');
+                isConnected = true;
+                
+                console.log('✅ اتصال کامل شد');
+                
+            } catch (error) {
+                console.error('❌ خطای اتصال:', error);
+                
+                let errorMsg = 'خطا در اتصال';
+                if (error.code === 4001) {
+                    errorMsg = 'کاربر درخواست اتصال را رد کرد';
+                } else if (error.message.includes('rejected')) {
+                    errorMsg = 'اتصال توسط کاربر رد شد';
+                }
+                
+                showNotification(`❌ ${errorMsg}`, 'error');
+                resetConnectButton();
+            }
+        }
+        
+        function resetConnectButton() {
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.innerHTML = '<i class="fas fa-wallet"></i> اتصال کیف پول';
+            connectBtn.className = '';
+            connectBtn.disabled = false;
+        }
+        
+        // ==================== دریافت موجودی ====================
+        async function updateBalance() {
+            if (!provider || !userAddress) return;
+            
+            try {
+                const balance = await provider.getBalance(userAddress);
+                const balanceMatic = ethers.utils.formatEther(balance);
+                document.getElementById('balance').textContent = parseFloat(balanceMatic).toFixed(2);
+                console.log('💰 موجودی:', balanceMatic, 'MATIC');
+            } catch (error) {
+                console.error('❌ خطا در دریافت موجودی:', error);
+            }
+        }
+        
+        // ==================== دریافت اطلاعات قرارداد ====================
+        async function updateContractInfo() {
+            if (!contract) return;
+            
+            try {
+                console.log('📊 دریافت اطلاعات قرارداد...');
+                
+                const [totalUsers, poolBalance] = await Promise.all([
+                    contract.totalUsers(),
+                    contract.poolBalance()
+                ]);
+                
+                document.getElementById('totalUsers').textContent = totalUsers.toString();
+                const poolMatic = ethers.utils.formatEther(poolBalance);
+                document.getElementById('poolBalance').textContent = parseFloat(poolMatic).toFixed(2);
+                
+                console.log('✅ اطلاعات قرارداد دریافت شد');
+                
+            } catch (error) {
+                console.error('❌ خطا در دریافت اطلاعات قرارداد:', error);
+            }
+        }
+        
+        // ==================== به‌روزرسانی اطلاعات ====================
+        async function refreshInfo() {
+            if (!isConnected) {
+                showNotification('❌ لطفاً اول کیف پول را متصل کنید', 'error');
+                return;
+            }
+            
+            try {
+                const refreshBtn = document.getElementById('refreshBtn');
+                refreshBtn.innerHTML = '<span class="loader"></span> در حال به‌روزرسانی...';
+                refreshBtn.disabled = true;
+                
+                await updateBalance();
+                await updateContractInfo();
+                
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> به‌روزرسانی اطلاعات';
+                refreshBtn.disabled = false;
+                
+                showNotification('✅ اطلاعات به‌روزرسانی شد', 'success');
+                
+            } catch (error) {
+                console.error('❌ خطا در به‌روزرسانی:', error);
+                showNotification('❌ خطا در به‌روزرسانی', 'error');
+            }
+        }
+        
+        // ==================== قطع اتصال ====================
+        function disconnectWallet() {
+            document.getElementById('walletInfo').style.display = 'none';
+            resetConnectButton();
+            
+            provider = null;
+            signer = null;
+            contract = null;
+            userAddress = null;
+            isConnected = false;
+            
+            showNotification('🔌 کیف پول قطع شد', 'info');
+            console.log('کیف پول قطع شد');
+        }
+        
+        // ==================== اتصال خودکار ====================
+        async function autoConnect() {
+            console.log('🔍 بررسی اتصال خودکار...');
+            
+            try {
+                const ethereumProvider = window.ethereum || window.safepalProvider;
+                if (!ethereumProvider) return;
+                
+                // بررسی حساب‌های فعال
+                const accounts = await ethereumProvider.request({ 
+                    method: 'eth_accounts' 
+                }).catch(() => []);
+                
+                if (accounts.length > 0) {
+                    console.log('✅ حساب فعال پیدا شد:', accounts[0]);
+                    
+                    // اتصال خودکار
+                    userAddress = accounts[0];
+                    provider = new ethers.providers.Web3Provider(ethereumProvider);
+                    signer = provider.getSigner();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    // نمایش اطلاعات
+                    document.getElementById('walletInfo').style.display = 'block';
+                    document.getElementById('walletAddress').textContent = userAddress;
+                    
+                    const connectBtn = document.getElementById('connectBtn');
+                    connectBtn.innerHTML = '<i class="fas fa-check"></i> متصل شد';
+                    connectBtn.className = 'connected';
+                    connectBtn.disabled = false;
+                    
+                    isConnected = true;
+                    
+                    // دریافت اطلاعات
+                    await updateBalance();
+                    await updateContractInfo();
+                    
+                    console.log('✅ اتصال خودکار موفق');
+                    showNotification('✅ اتصال خودکار فعال شد', 'success');
+                }
+                
+            } catch (error) {
+                console.log('⚠️ اتصال خودکار امکان‌پذیر نبود:', error);
+            }
+        }
+        
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 SPS Matrix Atomic DApp راه‌اندازی شد');
+            
+            // اتصال event listeners
+            document.getElementById('connectBtn').addEventListener('click', connectWallet);
+            document.getElementById('refreshBtn').addEventListener('click', refreshInfo);
+            document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                showNotification('⏳ این قابلیت به زودی فعال می‌شود', 'info');
+            });
+            
+            // اتصال خودکار
+            setTimeout(autoConnect, 1000);
+            
+            // خوش‌آمدگویی
+            setTimeout(() => {
+                showNotification('🚀 به دی‌اپ اتمی SPS MATRIX خوش آمدید!', 'info');
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
