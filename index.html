@@ -106,6 +106,21 @@
             max-width: 300px; max-height: 200px; overflow: auto; display: none;
             border: 1px solid var(--primary);
         }
+        
+        /* ==================== WALLET TEST ==================== */
+        .wallet-test-btn {
+            background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid var(--primary);
+            padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px;
+            width: 100%; margin-bottom: 10px; transition: all 0.3s ease;
+        }
+        .wallet-test-btn:hover {
+            background: rgba(99, 102, 241, 0.3); transform: translateY(-2px);
+        }
+        .test-result {
+            font-size: 12px; color: #94a3b8; margin-top: 10px; text-align: right;
+            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;
+            max-height: 150px; overflow-y: auto; direction: ltr;
+        }
     </style>
 </head>
 <body>
@@ -132,7 +147,7 @@
                 <i class="fas fa-bolt"></i> SafePal Optimized • Polygon
             </div>
             <div style="margin-top: 15px; font-size: 12px; color: #64748b;">
-                <i class="fas fa-code-branch"></i> v2.0 - رفع خطای اتصال
+                <i class="fas fa-code-branch"></i> v2.1 - رفع کامل خطای اتصال
             </div>
         </div>
         
@@ -141,6 +156,13 @@
             <h2 style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-size: 24px;">
                 <i class="fas fa-plug"></i> اتصال اتمی
             </h2>
+            
+            <!-- دکمه تست کیف پول -->
+            <button onclick="testWalletDetection()" class="wallet-test-btn">
+                <i class="fas fa-search"></i> تشخیص کیف پول
+            </button>
+            <div id="walletTestResult" class="test-result"></div>
+            
             <button id="connectBtn" class="atomic-btn">
                 <i class="fas fa-wallet"></i>
                 <span id="connectText">اتصال کیف پول</span>
@@ -276,7 +298,7 @@
                     <i class="fas fa-mobile-alt"></i> برای بهترین تجربه از مرورگر داخلی SafePal استفاده کنید
                 </p>
                 <p style="margin-top: 5px; font-size: 11px; color: #475569;">
-                    <i class="fas fa-code"></i> نسخه: 2.0 | ABI: تطبیق‌یافته
+                    <i class="fas fa-code"></i> نسخه: 2.1 | ABI: تطبیق‌یافته | رفع خطای اتصال
                 </p>
             </div>
         </div>
@@ -332,45 +354,137 @@
             debugPanel.scrollTop = debugPanel.scrollHeight;
         }
 
-        // ==================== SAFEPAL PROVIDER DETECTION ====================
+        // ==================== تابع تشخیص کیف پول ====================
+        function testWalletDetection() {
+            const resultDiv = document.getElementById('walletTestResult');
+            resultDiv.innerHTML = '<div style="text-align: center;"><div class="atomic-loader" style="width: 16px; height: 16px; display: inline-block;"></div> در حال تشخیص کیف پول...</div>';
+            
+            const providers = [
+                { name: 'ethereum', obj: window.ethereum },
+                { name: 'safepal', obj: window.safepal },
+                { name: 'safepalProvider', obj: window.safepalProvider },
+                { name: 'SafePal.ethereum', obj: window.SafePal?.ethereum },
+                { name: 'web3.currentProvider', obj: window.web3?.currentProvider },
+                { name: 'trustwallet', obj: window.trustwallet },
+                { name: 'coinbaseWalletExtension', obj: window.coinbaseWalletExtension },
+                { name: 'binance', obj: window.BinanceChain }
+            ];
+            
+            let found = [];
+            let notFound = [];
+            
+            providers.forEach(item => {
+                if (item.obj) {
+                    found.push(item.name);
+                } else {
+                    notFound.push(item.name);
+                }
+            });
+            
+            setTimeout(() => {
+                let html = '<div style="text-align: right;">';
+                if (found.length > 0) {
+                    html += '<div style="color: #10b981; margin-bottom: 5px;"><i class="fas fa-check-circle"></i> کیف پول‌های شناسایی شده:</div>';
+                    html += '<div style="color: #d1d5db; font-size: 11px; margin-right: 10px;">' + found.join(', ') + '</div>';
+                }
+                
+                if (notFound.length > 0) {
+                    html += '<div style="color: #ef4444; margin-top: 10px; margin-bottom: 5px;"><i class="fas fa-times-circle"></i> کیف پول‌های پیدا نشده:</div>';
+                    html += '<div style="color: #9ca3af; font-size: 11px; margin-right: 10px;">' + notFound.join(', ') + '</div>';
+                }
+                
+                // نمایش اطلاعات بیشتر
+                html += '<div style="color: #f59e0b; margin-top: 10px; margin-bottom: 5px;"><i class="fas fa-info-circle"></i> اطلاعات window:</div>';
+                html += '<div style="font-size: 10px; max-height: 80px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 5px;">';
+                
+                const relevantKeys = Object.keys(window).filter(key => 
+                    key.toLowerCase().includes('wallet') ||
+                    key.toLowerCase().includes('ethereum') ||
+                    key.toLowerCase().includes('web3') ||
+                    key.toLowerCase().includes('provider') ||
+                    key.toLowerCase().includes('safepal')
+                );
+                
+                relevantKeys.slice(0, 10).forEach(key => {
+                    const type = typeof window[key];
+                    html += `<div>${key}: ${type}</div>`;
+                });
+                
+                html += '</div>';
+                
+                // اگر ethereum وجود دارد، اطلاعات chainId و accounts را بگیر
+                if (window.ethereum) {
+                    html += '<div style="color: #60a5fa; margin-top: 10px;"><i class="fas fa-bolt"></i> در حال دریافت اطلاعات شبکه...</div>';
+                }
+                
+                resultDiv.innerHTML = html;
+                
+                // اگر ethereum وجود دارد، اطلاعات بیشتری بگیر
+                if (window.ethereum && window.ethereum.request) {
+                    Promise.all([
+                        window.ethereum.request({ method: 'eth_chainId' }).catch(() => null),
+                        window.ethereum.request({ method: 'eth_accounts' }).catch(() => [])
+                    ]).then(([chainId, accounts]) => {
+                        let extraInfo = '';
+                        if (chainId) {
+                            extraInfo += `<div style="color: #60a5fa; margin-top: 5px;">Chain ID: ${chainId} (${parseInt(chainId)})</div>`;
+                        }
+                        if (accounts && accounts.length > 0) {
+                            extraInfo += `<div style="color: #60a5fa;">حساب‌های فعال: ${accounts.length}</div>`;
+                            extraInfo += `<div style="font-size: 9px; word-break: break-all;">${accounts[0]}</div>`;
+                        } else {
+                            extraInfo += '<div style="color: #f59e0b;">هیچ حساب فعالی پیدا نشد</div>';
+                        }
+                        resultDiv.innerHTML += extraInfo;
+                    });
+                }
+                
+            }, 500);
+        }
+
+        // ==================== SAFEPAL PROVIDER DETECTION (نسخه بهبود یافته) ====================
         function getEthereumProvider() {
             logDebug('در حال تشخیص کیف پول...');
             
-            // روش‌های مختلف تشخیص SafePal
-            if (window.ethereum) {
-                logDebug('✅ window.ethereum پیدا شد');
-                return window.ethereum;
-            }
-            if (window.safepal) {
-                logDebug('✅ window.safepal پیدا شد');
-                window.ethereum = window.safepal; // برای سازگاری
-                return window.safepal;
-            }
-            if (window.safepalProvider) {
-                logDebug('✅ window.safepalProvider پیدا شد');
-                window.ethereum = window.safepalProvider;
-                return window.safepalProvider;
-            }
-            if (window.SafePal && window.SafePal.ethereum) {
-                logDebug('✅ window.SafePal.ethereum پیدا شد');
-                window.ethereum = window.SafePal.ethereum;
-                return window.SafePal.ethereum;
-            }
-            if (typeof window.web3 !== 'undefined' && window.web3.currentProvider) {
-                logDebug('✅ window.web3.currentProvider پیدا شد');
-                window.ethereum = window.web3.currentProvider;
-                return window.web3.currentProvider;
+            // ابتدا همه احتمالات را چک کنید
+            const providers = [
+                window.ethereum,
+                window.safepal,
+                window.safepalProvider,
+                window.SafePal?.ethereum,
+                window.web3?.currentProvider,
+                window.trustwallet,
+                window.coinbaseWalletExtension,
+                window.BinanceChain
+            ];
+            
+            for (let provider of providers) {
+                if (provider) {
+                    logDebug(`✅ کیف پول شناسایی شد: ${provider.constructor.name}`);
+                    
+                    // برای سازگاری، اگر window.ethereum نیست، آن را تنظیم کنید
+                    if (!window.ethereum && provider !== window.ethereum) {
+                        window.ethereum = provider;
+                        logDebug('window.ethereum تنظیم شد برای سازگاری');
+                    }
+                    
+                    return provider;
+                }
             }
             
-            logDebug('❌ هیچ provider کیف پولی پیدا نشد');
+            logDebug('❌ هیچ کیف پولی پیدا نشد');
             return null;
         }
 
         // ==================== NETWORK MANAGEMENT ====================
         async function ensurePolygonNetwork() {
             try {
+                if (!window.ethereum || !window.ethereum.request) {
+                    throw new Error('Provider شبکه موجود نیست');
+                }
+                
                 const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                logDebug(`شناسه شبکه فعلی: ${chainId}`);
+                logDebug(`شناسه شبکه فعلی: ${chainId} (${parseInt(chainId)})`);
                 
                 if (chainId === '0x89') { // Polygon Mainnet
                     logDebug('✅ شبکه Polygon فعال است');
@@ -386,6 +500,7 @@
                         params: [{ chainId: '0x89' }]
                     });
                     logDebug('✅ شبکه با موفقیت تغییر کرد');
+                    showNotification('✅ شبکه Polygon فعال شد', 'success');
                     return true;
                 } catch (switchError) {
                     if (switchError.code === 4902) {
@@ -395,10 +510,11 @@
                             params: [NETWORK_CONFIG]
                         });
                         logDebug('✅ شبکه Polygon اضافه شد');
+                        showNotification('✅ شبکه Polygon اضافه شد', 'success');
                         return true;
                     } else {
                         logDebug(`خطا در تغییر شبکه: ${switchError.message}`);
-                        throw switchError;
+                        throw new Error(`تغییر شبکه ناموفق: ${switchError.message}`);
                     }
                 }
             } catch (error) {
@@ -469,7 +585,7 @@
             animate();
         }
 
-        // ==================== WALLET CONNECTION ====================
+        // ==================== WALLET CONNECTION (نسخه بهبود یافته) ====================
         async function connectWallet() {
             try {
                 const connectBtn = document.getElementById('connectBtn');
@@ -481,39 +597,79 @@
                 // تشخیص کیف پول
                 const ethereumProvider = getEthereumProvider();
                 if (!ethereumProvider) {
-                    showNotification('❌ لطفاً SafePal را نصب کنید یا از مرورگر داخلی آن استفاده نمایید', 'error');
-                    logDebug('❌ هیچ کیف پولی پیدا نشد');
+                    showNotification('❌ کیف پول یافت نشد. راه‌حل:', 'error', 6000);
+                    setTimeout(() => {
+                        showNotification('📱 ۱. SafePal را نصب کنید', 'info');
+                    }, 1000);
+                    setTimeout(() => {
+                        showNotification('🌐 ۲. از مرورگر داخلی SafePal استفاده کنید', 'info');
+                    }, 3000);
+                    setTimeout(() => {
+                        showNotification('🔄 ۳. صفحه را رفرش کنید', 'info');
+                    }, 5000);
+                    
                     resetConnectButton();
                     return;
                 }
                 
-                window.ethereum = ethereumProvider; // برای سازگاری
                 logDebug('Provider شناسایی شد');
+                
+                // بررسی اینکه آیا متد eth_requestAccounts وجود دارد
+                if (!ethereumProvider.request || typeof ethereumProvider.request !== 'function') {
+                    throw new Error('این کیف پول از استاندارد Web3 پشتیبانی نمی‌کند');
+                }
                 
                 // درخواست دسترسی به حساب
                 logDebug('درخواست دسترسی به حساب‌ها...');
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                let accounts;
+                try {
+                    accounts = await ethereumProvider.request({ 
+                        method: 'eth_requestAccounts'
+                    });
+                    logDebug(`پاسخ eth_requestAccounts: ${accounts.length} حساب`);
+                } catch (requestError) {
+                    logDebug(`خطا در eth_requestAccounts: ${requestError.message} (کد: ${requestError.code})`);
+                    if (requestError.code === 4001 || requestError.code === -32603) {
+                        throw new Error('کاربر درخواست اتصال را رد کرد');
+                    }
+                    throw requestError;
+                }
                 
-                if (accounts.length === 0) {
+                if (!accounts || accounts.length === 0) {
                     throw new Error('هیچ حسابی انتخاب نشد');
                 }
                 
                 userAddress = accounts[0];
                 logDebug(`آدرس متصل: ${userAddress}`);
                 
-                // بررسی و تنظیم شبکه Polygon
-                await ensurePolygonNetwork();
-                
-                // ایجاد provider و signer
-                provider = new ethers.providers.Web3Provider(window.ethereum);
+                // تنظیم provider و signer
+                window.ethereum = ethereumProvider; // برای سازگاری
+                provider = new ethers.providers.Web3Provider(ethereumProvider);
                 signer = provider.getSigner();
-                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 
+                // تأیید آدرس signer
+                const signerAddress = await signer.getAddress();
+                if (signerAddress.toLowerCase() !== userAddress.toLowerCase()) {
+                    logDebug(`عدم تطابق آدرس: signer=${signerAddress}, user=${userAddress}`);
+                }
+                
+                logDebug(`آدرس signer تأیید شد: ${signerAddress}`);
+                
+                // ایجاد قرارداد
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 logDebug('قرارداد متصل شد');
+                
+                // بررسی شبکه (با امکان ادامه کار حتی اگر شبکه Polygon نباشد)
+                try {
+                    await ensurePolygonNetwork();
+                } catch (networkError) {
+                    logDebug(`اخطار شبکه: ${networkError.message}`);
+                    showNotification('⚠️ شبکه Polygon فعال نیست، اما اتصال برقرار شد', 'warning');
+                }
                 
                 // نمایش اطلاعات کیف پول
                 document.getElementById('walletPanel').style.display = 'block';
-                document.getElementById('walletAddress').textContent = formatAddress(userAddress);
+                document.getElementById('walletAddress').textContent = userAddress;
                 document.getElementById('status').textContent = 'متصل';
                 document.getElementById('status').style.color = 'var(--secondary)';
                 
@@ -533,19 +689,23 @@
                 setupEventListeners();
                 
             } catch (error) {
-                console.error('Connection error:', error);
+                console.error('Connection error details:', error);
                 logDebug(`خطای اتصال: ${error.message}`);
                 
-                let errorMsg = 'خطا در اتصال';
-                if (error.code === 4001) {
-                    errorMsg = 'کاربر درخواست را رد کرد';
-                } else if (error.message.includes('not installed')) {
-                    errorMsg = 'کیف پول یافت نشد';
-                } else if (error.message.includes('network')) {
-                    errorMsg = 'مشکل در شبکه Polygon';
+                let errorMsg = 'خطا در اتصال به کیف پول';
+                if (error.code === 4001 || error.code === -32603) {
+                    errorMsg = 'کاربر درخواست اتصال را رد کرد';
+                } else if (error.message.includes('not installed') || error.message.includes('not found')) {
+                    errorMsg = 'کیف پول نصب نیست یا فعال نیست';
+                } else if (error.message.includes('rejected')) {
+                    errorMsg = 'اتصال توسط کاربر رد شد';
+                } else if (error.message.includes('already pending')) {
+                    errorMsg = 'درخواست اتصال قبلی در حال پردازش است';
+                } else if (error.message.includes('User denied')) {
+                    errorMsg = 'کاربر اجازه اتصال نداد';
                 }
                 
-                showNotification(`❌ ${errorMsg}`, 'error');
+                showNotification(`❌ ${errorMsg}`, 'error', 5000);
                 resetConnectButton();
             }
         }
@@ -581,7 +741,7 @@
                 logDebug(`تغییر حساب: ${newAccounts.length} حساب`);
                 if (newAccounts.length > 0) {
                     userAddress = newAccounts[0];
-                    document.getElementById('walletAddress').textContent = formatAddress(userAddress);
+                    document.getElementById('walletAddress').textContent = userAddress;
                     updateContractData();
                     showNotification('🔄 حساب کاربری تغییر کرد', 'info');
                 } else {
@@ -593,7 +753,7 @@
                 logDebug(`تغییر شبکه: ${chainId}`);
                 if (chainId === '0x89') {
                     showNotification('✅ شبکه Polygon فعال شد', 'success');
-                    setTimeout(() => location.reload(), 1000);
+                    setTimeout(() => updateContractData(), 1000);
                 } else {
                     showNotification('⚠️ لطفاً به شبکه Polygon برگردید', 'warning');
                 }
@@ -617,25 +777,37 @@
                     const totalUsers = await contract.totalUsers();
                     document.getElementById('totalUsers').textContent = totalUsers.toString();
                     logDebug(`کاربران کل: ${totalUsers}`);
-                } catch (e) { console.warn('Could not get totalUsers:', e); }
+                } catch (e) { 
+                    console.warn('Could not get totalUsers:', e);
+                    logDebug(`خطا در دریافت totalUsers: ${e.message}`);
+                }
                 
                 try {
                     const poolBalance = await contract.poolBalance();
                     document.getElementById('poolBalance').textContent = formatMatic(poolBalance);
                     logDebug(`موجودی پول: ${formatMatic(poolBalance)} MATIC`);
-                } catch (e) { console.warn('Could not get poolBalance:', e); }
+                } catch (e) { 
+                    console.warn('Could not get poolBalance:', e);
+                    logDebug(`خطا در دریافت poolBalance: ${e.message}`);
+                }
                 
                 try {
                     const specialPool = await contract.specialRewardPool();
                     document.getElementById('specialPool').textContent = formatMatic(specialPool);
                     logDebug(`پول ویژه: ${formatMatic(specialPool)} MATIC`);
-                } catch (e) { console.warn('Could not get specialPool:', e); }
+                } catch (e) { 
+                    console.warn('Could not get specialPool:', e);
+                    logDebug(`خطا در دریافت specialPool: ${e.message}`);
+                }
                 
                 try {
                     const eligibleUsers = await contract.eligiblePoolUserCount();
                     document.getElementById('minerCount').textContent = eligibleUsers.toString();
                     logDebug(`ماینرها: ${eligibleUsers}`);
-                } catch (e) { console.warn('Could not get eligibleUsers:', e); }
+                } catch (e) { 
+                    console.warn('Could not get eligibleUsers:', e);
+                    logDebug(`خطا در دریافت eligibleUsers: ${e.message}`);
+                }
                 
                 logDebug('✅ اطلاعات قرارداد به‌روزرسانی شد');
             } catch (error) {
@@ -734,6 +906,8 @@
                     errorMsg = 'آپلاین وجود ندارد';
                 } else if (error.message.includes('User already registered')) {
                     errorMsg = 'کاربر قبلاً ثبت‌نام کرده است';
+                } else if (error.message.includes('user rejected')) {
+                    errorMsg = 'کاربر تراکنش را رد کرد';
                 }
                 
                 showNotification(`❌ ${errorMsg}`, 'error');
@@ -863,7 +1037,7 @@
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 SPS Matrix Atomic DApp v2.0 Initialized');
+            console.log('🚀 SPS Matrix Atomic DApp v2.1 Initialized');
             logDebug('برنامه راه‌اندازی شد');
             
             // فعال کردن پنل دیباگ در حالت توسعه
