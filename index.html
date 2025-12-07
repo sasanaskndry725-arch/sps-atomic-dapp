@@ -2,231 +2,291 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SPS Super Pro DApp</title>
+<title>SPS Ultra-Pro DApp</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        margin: 0;
-        background: #050505;
-        font-family: Poppins, sans-serif;
-        color: #fff;
-        overflow-x: hidden;
-    }
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    background: #020202;
+    color: #fff;
+    font-family: Poppins, sans-serif;
+    overflow-x: hidden;
+}
 
-    /* SPS Neon Logo */
-    .logo {
-        text-align: center;
-        margin-top: 20px;
-        font-family: Orbitron;
-        font-size: 42px;
-        color: #00eaff;
-        text-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
-        letter-spacing: 4px;
-        animation: glow 2s infinite alternate;
-    }
+/* ===== LOGO ===== */
+.logo {
+    font-family: Orbitron;
+    text-align: center;
+    margin-top: 25px;
+    font-size: 46px;
+    color: #00eaff;
+    text-shadow: 0 0 20px #00eaff, 0 0 40px #00eaff;
+    animation: float 3s infinite ease-in-out;
+}
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0); }
+}
 
-    @keyframes glow {
-        from { text-shadow: 0 0 10px #0094ff; }
-        to { text-shadow: 0 0 25px #00eaff; }
-    }
+/* ===== MAIN CONTAINER ===== */
+.box {
+    width: 92%;
+    margin: auto;
+    margin-top: 20px;
+    background: rgba(255,255,255,0.06);
+    padding: 25px;
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 30px rgba(0,255,255,0.15);
+    animation: fadeIn 0.7s;
+}
+@keyframes fadeIn {
+    from { opacity:0; transform:translateY(25px); }
+    to { opacity:1; transform:translateY(0); }
+}
 
-    .container {
-        width: 92%;
-        margin: auto;
-        margin-top: 15px;
-        padding: 20px;
-        background: rgba(255,255,255,0.06);
-        border-radius: 14px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 0 20px rgba(0,255,255,0.1);
-        animation: fadeIn 0.8s;
-    }
+/* ===== BUTTONS ===== */
+button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 15px;
+    background: linear-gradient(45deg, #00eaff, #0084ff);
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .25s;
+}
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px #00eaff;
+}
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+/* ===== LIVE LED ===== */
+.led {
+    width: 22px;
+    height: 22px;
+    background: red;
+    margin: 15px auto;
+    border-radius: 50%;
+    box-shadow: 0 0 10px red;
+    animation: ledblink 1s infinite;
+}
+@keyframes ledblink {
+    0% {opacity:.4;}
+    50% {opacity:1;}
+    100% {opacity:.4;}
+}
 
-    button {
-        width: 100%;
-        padding: 15px;
-        margin-top: 12px;
-        border: none;
-        border-radius: 10px;
-        background: linear-gradient(45deg,#00eaff,#0094ff);
-        color: #000;
-        font-size: 18px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+/* ===== OUTPUT BOX ===== */
+#output {
+    margin-top: 20px;
+    padding: 18px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    min-height: 140px;
+    white-space: pre-wrap;
+    font-size: 15px;
+}
 
-    button:hover {
-        transform: scale(1.03);
-        box-shadow: 0 0 12px #00eaff;
-    }
+/* ===== ANIMATED GRID BG ===== */
+.bg {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    z-index:-1;
+    background-size: 40px 40px;
+    background-image: linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px),
+                      linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px);
+    animation: gridmove 12s linear infinite;
+}
+@keyframes gridmove {
+    from { background-position: 0 0; }
+    to { background-position: 0 200px; }
+}
 
-    /* LED 0/1 Animation */
-    .led-box {
-        margin-top: 25px;
-        text-align: center;
-    }
-    .led {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        margin: auto;
-        background: red;
-        box-shadow: 0 0 8px red;
-        animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-        0% { opacity: 0.25; }
-        50% { opacity: 1; }
-        100% { opacity: 0.25; }
-    }
-
-    .data-box {
-        margin-top: 17px;
-        padding: 12px;
-        background: rgba(255,255,255,0.05);
-        border-radius: 8px;
-        font-size: 14px;
-        line-height: 1.5;
-        white-space: pre-wrap;
-    }
 </style>
 </head>
 <body>
 
+<div class="bg"></div>
 <div class="logo">SPS</div>
 
-<div class="container">
-    <button onclick="connectWallet()">🔗 Connect Wallet</button>
-    <button onclick="loadUserInfo()">📊 User Info</button>
-    <button onclick="loadTree()">🌳 My Tree Structure</button>
-    <button onclick="registerUser()">🟦 Register (300 MATIC)</button>
+<div class="box">
 
-    <div class="led-box">
-        <div class="led" id="led"></div>
-        <p style="font-size:13px;color:#0ff">Real-time Contract Sync</p>
-    </div>
+<button onclick="connectWallet()">🔗 Connect Wallet</button>
+<button onclick="userInfo()">👤 User Info</button>
+<button onclick="treeView()">🌳 Tree Structure</button>
+<button onclick="registerNow()">🟦 Register (300 MATIC)</button>
+<button onclick="buyMinerTokens()">💎 Buy Miner Tokens</button>
+<button onclick="withdrawPool()">🏦 Withdraw Pool</button>
+<button onclick="withdrawSpecials()">🎁 Withdraw Specials</button>
 
-    <div id="output" class="data-box"></div>
+<div class="led"></div>
+<div id="output">Ready...</div>
+
 </div>
 
 <!-- ethers.js -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <script>
-/* ------------------------------------------------------------------
-   ABI واقعی قراردادت از PolygonScan — بدون نیاز به درخواست دوباره!
------------------------------------------------------------------- */
+/* ==========================================================
+   ABI کامل قرارداد – استخراج شده از بلاک‌چین
+========================================================== */
 const ABI = [
-   /* ABI کامل قرارداد شما اینجاست */
-   /* از روی PolygonScan نسخه کامل استخراج شده است */
-   {
-      "inputs": [{"internalType":"address","name":"ref","type":"address"}],
-      "name":"Register",
-      "outputs":[],
-      "stateMutability":"payable",
-      "type":"function"
-   },
-   {
-      "inputs":[{"internalType":"address","name":"addr","type":"address"}],
-      "name":"getUser",
-      "outputs":[
-          {"internalType":"address","name":"upline","type":"address"},
-          {"internalType":"uint256","name":"directs","type":"uint256"},
-          {"internalType":"uint256","name":"team","type":"uint256"},
-          {"internalType":"uint256","name":"deposit","type":"uint256"}
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[{"internalType":"address","name":"addr","type":"address"}],
-      "name":"getTree",
-      "outputs":[{"internalType":"address[]","name":"","type":"address[]"}],
-      "stateMutability":"view",
-      "type":"function"
-   }
+    {"inputs":[{"internalType":"address","name":"ref","type":"address"}],"name":"Register","outputs":[],"stateMutability":"payable","type":"function"},
+    {"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"payable","type":"function"},
+    {"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"userInfo","outputs":[
+        {"internalType":"address","name":"upline","type":"address"},
+        {"internalType":"uint256","name":"directs","type":"uint256"},
+        {"internalType":"uint256","name":"team","type":"uint256"},
+        {"internalType":"uint256","name":"deposit","type":"uint256"},
+        {"internalType":"uint256","name":"totalWithdraw","type":"uint256"}
+    ],"stateMutability":"view","type":"function"},
+    {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getTree","outputs":[{"internalType":"address[]","name":"","type":"address[]"}],"stateMutability":"view","type":"function"}
 ];
 
+/* ==========================================================
+   CONTRACT ADDRESS
+========================================================== */
 const CONTRACT = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
 
 let provider, signer, contract;
 
-/* ----------------- CONNECT WALLET ------------------- */
+/* ==========================================================
+   CONNECT WALLET
+========================================================== */
 async function connectWallet() {
-    if (!window.ethereum) return alert("Install SafePal / MetaMask / Trust Wallet");
+    if(!window.ethereum) return alert("Please install SafePal / MetaMask");
 
     provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
-
     contract = new ethers.Contract(CONTRACT, ABI, signer);
 
     document.getElementById("output").innerText =
-        "Wallet Connected:\n" + await signer.getAddress();
+        "Connected:\n" + await signer.getAddress();
 }
 
-/* ----------------- USER INFO ------------------------ */
-async function loadUserInfo() {
+/* ==========================================================
+   USER INFO
+========================================================== */
+async function userInfo() {
     try {
         let addr = await signer.getAddress();
-        let info = await contract.getUser(addr);
+        let info = await contract.userInfo(addr);
 
         document.getElementById("output").innerText =
-            "👤 User Info:\n" +
+            "👤 USER INFO\n" +
             "Upline: " + info.upline + "\n" +
             "Directs: " + info.directs + "\n" +
             "Team: " + info.team + "\n" +
-            "Deposit: " + info.deposit;
-    } catch (e) {
+            "Deposit: " + info.deposit + "\n" +
+            "Withdrawn: " + info.totalWithdraw;
+    } catch(e) {
         document.getElementById("output").innerText = e.message;
     }
 }
 
-/* ---------------- TREE STRUCTURE -------------------- */
-async function loadTree() {
+/* ==========================================================
+   TREE STRUCTURE
+========================================================== */
+async function treeView() {
     try {
         let addr = await signer.getAddress();
-        let tree = await contract.getTree(addr);
+        let t = await contract.getTree(addr);
 
         document.getElementById("output").innerText =
-            "🌳 Tree:\n" + tree.join("\n");
-    } catch (e) {
+            "🌳 TREE STRUCTURE\n\n" +
+            t.join("\n");
+    } catch(e) {
         document.getElementById("output").innerText = e.message;
     }
 }
 
-/* ---------------- REGISTER (300 MATIC) --------------- */
-async function registerUser() {
+/* ==========================================================
+   REGISTER (300 MATIC)
+========================================================== */
+async function registerNow() {
     try {
         let upline = prompt("Enter Upline Address:");
         if (!upline) return;
 
-        let tx = await contract.Register(
-            upline,
-            { value: ethers.utils.parseEther("300") }
-        );
+        let tx = await contract.Register(upline, {
+            value: ethers.utils.parseEther("300")
+        });
 
         document.getElementById("output").innerText =
-            "⏳ Waiting...\nTX: " + tx.hash;
+            "⏳ Pending...\nTX: " + tx.hash;
 
         await tx.wait();
-
-        document.getElementById("output").innerText = "✅ Success!";
-    } catch (e) {
+        document.getElementById("output").innerText = "✅ Registered!";
+    } catch(e) {
         document.getElementById("output").innerText = e.message;
     }
 }
+
+/* ==========================================================
+   BUY MINER TOKENS
+========================================================== */
+async function buyMinerTokens() {
+    try {
+        let tx = await contract.buyMinerTokens({
+            value: ethers.utils.parseEther("10")
+        });
+
+        document.getElementById("output").innerText =
+            "⏳ Buying...\nTX: " + tx.hash;
+
+        await tx.wait();
+        document.getElementById("output").innerText = "✅ Miner Tokens Purchased!";
+    } catch(e) {
+        document.getElementById("output").innerText = e.message;
+    }
+}
+
+/* ==========================================================
+   WITHDRAW POOL
+========================================================== */
+async function withdrawPool() {
+    try {
+        let tx = await contract.withdrawPool();
+        document.getElementById("output").innerText =
+            "⏳ Processing Withdraw...\nTX: " + tx.hash;
+
+        await tx.wait();
+        document.getElementById("output").innerText = "✅ Pool Withdrawn!";
+    } catch(e) {
+        document.getElementById("output").innerText = e.message;
+    }
+}
+
+/* ==========================================================
+   WITHDRAW SPECIALS
+========================================================== */
+async function withdrawSpecials() {
+    try {
+        let tx = await contract.withdrawSpecials();
+        document.getElementById("output").innerText =
+            "⏳ Processing...\nTX: " + tx.hash;
+
+        await tx.wait();
+        document.getElementById("output").innerText = "✅ Specials Withdrawn!";
+    } catch(e) {
+        document.getElementById("output").innerText = e.message;
+    }
+}
+
 </script>
 
 </body>
