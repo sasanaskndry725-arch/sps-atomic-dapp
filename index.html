@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SPS Smart — Enhanced DApp</title>
+<title>SPS Smart — Full DApp (with ABI)</title>
 
 <!-- ethers v5 UMD -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <!-- Web3Modal + WalletConnect for mobile wallets (SafePal) -->
 <script src="https://unpkg.com/web3modal@1.9.8/dist/index.js"></script>
 <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+<!-- d3 for tree -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
 
 <style>
   :root{
@@ -21,14 +23,27 @@
     --bad:#ef4444;
   }
   html,body{height:100%;margin:0;font-family: Vazirmatn, system-ui, Arial; background:linear-gradient(180deg,#031427 0%,#051022 100%); color:#e6eef8}
-  .wrap{max-width:980px;margin:26px auto;padding:18px}
+  /* matrix background */
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events:none;
+    opacity:0.09;
+    font-family:monospace;
+    color:#00ff99;
+    white-space: pre;
+  }
+
+  .wrap{max-width:1100px;margin:20px auto;padding:18px;position:relative;z-index:1}
   .card{background:rgba(255,255,255,0.02);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
   header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-  h1{margin:0;font-size:20px}
+  h1{margin:0;font-size:22px;display:flex;align-items:center;gap:12px}
+  .logo-badge{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;box-shadow:0 6px 18px rgba(124,58,237,0.25)}
   .muted{color:var(--muted);font-size:13px}
-  .row{display:flex;gap:10px;align-items:center;margin-top:12px}
-  input,select{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#031426;color:#e6eef8}
-  button{background:var(--accent);border:none;color:white;padding:10px 12px;border-radius:8px;cursor:pointer}
+  .row{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  input,select,button,textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#031426;color:#e6eef8}
+  button{background:linear-gradient(90deg,#7c3aed,#00d4ff);border:none;color:white;padding:10px 12px;border-radius:8px;cursor:pointer}
   button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
   pre{background:#031426;padding:12px;border-radius:8px;color:#cfe8ff;overflow:auto;font-size:13px;white-space:pre-wrap}
@@ -37,22 +52,29 @@
   .status.ok{background:rgba(16,185,129,0.08);color:var(--good)}
   .status.err{background:rgba(239,68,68,0.06);color:var(--bad)}
   footer{margin-top:16px;color:var(--muted);font-size:13px}
-  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  #treeView{width:100%;height:420px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015));overflow:hidden}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+  <div id="matrix"></div>
   <div class="wrap">
     <div class="card">
       <header>
-        <div>
-          <h1>SPS Smart — DApp ارتقا یافته</h1>
-          <div class="muted">قرارداد: <a id="contractLink" target="_blank" rel="noreferrer" class="muted">0x7a7b06D49129B34976D07B3854d4D72D01588191</a></div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="logo-badge">SPS</div>
+          <div>
+            <h1>SPS Smart — DApp حرفه‌ای</h1>
+            <div class="muted">یک DApp تک‌فایلی برای قرارداد تو — کامل و آماده</div>
+          </div>
         </div>
-        <div style="text-align:left;min-width:220px">
-          <div id="walletShort" class="small">کیف‌پول: متصل نشده</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="text-align:left;min-width:260px">
+          <div id="walletShort" class="small">کیف‌پول: <strong>متصل نشده</strong></div>
+          <div style="display:flex;gap:8px;margin-top:8px" class="controls">
             <button id="connectBtn">🔗 اتصال</button>
             <button id="wcBtn" class="secondary">📱 WalletConnect</button>
+            <button id="disconnectBtn" class="secondary" style="display:none"> قطع اتصال</button>
           </div>
         </div>
       </header>
@@ -61,10 +83,10 @@
         <div class="grid">
           <div>
             <h3>ثبت‌نام (Register)</h3>
-            <div class="small">مقدار ENTRY_FEE از قرارداد خوانده می‌شود؛ همچنین امکان ارسالِ **۳۰۰ MATIC** به‌صورت override وجود دارد.</div>
+            <div class="small">ثبت‌نام با مقدار ثابت <strong>300 MATIC</strong> (مطابقت با ENTRY_FEE قرارداد فرض شده)</div>
 
             <div class="row" style="margin-top:10px">
-              <input id="uplineCode" placeholder="Upline code (عدد)">
+              <input id="uplineCode" placeholder="Upline code (عدد)" />
               <select id="placeSide">
                 <option value="true">چپ</option>
                 <option value="false">راست</option>
@@ -72,14 +94,13 @@
             </div>
 
             <div class="row" style="margin-top:10px">
-              <button id="readFeeBtn" class="secondary">خواندن ENTRY_FEE</button>
-              <button id="registerBtn">🚀 ثبت‌نام</button>
+              <button id="registerBtn">🚀 ثبت‌نام (300 MATIC)</button>
+              <button id="readFeeBtn" class="secondary">🔍 خواندن ENTRY_FEE</button>
             </div>
 
             <div style="margin-top:8px">
-              <label><input type="checkbox" id="force300"> ارسالِ مقدار ثابت 300 MATIC (override)</label>
-              <div class="small" style="margin-top:6px;color:#ffd966">تذکر: اگر ENTRY_FEE در قرارداد بزرگ‌تر از 300 باشد، تراکنش با 300 رد خواهد شد.</div>
-              <div id="feeInfo" class="small" style="margin-top:6px">ENTRY_FEE: —</div>
+              <div id="feeInfo" class="small" style="margin-top:6px;">ENTRY_FEE: —</div>
+              <div id="regResult" style="margin-top:8px;"></div>
             </div>
           </div>
 
@@ -121,6 +142,16 @@
       </section>
 
       <section style="margin-top:14px">
+        <h3>درخت شبکه (Tree View)</h3>
+        <div class="small">نمایش درخت دودویی زیرشاخه‌های شما. زوم / درگ قابل انجام است.</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="loadTreeBtn">🔁 بارگذاری درخت من</button>
+          <input id="treeDepth" style="width:80px" placeholder="عمق" value="3" />
+        </div>
+        <div id="treeView"></div>
+      </section>
+
+      <section style="margin-top:14px">
         <h3>لاگ و وضعیت تراکنش‌ها</h3>
         <pre id="logBox">آماده.</pre>
       </section>
@@ -128,7 +159,8 @@
       <div id="statusBox" class="status" style="display:none"></div>
 
       <footer>
-        نکته: برای اتصال SafePal موبایل، از WalletConnect یا مرورگر داخل SafePal استفاده کنید. قبل از تراکنش‌های مهم ابتدا در شبکهٔ تست (Mumbai) آزمایش کنید.
+        نکته: برای اتصال SafePal موبایل، از WalletConnect یا مرورگر داخل SafePal استفاده کنید.  
+        قبل از تراکنش‌های مهم ابتدا در شبکهٔ تست (Mumbai) آزمایش کنید.
       </footer>
     </div>
   </div>
@@ -139,11 +171,11 @@
    ============================ */
 
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
-document.getElementById('contractLink').href = 'https://polygonscan.com/address/' + CONTRACT_ADDRESS;
-document.getElementById('contractLink').innerText = CONTRACT_ADDRESS;
+document.getElementById('connectBtn').title = "Connect with MetaMask or in-app SafePal";
+document.getElementById('wcBtn').title = "Connect via WalletConnect (SafePal, Trust Wallet)";
 
-/* ==== ABI (کامل؛ دقیقا همان چیزی که شما فرستادید) ==== */
-const CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+/* ==== ABI (تماماً مطابق آنچه فرستادی) ==== */
+const CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
 const POLYGON_CHAIN_ID = 137;
 const POLYGON_CHAIN_HEX = '0x89';
@@ -155,6 +187,7 @@ let provider, signer, contract;
 /* UI elements */
 const connectBtn = document.getElementById('connectBtn');
 const wcBtn = document.getElementById('wcBtn');
+const disconnectBtn = document.getElementById('disconnectBtn');
 const readFeeBtn = document.getElementById('readFeeBtn');
 const registerBtn = document.getElementById('registerBtn');
 const getUserBtn = document.getElementById('getUserBtn');
@@ -164,6 +197,7 @@ const contributeBtn = document.getElementById('contributeBtn');
 const buyMinerBtn = document.getElementById('buyMinerBtn');
 const withdrawPoolBtn = document.getElementById('withdrawPoolBtn');
 const withdrawSpecialsBtn = document.getElementById('withdrawSpecialsBtn');
+const loadTreeBtn = document.getElementById('loadTreeBtn');
 
 const walletShort = document.getElementById('walletShort');
 const chainInfo = document.getElementById('chainInfo');
@@ -172,6 +206,8 @@ const feeInfo = document.getElementById('feeInfo');
 const resultBox = document.getElementById('resultBox');
 const logBox = document.getElementById('logBox');
 const statusBox = document.getElementById('statusBox');
+const regResult = document.getElementById('regResult');
+const treeView = document.getElementById('treeView');
 
 function addLog(msg){
   const now = new Date().toLocaleTimeString();
@@ -220,7 +256,8 @@ async function connectInjected(){
     signer = provider.getSigner();
     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     const addr = await signer.getAddress();
-    walletShort.innerText = 'کیف‌پول: ' + addr;
+    walletShort.innerHTML = 'کیف‌پول: <strong>' + addr + '</strong>';
+    disconnectBtn.style.display = 'inline-block';
     addLog('Connected (injected): ' + addr);
     await refreshNetworkAndBalance();
     setStatus('کیف‌پول متصل شد');
@@ -239,7 +276,8 @@ async function connectWalletConnect(){
     signer = provider.getSigner();
     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     const addr = await signer.getAddress();
-    walletShort.innerText = 'کیف‌پول: ' + addr;
+    walletShort.innerHTML = 'کیف‌پول: <strong>' + addr + '</strong>';
+    disconnectBtn.style.display = 'inline-block';
     addLog('Connected (WalletConnect): ' + addr);
     await refreshNetworkAndBalance();
     setStatus('WalletConnect متصل شد');
@@ -251,12 +289,26 @@ async function connectWalletConnect(){
       signer = null;
       contract = null;
       walletShort.innerText = 'کیف‌پول: متصل نشده';
+      disconnectBtn.style.display = 'none';
     });
   } catch(e){
     console.error(e);
     addLog('connectWalletConnect error: ' + (e && e.message));
     setStatus('اتصال WalletConnect شکست خورد', false);
   }
+}
+
+/* Disconnect */
+function disconnectWallet(){
+  try {
+    if(walletProvider && walletProvider.close) walletProvider.close();
+  } catch(e){}
+  provider = null;
+  signer = null;
+  contract = null;
+  walletShort.innerText = 'کیف‌پول: متصل نشده';
+  disconnectBtn.style.display = 'none';
+  addLog('Disconnected');
 }
 
 /* Switch to Polygon if needed */
@@ -268,7 +320,7 @@ async function trySwitchToPolygon(){
     setStatus('شبکه به Polygon تغییر یافت');
   } catch(switchError){
     // try to add chain
-    if(switchError.code === 4902){
+    if(switchError && switchError.code === 4902){
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
@@ -322,7 +374,7 @@ async function readEntryFee(){
   }
 }
 
-/* Register action: default uses contract.ENTRY_FEE(), but if force300 checked -> sends 300 MATIC */
+/* Register action: fixed 300 MATIC as requested */
 async function registerAction(){
   try {
     if(!signer) return alert('ابتدا کیف‌پول را متصل کنید.');
@@ -331,28 +383,17 @@ async function registerAction(){
     const upline = Number(uplineRaw);
     const placeOnLeft = document.getElementById('placeSide').value === 'true';
 
-    const force300 = document.getElementById('force300').checked;
-
-    let valueToSend;
-    if(force300){
-      valueToSend = ethers.utils.parseEther('300');
-      addLog('User chose force 300 MATIC override');
-      // warn user visually
-      if(!confirm('آیا مطمئنید می‌خواهید 300 MATIC ارسال کنید؟ در صورتی که ENTRY_FEE قرارداد >300 باشد تراکنش revert می‌شود.')) return;
-    } else {
-      const fee = await readEntryFee(); // BigNumber
-      valueToSend = fee;
-    }
+    const valueToSend = ethers.utils.parseEther('300');
 
     setStatus('در حال ارسال تراکنش ثبت‌نام...');
     const tx = await contract.register(upline, placeOnLeft, { value: valueToSend });
     addLog('register tx submitted: ' + tx.hash);
-    resultBox.innerText = 'TX ارسال شد: ' + tx.hash;
+    regResult.innerText = 'TX ارسال شد: ' + tx.hash;
     window.open(POLYGONSCAN_TX_PREFIX + tx.hash, '_blank');
     await tx.wait();
     addLog('register confirmed: ' + tx.hash);
     setStatus('ثبت‌نام با موفقیت انجام شد');
-    resultBox.innerText = 'ثبت‌نام موفق — ' + tx.hash;
+    regResult.innerText = 'ثبت‌نام موفق — ' + tx.hash;
     await refreshNetworkAndBalance();
   } catch(e){
     console.error(e);
@@ -507,6 +548,117 @@ async function withdrawSpecialsAction(){
   }
 }
 
+/* TREE: recursively fetch directs by userId up to depth */
+async function fetchTreeById(userId, depth){
+  if(userId === 0 || depth <= 0) return null;
+  try {
+    const directs = await contract.getUserDirects(userId);
+    const leftId = Number(directs.leftId || directs[0]);
+    const rightId = Number(directs.rightId || directs[1]);
+    const node = { name: `ID ${userId}`, id: userId, children: [] };
+    const leftNode = await fetchTreeById(leftId, depth-1);
+    const rightNode = await fetchTreeById(rightId, depth-1);
+    if(leftNode) node.children.push(leftNode);
+    if(rightNode) node.children.push(rightNode);
+    return node;
+  } catch(e){
+    return { name: `ID ${userId}`, id: userId, children: [] };
+  }
+}
+
+async function loadTree(){
+  try {
+    if(!signer) return alert('ابتدا کیف‌پول را متصل کنید');
+    setStatus('در حال بارگذاری درخت...');
+    const myAddr = await signer.getAddress();
+    const info = await contract.getUserInfo(myAddr);
+    const myId = Number(info[0].toString());
+    if(myId === 0){
+      setStatus('شما ثبت‌نام نشده‌اید (id=0)', false);
+      return;
+    }
+    const depth = Number(document.getElementById('treeDepth').value) || 3;
+    const data = await fetchTreeById(myId, depth);
+    drawTree(data || { name: `ID ${myId}`, children: [] });
+    setStatus('درخت بارگذاری شد');
+    addLog('Tree loaded for ID ' + myId);
+  } catch(e){
+    console.error(e);
+    setStatus('خطا در بارگذاری درخت', false);
+    addLog('loadTree error: ' + (e && e.message));
+  }
+}
+
+function drawTree(data){
+  // clear
+  treeView.innerHTML = '';
+  const width = treeView.clientWidth;
+  const height = 420;
+  const svg = d3.select(treeView).append('svg').attr('width', width).attr('height', height);
+  const g = svg.append('g').attr('transform', 'translate(40,20)');
+
+  const root = d3.hierarchy(data);
+  const treeLayout = d3.tree().size([width - 120, height - 80]);
+  treeLayout(root);
+
+  // links
+  g.selectAll('path.link')
+    .data(root.links())
+    .enter()
+    .append('path')
+    .attr('class','link')
+    .attr('d', d3.linkVertical()
+      .x(d => d.x)
+      .y(d => d.y))
+    .attr('fill','none')
+    .attr('stroke','#8a6bff')
+    .attr('stroke-width',2)
+    .attr('opacity',0.9);
+
+  // nodes
+  const node = g.selectAll('g.node')
+    .data(root.descendants())
+    .enter()
+    .append('g')
+    .attr('class','node')
+    .attr('transform', d => `translate(${d.x},${d.y})`);
+
+  node.append('circle')
+    .attr('r', 20)
+    .attr('fill', '#7c3aed')
+    .attr('stroke','#fff')
+    .attr('stroke-width',1.5)
+    .on('mouseover', function(e,d){
+      d3.select(this).transition().attr('r',26);
+    })
+    .on('mouseout', function(e,d){
+      d3.select(this).transition().attr('r',20);
+    });
+
+  node.append('text')
+    .attr('dy',5)
+    .attr('text-anchor','middle')
+    .attr('fill','#fff')
+    .style('font-size','12px')
+    .text(d => d.data.name);
+}
+
+/* MATRIX background generator (0/1) */
+function createMatrix(){
+  const rows = Math.floor(window.innerHeight/16);
+  const cols = Math.floor(window.innerWidth/10);
+  let out = '';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      out += Math.random()<0.5 ? '0' : '1';
+    }
+    out += '\n';
+  }
+  document.getElementById('matrix').textContent = out;
+}
+setInterval(createMatrix, 150);
+createMatrix();
+
 /* Wire UI */
 initWeb3Modal();
 ensureReadProvider();
@@ -520,18 +672,20 @@ connectBtn.addEventListener('click', async ()=> {
   }
 });
 wcBtn.addEventListener('click', async ()=> { await connectWalletConnect(); });
+disconnectBtn.addEventListener('click', disconnectWallet);
 
-readFeeBtn.addEventListener('click', async ()=> { await readEntryFee(); });
-registerBtn.addEventListener('click', async ()=> { await registerAction(); });
-getUserBtn.addEventListener('click', async ()=> { await getUserInfoAction(); });
-minerStatsBtn.addEventListener('click', async ()=> { await getMinerStatsAction(); });
-minerStatsByPercentBtn.addEventListener('click', async ()=> { await getMinerStatsByPercentAction(); });
-contributeBtn.addEventListener('click', async ()=> { await contributeToMinerPoolAction(); });
-buyMinerBtn.addEventListener('click', async ()=> { await buyMinerTokensAction(); });
-withdrawPoolBtn.addEventListener('click', async ()=> { await withdrawPoolAction(); });
-withdrawSpecialsBtn.addEventListener('click', async ()=> { await withdrawSpecialsAction(); });
+readFeeBtn && readFeeBtn.addEventListener('click', async ()=> { await readEntryFee(); });
+registerBtn && registerBtn.addEventListener('click', async ()=> { await registerAction(); });
+document.getElementById('getUserBtn')?.addEventListener('click', async ()=> { await getUserInfoAction(); });
+minerStatsBtn && minerStatsBtn.addEventListener('click', async ()=> { await getMinerStatsAction(); });
+minerStatsByPercentBtn && minerStatsByPercentBtn.addEventListener('click', async ()=> { await getMinerStatsByPercentAction(); });
+contributeBtn && contributeBtn.addEventListener('click', async ()=> { await contributeToMinerPoolAction(); });
+buyMinerBtn && buyMinerBtn.addEventListener('click', async ()=> { await buyMinerTokensAction(); });
+withdrawPoolBtn && withdrawPoolBtn.addEventListener('click', async ()=> { await withdrawPoolAction(); });
+withdrawSpecialsBtn && withdrawSpecialsBtn.addEventListener('click', async ()=> { await withdrawSpecialsAction(); });
+loadTreeBtn && loadTreeBtn.addEventListener('click', async ()=> { await loadTree(); });
 
-addLog('DApp loaded (read-only).');
+addLog('DApp loaded (ABI embedded).');
 
 </script>
 </body>
