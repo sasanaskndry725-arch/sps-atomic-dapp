@@ -1,272 +1,250 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { ethers } from 'ethers'
-import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi'
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SPS Smart DApp — Polygon</title>
 
-// ---------------------- CONFIG ----------------------
-const CONTRACT_ADDRESS = '0x7a7b06D49129B34976D07B3854d4D72D01588191'
-const CHAIN_ID = 137 // Polygon mainnet
-const RPC_FALLBACK = import.meta.env.VITE_ALCHEMY_KEY
-  ? `https://polygon-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_KEY}`
-  : 'https://polygon-rpc.com'
-const POLYGONSCAN_TX_URL = 'https://polygonscan.com/tx/'
+<!-- ethers.js UMD (v5) -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-// ====== ABI (as provided) ======
-const ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
-// helper functions
-function isViewOrPure(item) {
-  return item.stateMutability === 'view' || item.stateMutability === 'pure';
-}
-function isPayable(item) {
-  return item.stateMutability === 'payable';
-}
-function humanType(t) {
-  if (t.startsWith('uint')) return 'uint256';
-  if (t.startsWith('int')) return 'int256';
-  return t;
-}
-
-export default function App() {
-  const { address, isConnected } = useAccount()
-  const { chain } = useNetwork()
-
-  const [provider, setProvider] = useState(null)
-  const [signer, setSigner] = useState(null)
-  const [contract, setContract] = useState(null)
-  const [logs, setLogs] = useState([])
-
-  const functionsFromAbi = useMemo(() => ABI.filter(a => a.type === 'function'), [])
-  const viewFuncs = useMemo(() => functionsFromAbi.filter(isViewOrPure), [functionsFromAbi])
-  const writeFuncs = useMemo(() => functionsFromAbi.filter(f => !isViewOrPure(f)), [functionsFromAbi])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const p = new ethers.BrowserProvider(window.ethereum)
-      setProvider(p)
-    } else {
-      // fallback provider (read-only)
-      const rpc = new ethers.JsonRpcProvider(RPC_FALLBACK)
-      setProvider(rpc)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (provider && isConnected) {
-      (async () => {
-        try {
-          const s = await provider.getSigner()
-          setSigner(s)
-          setContract(new ethers.Contract(CONTRACT_ADDRESS, ABI, s))
-          addLog('Signer and contract set up')
-        } catch (e) {
-          console.error(e)
-          addLog('Error setting signer: ' + e.message)
-        }
-      })()
-    } else if (provider) {
-      // read-only contract
-      setContract(new ethers.Contract(CONTRACT_ADDRESS, ABI, provider))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, isConnected])
-
-  function addLog(msg) {
-    setLogs(prev => [new Date().toLocaleTimeString() + ' - ' + msg, ...prev].slice(0, 100))
+<style>
+  :root {
+    --bg: #071022;
+    --card: #0f1724;
+    --accent: #7c3aed;
+    --muted: #cbd5e1;
   }
+  body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#e6eef8;display:flex;align-items:center;justify-content:center;min-height:100vh}
+  .wrap{width:100%;max-width:760px;padding:20px}
+  .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  h1{margin:0 0 12px 0;font-size:20px}
+  .muted{color:var(--muted);font-size:13px}
+  button{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;margin-top:8px;width:100%}
+  .row{display:flex;gap:10px;align-items:center;margin-top:10px}
+  input, select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071322;color:#e6eef8}
+  pre{background:#041220;padding:12px;border-radius:8px;overflow:auto;max-height:260px;font-size:13px;color:#dbeafe}
+  .small{font-size:13px;color:#cbd5e1;margin-top:8px}
+  a.mono{font-family:monospace;color:#9ae6b4}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>SPS Smart DApp (Polygon)</h1>
+      <div class="muted">Contract: <a class="mono" id="contractAddress" href="https://polygonscan.com/address/0x7a7b06D49129B34976D07B3854d4D72D01588191" target="_blank" rel="noopener noreferrer">0x7a7b06D49129B34976D07B3854d4D72D01588191</a></div>
 
-  async function connectWallet() {
-    try {
-      if (window.ethereum) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' })
-        addLog('Injected wallet connected (likely MetaMask or SafePal Browser).')
-      } else {
-        alert('برای اتصال SafePal: دکمهٔ Web3Modal (WalletConnect) را باز کنید و QR را با اپ SafePal اسکن کنید.')
-      }
-    } catch (e) {
-      console.error(e)
-      addLog('connectWallet error: ' + (e && e.message))
-    }
-  }
+      <div style="margin-top:14px">
+        <button id="connectBtn">🔗 اتصال کیف‌پول (MetaMask / SafePal Browser)</button>
+        <div class="small" id="connectedInfo"></div>
+      </div>
 
-  async function callView(func) {
-    try {
-      addLog(`Calling view: ${func.name}`)
-      const args = await promptForInputs(func.inputs || [])
-      const result = await contract[func.name](...args)
-      addLog(`${func.name} => ${formatResult(result)}`)
-      alert(`${func.name} => ${formatResult(result)}`)
-    } catch (e) {
-      console.error(e)
-      addLog('callView error: ' + (e && e.message))
-      alert('Error: ' + (e && e.message))
-    }
-  }
+      <hr style="margin:16px 0;opacity:0.08;border:none;height:1px;background:rgba(255,255,255,0.03)">
 
-  async function callWrite(func) {
-    if (!signer) {
-      alert('لطفاً کیف‌پول را متصل کنید (Connect). برای اتصال SafePal: از WalletConnect استفاده کنید یا SafePal Browser را باز کنید.')
-      return
-    }
-    try {
-      addLog(`Sending tx: ${func.name}`)
-      const c = contract.connect(signer)
-      const args = await promptForInputs(func.inputs || [])
-      let overrides = {}
-      if (isPayable(func)) {
-        const raw = prompt('This function is payable. Enter amount in MATIC (e.g. 0.35):', '0')
-        const value = raw ? ethers.parseUnits(String(raw), 'ether') : 0n
-        overrides = { value }
-      }
-      const tx = await c[func.name](...args, overrides)
-      addLog('TX sent: ' + tx.hash)
-      const open = confirm('Tx sent: ' + tx.hash + '\\nOpen in Polygonscan?')
-      if (open) window.open(POLYGONSCAN_TX_URL + tx.hash, '_blank')
-      await tx.wait()
-      addLog('TX confirmed: ' + tx.hash)
-      alert('Transaction confirmed: ' + tx.hash)
-    } catch (e) {
-      console.error(e)
-      addLog('callWrite error: ' + (e && e.message))
-      alert('Error: ' + (e && e.message))
-    }
-  }
-
-  async function promptForInputs(inputs) {
-    const result = []
-    for (let i = 0; i < inputs.length; i++) {
-      const inp = inputs[i]
-      const promptLabel = `${inp.name || 'arg' + i} (${humanType(inp.type)})`
-      let value = window.prompt(promptLabel + ':', '')
-      if (value === null) throw new Error('User cancelled input')
-      if (inp.type.startsWith('uint') || inp.type.startsWith('int')) {
-        value = value.trim()
-        if (value === '') value = '0'
-        if (value.includes('.')) {
-          value = ethers.parseUnits(value, 'ether').toString()
-        }
-        result.push(ethers.toBigInt(value))
-      } else if (inp.type === 'address') {
-        result.push(value)
-      } else if (inp.type === 'bool') {
-        result.push(value.toLowerCase() === 'true' || value === '1')
-      } else {
-        result.push(value)
-      }
-    }
-    return result
-  }
-
-  function formatResult(r) {
-    try {
-      if (r === null || r === undefined) return String(r)
-      if (Array.isArray(r)) return r.map(formatResult).join(', ')
-      if (typeof r === 'object' && r._isBigNumber) return r.toString()
-      if (typeof r === 'bigint') return r.toString()
-      if (typeof r === 'object') return JSON.stringify(r)
-      return String(r)
-    } catch (e) {
-      return String(r)
-    }
-  }
-
-  return (
-    <div className="app-root">
-      <header className="app-header">
-        <div>
-          <h1>PTK DApp (Polygon)</h1>
-          <p className="muted">Contract: <span className="mono">{CONTRACT_ADDRESS}</span></p>
+      <div>
+        <h3 style="margin:0 0 8px 0">ثبت‌نام (register)</h3>
+        <div class="row">
+          <input id="uplineCode" placeholder="Upline code (number)">
+          <select id="placeSide" style="width:160px">
+            <option value="true">Left</option>
+            <option value="false">Right</option>
+          </select>
         </div>
+        <button id="registerBtn">🚀 ثبت‌نام</button>
+        <div class="small">مقدار ENTRY_FEE به‌صورت خودکار خوانده می‌شود و برای ثبت ارسال می‌گردد.</div>
+      </div>
 
-        <div>
-          {isConnected ? (
-            <div className="account-box">
-              <div className="mono">{address}</div>
-              <div>Chain: {chain?.id || '–'}</div>
-            </div>
-          ) : (
-            <div style={{display:'flex',gap:8}}>
-              <button className="btn" onClick={connectWallet}>Connect (Injected / SafePal Browser)</button>
-            </div>
-          )}
+      <hr style="margin:16px 0;opacity:0.08;border:none;height:1px;background:rgba(255,255,255,0.03)">
+
+      <div>
+        <h3 style="margin:0 0 8px 0">اطلاعات کاربر (getUserInfo)</h3>
+        <input id="lookupWallet" placeholder="Wallet address (خالی برای کیف پول متصل)">
+        <button id="getUserInfoBtn">🔍 دریافت اطلاعات</button>
+        <pre id="userInfoBox">نتیجه در اینجا نمایش داده می‌شود...</pre>
+      </div>
+
+      <hr style="margin:16px 0;opacity:0.08;border:none;height:1px;background:rgba(255,255,255,0.03)">
+
+      <div>
+        <h3 style="margin:0 0 8px 0">عملیات دیگر</h3>
+        <div class="row">
+          <button id="buyMinerTokensBtn" style="flex:1">💠 buyMinerTokens()</button>
+          <button id="contributeMinerBtn" style="flex:1">➕ contributeToMinerPool (payable)</button>
         </div>
-      </header>
+        <div class="row">
+          <button id="withdrawPoolBtn" style="flex:1">💸 withdrawPool()</button>
+          <button id="withdrawSpecialsBtn" style="flex:1">🏆 withdrawSpecials()</button>
+        </div>
+      </div>
 
-      <main className="container">
-        <section className="card">
-          <h2>Quick Actions</h2>
-          <div className="grid">
-            <button className="btn" onClick={async () => {
-              try {
-                const rpc = new ethers.JsonRpcProvider(RPC_FALLBACK)
-                const c = new ethers.Contract(CONTRACT_ADDRESS, ABI, rpc)
-                const fee = await c.ENTRY_FEE()
-                alert('ENTRY_FEE = ' + ethers.formatEther(fee) + ' MATIC')
-              } catch(e){ alert('err: '+e.message) }
-            }}>Read ENTRY_FEE</button>
-
-            <button className="btn" onClick={async () => {
-              try {
-                const rpc = new ethers.JsonRpcProvider(RPC_FALLBACK)
-                const c = new ethers.Contract(CONTRACT_ADDRESS, ABI, rpc)
-                const v = await c.totalUsers()
-                alert('totalUsers = ' + String(v))
-              } catch(e){ alert('err: '+e.message) }
-            }}>Read totalUsers</button>
-
-            <a className="btn" href={`https://polygonscan.com/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noreferrer">Open on Polygonscan</a>
-          </div>
-        </section>
-
-        <section className="card">
-          <h2>Read (view / pure) functions</h2>
-          <div className="func-list">
-            {viewFuncs.map((f, idx) => (
-              <div key={idx} className="func-row">
-                <div className="func-meta">
-                  <div className="func-name">{f.name}()</div>
-                  <div className="func-sign">{f.inputs.map(i=>`${i.name||'arg'}:${i.type}`).join(', ') || 'no args'}</div>
-                </div>
-                <div>
-                  <button className="btn small" onClick={() => callView(f)}>Call</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="card">
-          <h2>Write (state-changing) functions</h2>
-          <div className="func-list">
-            {writeFuncs.map((f, idx) => (
-              <div key={idx} className="func-row">
-                <div className="func-meta">
-                  <div className="func-name">{f.name}()</div>
-                  <div className="func-sign">{f.inputs.map(i=>`${i.name||'arg'}:${i.type}`).join(', ') || 'no args'}</div>
-                </div>
-                <div>
-                  <button className="btn small" onClick={() => callWrite(f)}>{isPayable(f) ? 'Send (payable)' : 'Send'}</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="card">
-          <h2>Logs</h2>
-          <div className="logs">
-            {logs.length===0 ? <div className="muted">No logs yet</div> : logs.map((l,i)=>(<div key={i} className="log-item">{l}</div>))}
-          </div>
-        </section>
-
-        <footer className="card small muted">
-          <div>نکات:</div>
-          <ul>
-            <li>برای اتصال از SafePal موبایل: داخل SafePal گزینه WalletConnect را باز کن و QR یا لینک را اسکن کن (Web3Modal از WalletConnect v2 استفاده می‌کند).</li>
-            <li>برای توابع payable، مقدار را به واحد MATIC وارد کن (مثلاً 0.35).</li>
-            <li>برای ورودی‌های uint اگر مقدار اعشاری وارد کنی، به wei تبدیل می‌شود (ether → wei) برای راحتی ورودی.</li>
-          </ul>
-        </footer>
-      </main>
+      <div class="small" style="margin-top:12px">
+        نکته: برای اتصال SafePal موبایل، از Web3Modal/WalletConnect یا مرورگر درون‌برنامهٔ SafePal استفاده کنید.  
+        قبل از ارسال تراکنش در mainnet مقدار کمی را تست کنید.
+      </div>
     </div>
-  )
+  </div>
+
+<script>
+/* ===========================
+   تنظیمات قرارداد / ABI
+   =========================== */
+
+const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+
+const CONTRACT_ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+ /* ===========================
+    DApp runtime
+    =========================== */
+
+let provider, signer, contract;
+
+const connectBtn = document.getElementById('connectBtn');
+const registerBtn = document.getElementById('registerBtn');
+const getUserInfoBtn = document.getElementById('getUserInfoBtn');
+const userInfoBox = document.getElementById('userInfoBox');
+const connectedInfo = document.getElementById('connectedInfo');
+const buyMinerTokensBtn = document.getElementById('buyMinerTokensBtn');
+const contributeMinerBtn = document.getElementById('contributeMinerBtn');
+const withdrawPoolBtn = document.getElementById('withdrawPoolBtn');
+const withdrawSpecialsBtn = document.getElementById('withdrawSpecialsBtn');
+
+async function connectWallet() {
+  try {
+    if (!window.ethereum) {
+      alert('کیف پول Web3 (MetaMask / SafePal) یافت نشد.');
+      return;
+    }
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    signer = provider.getSigner();
+    const addr = await signer.getAddress();
+    connectedInfo.innerText = 'متصل: ' + addr;
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    console.log('Connected to', addr);
+  } catch (e) {
+    console.error(e);
+    alert('خطا در اتصال کیف پول: ' + (e && e.message));
+  }
 }
+
+async function register() {
+  try {
+    if (!contract || !signer) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const uplineRaw = document.getElementById('uplineCode').value;
+    const placeRaw = document.getElementById('placeSide').value;
+    if (!uplineRaw) return alert('لطفاً Upline code را وارد کنید.');
+    const upline = Number(uplineRaw);
+    const placeOnLeft = placeRaw === 'true';
+
+    // read ENTRY_FEE from contract
+    const entryFee = await contract.ENTRY_FEE(); // BigNumber (wei)
+    // send tx with value = entryFee
+    const tx = await contract.register(upline, placeOnLeft, { value: entryFee });
+    userInfoBox.innerText = 'در حال ارسال تراکنش...\n' + tx.hash;
+    await tx.wait();
+    userInfoBox.innerText = 'ثبت‌نام موفق — TX: ' + tx.hash;
+  } catch (e) {
+    console.error(e);
+    alert('خطا در ثبت‌نام: ' + (e && e.message));
+  }
+}
+
+async function getUserInfo() {
+  try {
+    if (!contract) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const lookup = document.getElementById('lookupWallet').value;
+    let addr;
+    if (!lookup) {
+      if (!signer) return alert('ابتدا کیف‌پول را متصل کنید.');
+      addr = await signer.getAddress();
+    } else {
+      addr = lookup;
+    }
+    const info = await contract.getUserInfo(addr);
+    userInfoBox.innerText = JSON.stringify({
+      id: info[0].toString(),
+      uplineId: info[1].toString(),
+      leftCount: info[2].toString(),
+      rightCount: info[3].toString(),
+      saveLeft: info[4].toString(),
+      saveRight: info[5].toString(),
+      balanceCount: info[6].toString(),
+      specialBalanceCount: info[7].toString(),
+      totalMinerRewards: info[8].toString(),
+      entryPrice: info[9].toString(),
+      isMiner: info[10]
+    }, null, 2);
+  } catch (e) {
+    console.error(e);
+    alert('خطا در دریافت اطلاعات: ' + (e && e.message));
+  }
+}
+
+async function buyMinerTokens() {
+  try {
+    if (!contract) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const tx = await contract.buyMinerTokens();
+    userInfoBox.innerText = 'در حال ارسال... ' + tx.hash;
+    await tx.wait();
+    userInfoBox.innerText = 'خرید انجام شد: ' + tx.hash;
+  } catch (e) {
+    console.error(e);
+    alert('خطا: ' + (e && e.message));
+  }
+}
+
+async function contributeToMinerPool() {
+  try {
+    if (!contract) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const amount = prompt('مقدار MATIC برای واریز به Miner Pool (مثال: 0.1):', '0.1');
+    if (amount === null) return;
+    const value = ethers.utils.parseEther(String(amount));
+    const tx = await contract.contributeToMinerPool({ value });
+    userInfoBox.innerText = 'در حال ارسال... ' + tx.hash;
+    await tx.wait();
+    userInfoBox.innerText = 'واریز انجام شد: ' + tx.hash;
+  } catch (e) {
+    console.error(e);
+    alert('خطا: ' + (e && e.message));
+  }
+}
+
+async function withdrawPool() {
+  try {
+    if (!contract) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const tx = await contract.withdrawPool();
+    userInfoBox.innerText = 'در حال ارسال... ' + tx.hash;
+    await tx.wait();
+    userInfoBox.innerText = 'withdrawPool انجام شد: ' + tx.hash;
+  } catch (e) {
+    console.error(e);
+    alert('خطا: ' + (e && e.message));
+  }
+}
+
+async function withdrawSpecials() {
+  try {
+    if (!contract) return alert('ابتدا کیف‌پول را متصل کنید.');
+    const tx = await contract.withdrawSpecials();
+    userInfoBox.innerText = 'در حال ارسال... ' + tx.hash;
+    await tx.wait();
+    userInfoBox.innerText = 'withdrawSpecials انجام شد: ' + tx.hash;
+  } catch (e) {
+    console.error(e);
+    alert('خطا: ' + (e && e.message));
+  }
+}
+
+/* ============ wire UI ============ */
+connectBtn.addEventListener('click', connectWallet);
+registerBtn.addEventListener('click', register);
+getUserInfoBtn.addEventListener('click', getUserInfo);
+buyMinerTokensBtn.addEventListener('click', buyMinerTokens);
+contributeMinerBtn.addEventListener('click', contributeToMinerPool);
+withdrawPoolBtn.addEventListener('click', withdrawPool);
+withdrawSpecialsBtn.addEventListener('click', withdrawSpecials);
+
+</script>
+</body>
+</html>
