@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPS Ultra Pro — Smart DApp</title>
+
+    <!-- فونت -->
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;900&display=swap" rel="stylesheet">
+
     <style>
         body {
             background: #0d0f17;
@@ -13,11 +16,14 @@
             margin: 0;
             padding: 0;
         }
+
         .container {
             width: 95%;
             margin: auto;
             padding-bottom: 100px;
         }
+
+        /* کارت */
         .card {
             background: #131627;
             border-radius: 16px;
@@ -28,6 +34,8 @@
             animation: fadeIn .7s;
         }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+        /* دکمه‌ها */
         .btn {
             display: inline-block;
             width: 100%;
@@ -42,11 +50,13 @@
             text-align: center;
             box-shadow: 0 0 10px rgba(137, 78, 255, .45);
         }
-        .btn:hover {
+        .btn:hover{
             transform: scale(1.02);
-            cursor: pointer;
+            cursor:pointer;
         }
-        input, select {
+
+        /* ورودی */
+        input {
             width: 100%;
             padding: 12px;
             background: #0f1120;
@@ -55,6 +65,18 @@
             color: #fff;
             margin-top: 10px;
         }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #0f1120;
+            border: 2px solid #24283b;
+            border-radius: 10px;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        /* عنوان بخش */
         .title {
             font-size: 22px;
             font-weight: 700;
@@ -63,16 +85,21 @@
             -webkit-background-clip: text;
             color: transparent;
         }
+
+        /* نوار بالایی */
         .header {
             padding: 25px;
             text-align: center;
             background: linear-gradient(90deg,#1e1f31,#13141f);
             border-bottom: 1px solid #2b2c44;
         }
+
         .logo {
             width: 95px;
             margin-bottom: 15px;
         }
+
+        /* نمایش JSON */
         .jsonBox {
             white-space: pre-wrap;
             background: #0c0d15;
@@ -82,6 +109,8 @@
             font-size: 15px;
             direction: ltr;
         }
+
+        /* درخت */
         #treeContainer {
             background: #0f1120;
             border-radius: 14px;
@@ -89,6 +118,7 @@
             margin-top: 15px;
             border: 1px solid #292b42;
         }
+
         .node {
             background:#7f3dff;
             padding:8px 14px;
@@ -98,6 +128,7 @@
             font-weight:bold;
             box-shadow:0 0 10px #7f3dffaa;
         }
+
         .line {
             width:2px;
             height:40px;
@@ -116,176 +147,139 @@
 
 <div class="container">
 
-    <!-- اتصال کیف پول -->
-    <div class="card">
-        <div class="title">اتصال کیف پول</div>
-        <button class="btn" onclick="connectWallet()">اتصال Wallet</button>
-        <div id="walletAddress" style="margin-top:10px;color:#7de0ff;"></div>
-        <div id="maticBalance" style="margin-top:5px;color:#8affc7;"></div>
-    </div>
+<!-- اتصال کیف پول -->
+<div class="card">
+    <div class="title">اتصال کیف پول</div>
+    <button class="btn" onclick="connectWallet()">اتصال Wallet</button>
+    <div id="walletAddress" style="margin-top:10px;color:#7de0ff;"></div>
+    <div id="maticBalance" style="margin-top:5px;color:#8affc7;"></div>
+</div>
 
-    <!-- User Info -->
-    <div class="card">
-        <div class="title">اطلاعات حساب</div>
-        <button class="btn" onclick="loadUserInfo()">دریافت User Info</button>
-        <div id="userInfo" class="jsonBox"></div>
-    </div>
+<!-- User Info -->
+<div class="card">
+    <div class="title">اطلاعات حساب</div>
+    <button class="btn" onclick="loadUserInfo()">دریافت User Info</button>
+    <div id="userInfo" class="jsonBox"></div>
+</div>
 
-    <!-- ثبت نام -->
-    <div class="card">
-        <div class="title">ثبت‌نام</div>
-        <input id="uplineCode" placeholder="upline (ID)">
-        <select id="side">
-            <option value="true">چپ</option>
-            <option value="false">راست</option>
-        </select>
-        <button class="btn" onclick="register()">ثبت‌نام (300 MATIC)</button>
-    </div>
+<!-- ثبت نام -->
+<div class="card">
+    <div class="title">ثبت‌نام</div>
+    <input id="uplineCode" placeholder="upline (ID)">
+    <select id="side">
+        <option value="true">چپ</option>
+        <option value="false">راست</option>
+    </select>
+    <button class="btn" onclick="register()">ثبت‌نام (300 MATIC)</button>
+</div>
 
-    <!-- عملیات قرارداد -->
-    <div class="card">
-        <div class="title">عملیات اصلی قرارداد</div>
-        <button class="btn" onclick="buyMinerTokens()">buyMinerTokens()</button>
-        <button class="btn" onclick="withdrawPool()">withdrawPool()</button>
-        <button class="btn" onclick="withdrawSpecials()">withdrawSpecials()</button>
-    </div>
+<!-- عملیات قرارداد -->
+<div class="card">
+    <div class="title">عملیات اصلی قرارداد</div>
+    <button class="btn" onclick="buyMinerTokens()">buyMinerTokens()</button>
+    <button class="btn" onclick="withdrawPool()">withdrawPool()</button>
+    <button class="btn" onclick="withdrawSpecials()">withdrawSpecials()</button>
+</div>
 
-    <!-- ساختار درختی -->
-    <div class="card">
-        <div class="title">ساختار درختی</div>
-        <input id="treeId" placeholder="User ID برای نمایش درخت">
-        <button class="btn" onclick="loadTree()">نمایش ساختار</button>
-        <div id="treeContainer"></div>
-    </div>
+<!-- ساختار درختی -->
+<div class="card">
+    <div class="title">ساختار درختی</div>
+    <input id="treeId" placeholder="User ID برای نمایش درخت">
+    <button class="btn" onclick="loadTree()">نمایش ساختار</button>
+    <div id="treeContainer"></div>
+</div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 
 <script>
+// آدرس قرارداد و ABI
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
-const ABI = [ /* [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}] */ ];
+const ABI = [
+    {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
+    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
+    {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},
+    {"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+    {"inputs":[],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"}],"stateMutability":"view","type":"function"},
+    {"inputs":[],"name":"register","outputs":[],"stateMutability":"payable","type":"function"}
+    // ادامه ABI ...
+];
 
 let provider, signer, contract;
 
 /* اتصال کیف پول */
 async function connectWallet(){
-    if (!window.ethereum) {
-        alert("لطفاً MetaMask یا یک کیف پول مشابه نصب کنید.");
+    if(!window.ethereum){
+        alert("لطفاً MetaMask نصب کنید");
         return;
     }
-    
     provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []); // درخواست اتصال به کیف پول
+    await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
     const addr = await signer.getAddress();
-    document.getElementById("walletAddress").innerText = "آدرس: " + addr;
+    document.getElementById("walletAddress").innerHTML = "آدرس: " + addr;
 
     const bal = await provider.getBalance(addr);
-    document.getElementById("maticBalance").innerText =
-        "موجودی: " + ethers.utils.formatEther(bal) + " MATIC";
+    document.getElementById("maticBalance").innerHTML = "موجودی: " + ethers.utils.formatEther(bal) + " MATIC";
 }
 
-/* User Info */
-async function loadUserInfo() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
+/* اطلاعات کاربر */
+async function loadUserInfo(){
     const addr = await signer.getAddress();
     const info = await contract.getUserInfo(addr);
     document.getElementById("userInfo").innerText = JSON.stringify(info, null, 4);
 }
 
 /* ثبت نام */
-async function register() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
+async function register(){
+    let id = document.getElementById("uplineCode").value;
+    let side = document.getElementById("side").value === "true";
 
-    const id = document.getElementById("uplineCode").value;
-    const side = document.getElementById("side").value === "true";
+    const tx = await contract.register(id, side, {
+        value: ethers.utils.parseEther("300")
+    });
 
-    try {
-        const tx = await contract.register(id, side, {
-            value: ethers.utils.parseEther("300")
-        });
-        await tx.wait();
-        alert("ثبت‌نام موفق!");
-    } catch (error) {
-        alert("خطا در ثبت‌نام: " + error.message);
-    }
+    await tx.wait();
+    alert("ثبت‌نام موفق!");
 }
 
-/* خرید توکن‌های ماینر */
-async function buyMinerTokens() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
-    try {
-        const tx = await contract.buyMinerTokens();
-        await tx.wait();
-        alert("خرید توکن ماینر موفق بود!");
-    } catch (error) {
-        alert("خطا در خرید توکن ماینر: " + error.message);
-    }
+/* خرید Miner Tokens */
+async function buyMinerTokens(){
+    const tx = await contract.buyMinerTokens();
+    await tx.wait();
+    alert("خرید موفق!");
 }
 
 /* برداشت از استخر */
-async function withdrawPool() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
-    try {
-        const tx = await contract.withdrawPool();
-        await tx.wait();
-        alert("برداشت از استخر موفق بود!");
-    } catch (error) {
-        alert("خطا در برداشت از استخر: " + error.message);
-    }
+async function withdrawPool(){
+    const tx = await contract.withdrawPool();
+    await tx.wait();
+    alert("برداشت موفق!");
 }
 
-/* برداشت از خصوصی‌ها */
-async function withdrawSpecials() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
-    try {
-        const tx = await contract.withdrawSpecials();
-        await tx.wait();
-        alert("برداشت از خصوصی‌ها موفق بود!");
-    } catch (error) {
-        alert("خطا در برداشت از خصوصی‌ها: " + error.message);
-    }
+/* برداشت از Special */
+async function withdrawSpecials(){
+    const tx = await contract.withdrawSpecials();
+    await tx.wait();
+    alert("برداشت موفق!");
 }
 
 /* ساختار درختی */
-async function loadTree() {
-    if (!signer) {
-        alert("ابتدا کیف پول را متصل کنید.");
-        return;
-    }
+async function loadTree(){
+    let id = document.getElementById("treeId").value;
+    let node = await contract.getUserDirects(id);
 
-    const userId = document.getElementById("treeId").value;
-    try {
-        const directs = await contract.getUserDirects(userId);
-        document.getElementById("treeContainer").innerHTML = `
-            <div class="node">ID ${userId}</div>
-            <div class="line"></div>
-            <div>
-                <span class="node">ID ${directs.leftId}</span>
-                <span class="node">ID ${directs.rightId}</span>
-            </div>
-        `;
-    } catch (error) {
-        alert("خطا در بارگذاری درخت: " + error.message);
-    }
+    document.getElementById("treeContainer").innerHTML = `
+        <div class="node">ID ${id}</div>
+        <div class="line"></div>
+        <div>
+            <span class="node">ID ${node.leftId}</span>
+            <span class="node">ID ${node.rightId}</span>
+        </div>
+    `;
 }
 </script>
 
