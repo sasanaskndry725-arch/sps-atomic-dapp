@@ -1,141 +1,110 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPS Ultra Pro — Smart DApp</title>
-
-<!-- فونت -->
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;900&display=swap" rel="stylesheet">
-
-<style>
-body {
-    background: #0d0f17;
-    color: #fff;
-    font-family: "Vazirmatn";
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    width: 95%;
-    margin: auto;
-    padding-bottom: 100px;
-}
-
-/* کارت */
-.card {
-    background: #131627;
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
-    border: 1px solid #24273d;
-    box-shadow: 0 0 18px rgba(138, 73, 255, 0.2);
-    animation: fadeIn .7s;
-}
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-
-/* دکمه‌ها */
-.btn {
-    display: inline-block;
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    background: linear-gradient(90deg, #7f3dff, #00d0ff);
-    border: none;
-    color: #fff;
-    font-size: 17px;
-    margin-top: 10px;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 0 10px rgba(137, 78, 255, .45);
-}
-.btn:hover{
-    transform: scale(1.02);
-    cursor:pointer;
-}
-
-/* ورودی */
-input {
-    width: 100%;
-    padding: 12px;
-    background: #0f1120;
-    border: 2px solid #24283b;
-    border-radius: 10px;
-    color: #fff;
-    margin-top: 10px;
-}
-
-select {
-    width: 100%;
-    padding: 12px;
-    background: #0f1120;
-    border: 2px solid #24283b;
-    border-radius: 10px;
-    color: #fff;
-    margin-top: 10px;
-}
-
-/* عنوان بخش */
-.title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    background: linear-gradient(90deg,#8a39ff,#00d0ff);
-    -webkit-background-clip: text;
-    color: transparent;
-}
-
-/* نوار بالایی */
-.header {
-    padding: 25px;
-    text-align: center;
-    background: linear-gradient(90deg,#1e1f31,#13141f);
-    border-bottom: 1px solid #2b2c44;
-}
-
-.logo {
-    width: 95px;
-    margin-bottom: 15px;
-}
-
-/* نمایش JSON */
-.jsonBox {
-    white-space: pre-wrap;
-    background: #0c0d15;
-    border-radius: 16px;
-    padding: 15px;
-    border: 1px solid #2b2e4a;
-    font-size: 15px;
-    direction: ltr;
-}
-
-/* درخت */
-#treeContainer {
-    background: #0f1120;
-    border-radius: 14px;
-    padding: 15px;
-    margin-top: 15px;
-    border: 1px solid #292b42;
-}
-
-.node {
-    background:#7f3dff;
-    padding:8px 14px;
-    border-radius:50px;
-    display:inline-block;
-    margin:12px;
-    font-weight:bold;
-    box-shadow:0 0 10px #7f3dffaa;
-}
-
-.line {
-    width:2px;
-    height:40px;
-    background:#00d0ff;
-    margin:auto;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPS Ultra Pro — Smart DApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #0d0f17;
+            color: #fff;
+            font-family: "Vazirmatn";
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 95%;
+            margin: auto;
+            padding-bottom: 100px;
+        }
+        .card {
+            background: #131627;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #24273d;
+            box-shadow: 0 0 18px rgba(138, 73, 255, 0.2);
+            animation: fadeIn .7s;
+        }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #7f3dff, #00d0ff);
+            border: none;
+            color: #fff;
+            font-size: 17px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(137, 78, 255, .45);
+        }
+        .btn:hover {
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #0f1120;
+            border: 2px solid #24283b;
+            border-radius: 10px;
+            color: #fff;
+            margin-top: 10px;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg,#8a39ff,#00d0ff);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .header {
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(90deg,#1e1f31,#13141f);
+            border-bottom: 1px solid #2b2c44;
+        }
+        .logo {
+            width: 95px;
+            margin-bottom: 15px;
+        }
+        .jsonBox {
+            white-space: pre-wrap;
+            background: #0c0d15;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #2b2e4a;
+            font-size: 15px;
+            direction: ltr;
+        }
+        #treeContainer {
+            background: #0f1120;
+            border-radius: 14px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #292b42;
+        }
+        .node {
+            background:#7f3dff;
+            padding:8px 14px;
+            border-radius:50px;
+            display:inline-block;
+            margin:12px;
+            font-weight:bold;
+            box-shadow:0 0 10px #7f3dffaa;
+        }
+        .line {
+            width:2px;
+            height:40px;
+            background:#00d0ff;
+            margin:auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -147,47 +116,47 @@ select {
 
 <div class="container">
 
-<!-- اتصال کیف پول -->
-<div class="card">
-    <div class="title">اتصال کیف پول</div>
-    <button class="btn" onclick="connectWallet()">اتصال Wallet</button>
-    <div id="walletAddress" style="margin-top:10px;color:#7de0ff;"></div>
-    <div id="maticBalance" style="margin-top:5px;color:#8affc7;"></div>
-</div>
+    <!-- اتصال کیف پول -->
+    <div class="card">
+        <div class="title">اتصال کیف پول</div>
+        <button class="btn" onclick="connectWallet()">اتصال Wallet</button>
+        <div id="walletAddress" style="margin-top:10px;color:#7de0ff;"></div>
+        <div id="maticBalance" style="margin-top:5px;color:#8affc7;"></div>
+    </div>
 
-<!-- User Info -->
-<div class="card">
-    <div class="title">اطلاعات حساب</div>
-    <button class="btn" onclick="loadUserInfo()">دریافت User Info</button>
-    <div id="userInfo" class="jsonBox"></div>
-</div>
+    <!-- User Info -->
+    <div class="card">
+        <div class="title">اطلاعات حساب</div>
+        <button class="btn" onclick="loadUserInfo()">دریافت User Info</button>
+        <div id="userInfo" class="jsonBox"></div>
+    </div>
 
-<!-- ثبت نام -->
-<div class="card">
-    <div class="title">ثبت‌نام</div>
-    <input id="uplineCode" placeholder="upline (ID)">
-    <select id="side">
-        <option value="true">چپ</option>
-        <option value="false">راست</option>
-    </select>
-    <button class="btn" onclick="register()">ثبت‌نام (300 MATIC)</button>
-</div>
+    <!-- ثبت نام -->
+    <div class="card">
+        <div class="title">ثبت‌نام</div>
+        <input id="uplineCode" placeholder="upline (ID)">
+        <select id="side">
+            <option value="true">چپ</option>
+            <option value="false">راست</option>
+        </select>
+        <button class="btn" onclick="register()">ثبت‌نام (300 MATIC)</button>
+    </div>
 
-<!-- عملیات قرارداد -->
-<div class="card">
-    <div class="title">عملیات اصلی قرارداد</div>
-    <button class="btn" onclick="buyMinerTokens()">buyMinerTokens()</button>
-    <button class="btn" onclick="withdrawPool()">withdrawPool()</button>
-    <button class="btn" onclick="withdrawSpecials()">withdrawSpecials()</button>
-</div>
+    <!-- عملیات قرارداد -->
+    <div class="card">
+        <div class="title">عملیات اصلی قرارداد</div>
+        <button class="btn" onclick="buyMinerTokens()">buyMinerTokens()</button>
+        <button class="btn" onclick="withdrawPool()">withdrawPool()</button>
+        <button class="btn" onclick="withdrawSpecials()">withdrawSpecials()</button>
+    </div>
 
-<!-- ساختار درختی -->
-<div class="card">
-    <div class="title">ساختار درختی</div>
-    <input id="treeId" placeholder="User ID برای نمایش درخت">
-    <button class="btn" onclick="loadTree()">نمایش ساختار</button>
-    <div id="treeContainer"></div>
-</div>
+    <!-- ساختار درختی -->
+    <div class="card">
+        <div class="title">ساختار درختی</div>
+        <input id="treeId" placeholder="User ID برای نمایش درخت">
+        <button class="btn" onclick="loadTree()">نمایش ساختار</button>
+        <div id="treeContainer"></div>
+    </div>
 
 </div>
 
@@ -196,8 +165,61 @@ select {
 <script>
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
 
-const ABI = /* ABI که خودت دادی، کامل اینجا قرار می‌گیرد */ 
-<?php echo json_encode($yourABI); ?>;
+const ABI = [
+    {
+        "inputs":[{"internalType":"address","name":"owner","type":"address"}],
+        "stateMutability":"nonpayable",
+        "type":"constructor"
+    },
+    {
+        "anonymous":false,
+        "inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],
+        "name":"DebugMessage",
+        "type":"event"
+    },
+    {
+        "inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
+        "stateMutability":"view","type":"function"
+    },
+    {
+        "inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],
+        "name":"getUserInfo","outputs":[
+            {"internalType":"uint256","name":"id","type":"uint256"},
+            {"internalType":"uint256","name":"uplineId","type":"uint256"},
+            {"internalType":"uint256","name":"leftCount","type":"uint256"},
+            {"internalType":"uint256","name":"rightCount","type":"uint256"},
+            {"internalType":"uint256","name":"saveLeft","type":"uint256"},
+            {"internalType":"uint256","name":"saveRight","type":"uint256"},
+            {"internalType":"uint256","name":"balanceCount","type":"uint256"},
+            {"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},
+            {"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},
+            {"internalType":"uint256","name":"entryPrice","type":"uint256"},
+            {"internalType":"bool","name":"isMiner","type":"bool"}
+        ],
+        "stateMutability":"view","type":"function"
+    },
+    {
+        "inputs":[{"internalType":"uint256","name":"id","type":"uint256"},
+        {"internalType":"address","name":"userWallet","type":"address"},
+        {"internalType":"uint256","name":"uplineId","type":"uint256"},
+        {"internalType":"address","name":"leftChildAddress","type":"address"},
+        {"internalType":"address","name":"rightChildAddress","type":"address"},
+        {"internalType":"uint256","name":"oldLeftCount","type":"uint256"},
+        {"internalType":"uint256","name":"oldRightCount","type":"uint256"},
+        {"internalType":"uint256","name":"oldLeftSave","type":"uint256"},
+        {"internalType":"uint256","name":"oldRightSave","type":"uint256"}],
+        "name":"register","outputs":[],"stateMutability":"payable","type":"function"
+    },
+    {
+        "inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"
+    },
+    {
+        "inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"
+    },
+    {
+        "inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"
+    }
+];
 
 let provider, signer, contract;
 
