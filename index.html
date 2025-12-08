@@ -379,7 +379,7 @@
 <script>
 // قراردادن ABI و آدرس قرارداد در اینجا
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";  // آدرس قرارداد
-const ABI = [ /* const ABI = [
+const ABI = [
     {
         "inputs": [
             {
@@ -587,168 +587,9 @@ const ABI = [ /* const ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "ENTRY_FEE",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "MAX_CYCLE_BALANCES",
-        "outputs": [
-            {
-                "internalType": "uint8",
-                "name": "",
-                "type": "uint8"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "MINER_BUY_INTERVAL",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "PTOKEN_CONTRACT",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "userId",
-                "type": "uint256"
-            }
-        ],
-        "name": "_getSpecialUserInfoForMigrateToNewFork",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "userAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "leftCount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "rightCount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "saveLeft",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "saveRight",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "balanceCount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "upline",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "specialBalanceCount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalMinerRewards",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "entryPrice",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "isMiner",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address[]",
-                "name": "usersToRemove",
-                "type": "address[]"
-            }
-        ],
-        "name": "batchRemoveMiners",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "buyMinerTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "contributeToMinerPool",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "distributeMinerTokens",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
     }
-]; */ ];
+];
+
 const POLYGON_CHAIN_ID = "0x89"; // شناسه شبکه Polygon Mainnet
 
 let provider, signer, contract;
@@ -768,6 +609,9 @@ async function connectWallet() {
         }
 
         // بررسی شبکه
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        if (chainId !== POLYGON_CHAIN_ID) {
+            alert// بررسی شبکه
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
         if (chainId !== POLYGON_CHAIN_ID) {
             alert("لطفاً شبکه خود را به Polygon تغییر دهید.");
@@ -793,5 +637,6 @@ async function connectWallet() {
     }
 }
 </script>
+
 </body>
 </html>
