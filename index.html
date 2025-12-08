@@ -265,6 +265,7 @@
             z-index: 1000;
             display: none;
             animation: slideUp 0.3s;
+            text-align: center;
         }
 
         @keyframes slideUp {
@@ -327,6 +328,40 @@
             border: 1px solid rgba(36, 40, 59, 0.8);
         }
 
+        .wallet-check {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(15, 17, 32, 0.6);
+            border-radius: 12px;
+        }
+
+        .wallet-option {
+            padding: 10px 20px;
+            background: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .wallet-option:hover {
+            background: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .network-warning {
+            background: linear-gradient(90deg, #f39c12, #ffcc00);
+            color: #000;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .container {
                 width: 98%;
@@ -352,6 +387,10 @@
                 gap: 10px;
                 text-align: center;
             }
+            
+            .wallet-check {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -369,15 +408,27 @@
 <!-- اتصال کیف پول -->
 <div class="card">
     <div class="title"><i class="fas fa-wallet"></i> اتصال کیف پول</div>
+    
+    <div id="walletCheck" class="wallet-check">
+        <div>وضعیت Web3: <span id="web3Status">در حال بررسی...</span></div>
+        <div>شبکه: <span id="networkStatus">-</span></div>
+    </div>
+    
     <button class="btn" onclick="connectWallet()" id="connectBtn">
-        <i class="fas fa-plug"></i> اتصال کیف پول
+        <i class="fas fa-plug"></i> اتصال کیف پول (MetaMask)
     </button>
+    
+    <div id="networkWarning" class="network-warning" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        لطفاً شبکه خود را به Polygon Mainnet تغییر دهید!
+    </div>
     
     <div id="walletInfo" style="display: none;">
         <div class="wallet-info">
             <div>
                 <div><i class="fas fa-user-circle"></i> <span id="walletAddress"></span></div>
                 <div><i class="fas fa-coins"></i> <span id="maticBalance"></span> MATIC</div>
+                <div><i class="fas fa-network-wired"></i> شبکه: <span id="currentNetwork"></span></div>
             </div>
             <div>
                 <span class="status-indicator status-connected"></span>
@@ -385,12 +436,22 @@
             </div>
         </div>
     </div>
+    
+    <div style="margin-top: 15px;">
+        <p><small><i class="fas fa-info-circle"></i> اگر با مشکل اتصال مواجه هستید:</small></p>
+        <button class="btn btn-warning" onclick="installMetaMask()" style="margin-top: 5px;">
+            <i class="fas fa-download"></i> نصب MetaMask
+        </button>
+        <button class="btn btn-danger" onclick="switchToPolygon()" style="margin-top: 5px;">
+            <i class="fas fa-exchange-alt"></i> تغییر به شبکه Polygon
+        </button>
+    </div>
 </div>
 
 <!-- اطلاعات سیستم -->
 <div class="card">
     <div class="title"><i class="fas fa-chart-line"></i> آمار سیستم</div>
-    <button class="btn btn-success" onclick="loadSystemStats()">
+    <button class="btn btn-success" onclick="loadSystemStats()" id="systemStatsBtn">
         <i class="fas fa-sync-alt"></i> بارگذاری آمار
     </button>
     
@@ -517,7 +578,18 @@
 <script>
 // تنظیمات قرارداد
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
-const ABI = [{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},{"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"contributeToMinerPool","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+const POLYGON_CHAIN_ID = "0x89"; // 137 به صورت هگزادسیمال
+const POLYGON_MAINNET_PARAMS = {
+    chainId: POLYGON_CHAIN_ID,
+    chainName: "Polygon Mainnet",
+    nativeCurrency: {
+        name: "MATIC",
+        symbol: "MATIC",
+        decimals: 18
+    },
+    rpcUrls: ["https://polygon-rpc.com/"],
+    blockExplorerUrls: ["https://polygonscan.com/"]
+};
 
 let provider, signer, contract;
 let userAddress = null;
@@ -555,21 +627,135 @@ function setButtonLoading(buttonId, isLoading) {
     }
 }
 
+// بررسی وجود Web3
+function checkWeb3() {
+    if (typeof window.ethereum !== 'undefined') {
+        document.getElementById('web3Status').innerHTML = '<span style="color: #00ff9d;">متصل ✓</span>';
+        document.getElementById('web3Status').style.color = '#00ff9d';
+        return true;
+    } else {
+        document.getElementById('web3Status').innerHTML = '<span style="color: #ff4757;">غیرفعال ✗</span>';
+        document.getElementById('web3Status').style.color = '#ff4757';
+        return false;
+    }
+}
+
+// بررسی شبکه
+async function checkNetwork() {
+    if (!window.ethereum) return;
+    
+    try {
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        
+        if (chainId === POLYGON_CHAIN_ID) {
+            document.getElementById('networkStatus').innerHTML = '<span style="color: #00ff9d;">Polygon ✓</span>';
+            document.getElementById('networkWarning').style.display = 'none';
+            return true;
+        } else {
+            document.getElementById('networkStatus').innerHTML = `<span style="color: #ffcc00;">شبکه دیگر (${chainId})</span>`;
+            document.getElementById('networkWarning').style.display = 'block';
+            
+            // نمایش نام شبکه
+            let networkName = "ناشناخته";
+            switch(chainId) {
+                case "0x1": networkName = "Ethereum"; break;
+                case "0x38": networkName = "BNB Smart Chain"; break;
+                case "0xa86a": networkName = "Avalanche"; break;
+                default: networkName = chainId;
+            }
+            document.getElementById('networkStatus').innerHTML = `<span style="color: #ffcc00;">${networkName}</span>`;
+            
+            return false;
+        }
+    } catch (error) {
+        console.error('Error checking network:', error);
+        return false;
+    }
+}
+
+// تغییر به شبکه Polygon
+async function switchToPolygon() {
+    try {
+        if (!window.ethereum) {
+            showNotification('لطفاً MetaMask را نصب کنید', 'error');
+            return;
+        }
+        
+        setButtonLoading('connectBtn', true);
+        
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: POLYGON_CHAIN_ID }],
+            });
+            showNotification('شبکه به Polygon تغییر یافت', 'success');
+            location.reload();
+        } catch (switchError) {
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [POLYGON_MAINNET_PARAMS],
+                    });
+                    showNotification('شبکه Polygon اضافه شد', 'success');
+                    location.reload();
+                } catch (addError) {
+                    console.error('Error adding Polygon network:', addError);
+                    showNotification('خطا در اضافه کردن شبکه Polygon', 'error');
+                }
+            } else {
+                console.error('Error switching network:', switchError);
+                showNotification('خطا در تغییر شبکه', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('خطا در تغییر شبکه: ' + error.message, 'error');
+    } finally {
+        setButtonLoading('connectBtn', false);
+    }
+}
+
+// نصب MetaMask
+function installMetaMask() {
+    window.open('https://metamask.io/download/', '_blank');
+    showNotification('لطفاً MetaMask را نصب کرده و صفحه را رفرش کنید', 'info');
+}
+
 // اتصال کیف پول
 async function connectWallet() {
     try {
         setButtonLoading('connectBtn', true);
         
         if (!window.ethereum) {
-            throw new Error('لطفاً MetaMask را نصب کنید');
+            showNotification('لطفاً MetaMask را نصب کنید', 'error');
+            installMetaMask();
+            return;
         }
         
+        // بررسی شبکه
+        const isPolygon = await checkNetwork();
+        if (!isPolygon) {
+            showNotification('لطفاً شبکه را به Polygon تغییر دهید', 'warning');
+            setButtonLoading('connectBtn', false);
+            return;
+        }
+        
+        // درخواست دسترسی به حساب‌ها
+        const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts'
+        });
+        
+        if (accounts.length === 0) {
+            throw new Error('هیچ حسابی انتخاب نشده است');
+        }
+        
+        // ایجاد provider و signer
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
         
-        userAddress = await signer.getAddress();
+        userAddress = accounts[0];
         const shortAddress = userAddress.substring(0, 6) + '...' + userAddress.substring(38);
         
         // به‌روزرسانی UI
@@ -578,7 +764,9 @@ async function connectWallet() {
         
         document.getElementById('walletInfo').style.display = 'block';
         document.getElementById('walletAddress').textContent = `آدرس: ${shortAddress}`;
+        document.getElementById('currentNetwork').textContent = 'Polygon Mainnet';
         
+        // دریافت موجودی
         const balance = await provider.getBalance(userAddress);
         const maticBalance = ethers.utils.formatEther(balance);
         document.getElementById('maticBalance').textContent = `موجودی: ${parseFloat(maticBalance).toFixed(4)} MATIC`;
@@ -588,12 +776,44 @@ async function connectWallet() {
         
         showNotification('کیف پول با موفقیت متصل شد', 'success');
         
+        // فعال کردن دکمه‌های دیگر
+        enableAllButtons();
+        
     } catch (error) {
         console.error('Error connecting wallet:', error);
-        showNotification('خطا در اتصال کیف پول: ' + error.message, 'error');
+        
+        if (error.code === 4001) {
+            showNotification('اتصال توسط کاربر رد شد', 'warning');
+        } else if (error.code === -32002) {
+            showNotification('درخواست اتصال در حال انجام است. لطفاً MetaMask را بررسی کنید', 'info');
+        } else {
+            showNotification('خطا در اتصال کیف پول: ' + error.message, 'error');
+        }
     } finally {
         setButtonLoading('connectBtn', false);
     }
+}
+
+// فعال کردن تمام دکمه‌ها پس از اتصال
+function enableAllButtons() {
+    const buttons = [
+        'systemStatsBtn',
+        'userInfoBtn',
+        'registerBtn',
+        'buyTokensBtn',
+        'withdrawPoolBtn',
+        'withdrawSpecialsBtn',
+        'contributeBtn',
+        'treeBtn',
+        'minerStatsBtn'
+    ];
+    
+    buttons.forEach(buttonId => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.disabled = false;
+        }
+    });
 }
 
 // بارگذاری هزینه ثبت‌نام
@@ -613,12 +833,12 @@ async function loadEntryFee() {
 // بارگذاری آمار سیستم
 async function loadSystemStats() {
     try {
-        if (!contract) {
+        if (!contract || !userAddress) {
             showNotification('لطفاً ابتدا کیف پول را متصل کنید', 'warning');
             return;
         }
         
-        setButtonLoading('systemStats', true);
+        setButtonLoading('systemStatsBtn', true);
         
         const [
             totalUsers,
@@ -671,7 +891,7 @@ async function loadSystemStats() {
         console.error('Error loading system stats:', error);
         showNotification('خطا در بارگذاری آمار: ' + error.message, 'error');
     } finally {
-        setButtonLoading('systemStats', false);
+        setButtonLoading('systemStatsBtn', false);
     }
 }
 
@@ -730,6 +950,9 @@ async function register() {
         // دریافت هزینه ثبت‌نام از قرارداد
         const entryFee = await contract.ENTRY_FEE();
         
+        // نمایش جزئیات تراکنش
+        showNotification(`در حال ارسال ${ethers.utils.formatEther(entryFee)} MATIC برای ثبت‌نام...`, 'info');
+        
         // اجرای تراکنش
         const tx = await contract.register(uplineId, side, {
             value: entryFee
@@ -737,7 +960,7 @@ async function register() {
         
         showNotification('تراکنش در حال پردازش... لطفاً صبر کنید', 'info');
         
-        await tx.wait();
+        const receipt = await tx.wait();
         
         showNotification('ثبت‌نام با موفقیت انجام شد!', 'success');
         
@@ -755,6 +978,8 @@ async function register() {
             showNotification('موجودی MATIC کافی نیست', 'error');
         } else if (error.message.includes('already registered')) {
             showNotification('این آدرس قبلاً ثبت‌نام کرده است', 'warning');
+        } else if (error.message.includes('Invalid upline')) {
+            showNotification('کد معرف نامعتبر است', 'error');
         } else {
             showNotification('خطا در ثبت‌نام: ' + error.message, 'error');
         }
@@ -786,6 +1011,8 @@ async function buyMinerTokens() {
         
         if (error.code === 4001) {
             showNotification('تراکنش توسط کاربر لغو شد', 'warning');
+        } else if (error.message.includes('Not eligible')) {
+            showNotification('شما واجد شرایط خرید توکن نیستید', 'warning');
         } else {
             showNotification('خطا در خرید توکن: ' + error.message, 'error');
         }
@@ -819,6 +1046,8 @@ async function withdrawPool() {
             showNotification('تراکنش توسط کاربر لغو شد', 'warning');
         } else if (error.message.includes('No eligible')) {
             showNotification('هیچ کاربر واجد شرایطی برای برداشت وجود ندارد', 'warning');
+        } else if (error.message.includes('Not eligible')) {
+            showNotification('شما واجد شرایط برداشت نیستید', 'warning');
         } else {
             showNotification('خطا در برداشت: ' + error.message, 'error');
         }
@@ -852,6 +1081,8 @@ async function withdrawSpecials() {
             showNotification('تراکنش توسط کاربر لغو شد', 'warning');
         } else if (error.message.includes('No eligible')) {
             showNotification('هیچ کاربر واجد شرایطی برای برداشت وجود ندارد', 'warning');
+        } else if (error.message.includes('Not eligible')) {
+            showNotification('شما واجد شرایط برداشت نیستید', 'warning');
         } else {
             showNotification('خطا در برداشت: ' + error.message, 'error');
         }
@@ -919,7 +1150,7 @@ async function loadTree() {
             <div style="text-align: center;">
                 <div class="node node-upline">کاربر اصلی (ID: ${treeId})</div>
                 <div class="line"></div>
-                <div style="display: flex; justify-content: center; gap: 40px;">
+                <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
         `;
         
         if (directs.leftId > 0) {
@@ -986,7 +1217,7 @@ async function loadMinerStats() {
             </div>
             <div class="info-item">
                 <div class="info-label">موجودی باقیمانده</div>
-                <div class="info-value">${minerStats.totalRemain.toString()} MATIC</div>
+                <div class="info-value">${ethers.utils.formatEther(minerStats.totalRemain)} MATIC</div>
             </div>
             <div class="info-item">
                 <div class="info-label">تعداد شبکه‌سازان</div>
@@ -1019,16 +1250,29 @@ async function loadMinerStats() {
     }
 }
 
-// بررسی اتصال MetaMask هنگام بارگذاری صفحه
+// بررسی وضعیت Web3 هنگام بارگذاری صفحه
 window.addEventListener('load', async () => {
+    // بررسی وجود Web3
+    checkWeb3();
+    
     if (window.ethereum) {
         try {
+            // بررسی شبکه
+            await checkNetwork();
+            
             // بررسی اگر قبلاً متصل شده است
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
             if (accounts.length > 0) {
                 // اتصال خودکار
                 await connectWallet();
             }
+            
+            // گوش دادن به تغییرات شبکه
+            window.ethereum.on('chainChanged', async () => {
+                await checkNetwork();
+                location.reload();
+            });
+            
         } catch (error) {
             console.error('Auto-connect error:', error);
         }
@@ -1041,17 +1285,14 @@ if (window.ethereum) {
         if (accounts.length === 0) {
             // کاربر از حساب خارج شد
             document.getElementById('walletInfo').style.display = 'none';
-            document.getElementById('connectBtn').innerHTML = '<i class="fas fa-plug"></i> اتصال کیف پول';
+            document.getElementById('connectBtn').innerHTML = '<i class="fas fa-plug"></i> اتصال کیف پول (MetaMask)';
             document.getElementById('connectBtn').style.background = 'linear-gradient(90deg, var(--primary), var(--secondary))';
             showNotification('کیف پول قطع شد', 'warning');
+            userAddress = null;
         } else {
             // کاربر حساب را تغییر داد
             await connectWallet();
         }
-    });
-    
-    window.ethereum.on('chainChanged', () => {
-        window.location.reload();
     });
 }
 </script>
