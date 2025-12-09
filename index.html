@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPS DApp - شبکه هوشمند</title>
+    <title>SPS Atomic DApp - شبکه هوشمند</title>
     
-    <!-- Web3.js -->
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
+    <!-- Ethers.js v6 - سریع و سبک -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
     
     <style>
         * {
@@ -32,34 +32,33 @@
             color: var(--light);
             min-height: 100vh;
             line-height: 1.6;
+            padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
         }
         
         header {
             background: rgba(16, 24, 39, 0.8);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
         }
         
         .logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 15px;
         }
         
         .logo-icon {
@@ -72,6 +71,7 @@
             justify-content: center;
             font-size: 24px;
             font-weight: bold;
+            color: white;
         }
         
         .logo-text h1 {
@@ -79,7 +79,7 @@
             background: linear-gradient(90deg, var(--primary), #8B5CF6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.2rem;
+            margin-bottom: 5px;
         }
         
         .logo-text p {
@@ -90,14 +90,14 @@
         .wallet-section {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 15px;
         }
         
         .wallet-btn {
             background: linear-gradient(90deg, var(--primary), #6366F1);
             color: white;
             border: none;
-            padding: 0.8rem 1.8rem;
+            padding: 12px 24px;
             border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
@@ -105,7 +105,7 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
         
         .wallet-btn:hover {
@@ -116,43 +116,40 @@
         .connected-wallet {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 0.8rem 1.5rem;
+            padding: 10px 20px;
             border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
         
         .network-badge {
             background: rgba(139, 92, 246, 0.1);
             border: 1px solid rgba(139, 92, 246, 0.3);
-            padding: 0.3rem 0.8rem;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
         }
         
-        nav {
-            padding: 1rem 0;
-            border-top: 1px solid var(--border);
-        }
-        
-        .nav-links {
+        .tabs {
             display: flex;
-            gap: 2rem;
-            list-style: none;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
         }
         
-        .nav-links a {
-            color: #D1D5DB;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #9CA3AF;
+            padding: 10px 20px;
+            cursor: pointer;
             border-radius: 8px;
             transition: all 0.3s;
-            font-weight: 500;
         }
         
-        .nav-links a:hover,
-        .nav-links a.active {
+        .tab-btn.active {
             background: rgba(59, 130, 246, 0.1);
             color: var(--primary);
         }
@@ -160,23 +157,18 @@
         .card {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
             backdrop-filter: blur(10px);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(59, 130, 246, 0.3);
         }
         
         .card-title {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 1px solid var(--border);
         }
         
@@ -185,32 +177,25 @@
             color: white;
         }
         
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+            gap: 20px;
+            margin: 20px 0;
         }
         
         .stat-card {
+            background: rgba(17, 24, 39, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            padding: 1.5rem;
         }
         
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
-            margin: 1rem 0;
+            margin: 10px 0;
             background: linear-gradient(90deg, var(--primary), #8B5CF6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -222,22 +207,22 @@
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
             color: #D1D5DB;
             font-weight: 500;
         }
         
         .form-input {
             width: 100%;
-            padding: 1rem;
+            padding: 12px;
             background: rgba(17, 24, 39, 0.8);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
             font-size: 1rem;
             transition: all 0.3s;
@@ -250,15 +235,15 @@
         }
         
         .btn {
-            padding: 1rem 2rem;
+            padding: 12px 24px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
-            margin-top: 0.5rem;
+            margin-top: 10px;
         }
         
         .btn-primary {
@@ -292,39 +277,16 @@
             transform: none !important;
         }
         
-        .grid {
+        .action-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-        }
-        
-        .tab-btn {
-            padding: 0.8rem 1.5rem;
-            background: none;
-            border: none;
-            color: #9CA3AF;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .tab-btn.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
         }
         
         .loading {
             text-align: center;
-            padding: 2rem;
+            padding: 30px;
         }
         
         .spinner {
@@ -334,7 +296,7 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            margin: 0 auto 15px;
         }
         
         @keyframes spin {
@@ -346,7 +308,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 1rem 1.5rem;
+            padding: 15px 20px;
             border-radius: 10px;
             background: var(--dark);
             border: 1px solid var(--border);
@@ -373,9 +335,26 @@
             border-left: 4px solid var(--primary);
         }
         
+        .log-container {
+            background: rgba(17, 24, 39, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
         footer {
-            margin-top: 4rem;
-            padding: 2rem 0;
+            margin-top: 40px;
+            padding: 20px 0;
             border-top: 1px solid var(--border);
             text-align: center;
             color: #9CA3AF;
@@ -385,29 +364,34 @@
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 15px;
             }
             
-            .nav-links {
+            .wallet-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .tabs {
                 overflow-x: auto;
-                padding-bottom: 0.5rem;
+                padding-bottom: 5px;
             }
             
-            .grid {
+            .action-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
+    <div class="container">
+        <header>
             <div class="header-content">
                 <div class="logo">
                     <div class="logo-icon">SPS</div>
                     <div class="logo-text">
-                        <h1>SPS Network</h1>
-                        <p>شبکه هوشمند قرارداد Polygon</p>
+                        <h1>SPS Atomic DApp</h1>
+                        <p>شبکه هوشمند - Polygon Mainnet</p>
                     </div>
                 </div>
                 
@@ -426,68 +410,58 @@
                 </div>
             </div>
             
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="#" class="active" onclick="showTab('dashboard')">داشبورد</a></li>
-                    <li><a href="#" onclick="showTab('register')">ثبت‌نام</a></li>
-                    <li><a href="#" onclick="showTab('miner')">استخر ماینر</a></li>
-                    <li><a href="#" onclick="showTab('withdraw')">برداشت</a></li>
-                    <li><a href="#" onclick="showTab('admin')" id="adminTab" style="display: none;">مدیریت</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('dashboard')">داشبورد</button>
+                <button class="tab-btn" onclick="showTab('register')">ثبت‌نام</button>
+                <button class="tab-btn" onclick="showTab('miner')">استخر ماینر</button>
+                <button class="tab-btn" onclick="showTab('withdraw')">برداشت</button>
+                <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display: none;">مدیریت</button>
+            </div>
+        </header>
 
-    <div class="container">
         <div id="toastContainer"></div>
 
+        <!-- Dashboard Tab -->
         <div id="dashboardTab" class="tab-content">
             <div class="stats-grid">
-                <div class="card stat-card">
-                    <div class="card-icon" style="background: rgba(59, 130, 246, 0.1);">👤</div>
-                    <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-card">
                     <div class="stat-label">کاربران کل</div>
+                    <div class="stat-value" id="totalUsers">0</div>
                 </div>
                 
-                <div class="card stat-card">
-                    <div class="card-icon" style="background: rgba(16, 185, 129, 0.1);">💰</div>
-                    <div class="stat-value" id="poolBalance">0</div>
+                <div class="stat-card">
                     <div class="stat-label">موجودی استخر</div>
+                    <div class="stat-value" id="poolBalance">0</div>
                 </div>
                 
-                <div class="card stat-card">
-                    <div class="card-icon" style="background: rgba(245, 158, 11, 0.1);">⛏️</div>
-                    <div class="stat-value" id="minerPool">0</div>
+                <div class="stat-card">
                     <div class="stat-label">استخر ماینر</div>
+                    <div class="stat-value" id="minerPool">0</div>
                 </div>
                 
-                <div class="card stat-card">
-                    <div class="card-icon" style="background: rgba(139, 92, 246, 0.1);">🎁</div>
-                    <div class="stat-value" id="specialPool">0</div>
+                <div class="stat-card">
                     <div class="stat-label">پاداش ویژه</div>
+                    <div class="stat-value" id="specialPool">0</div>
                 </div>
             </div>
 
-            <div class="card" style="margin-bottom: 2rem;">
+            <div class="card">
                 <div class="card-title">
-                    <div class="card-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">
-                        👤
-                    </div>
+                    <span>👤</span>
                     <h3>اطلاعات کاربری</h3>
                 </div>
-                <div id="userInfo" style="text-align: center; padding: 2rem;">
-                    <p>لطفاً کیف پول خود را متصل کنید</p>
+                <div id="userInfo">
+                    <p style="text-align: center; padding: 20px;">لطفاً کیف پول خود را متصل کنید</p>
                 </div>
             </div>
         </div>
 
+        <!-- Register Tab -->
         <div id="registerTab" class="tab-content" style="display: none;">
-            <div class="grid">
+            <div class="action-grid">
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);">
-                            📝
-                        </div>
+                        <span>📝</span>
                         <h3>ثبت‌نام در شبکه</h3>
                     </div>
                     
@@ -498,16 +472,16 @@
                     
                     <div class="form-group">
                         <label class="form-label">انتخاب موقعیت</label>
-                        <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
                             <button id="leftPosition" class="tab-btn active" onclick="selectPosition(true)">سمت چپ</button>
                             <button id="rightPosition" class="tab-btn" onclick="selectPosition(false)">سمت راست</button>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                        <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
                             <p style="color: var(--primary); font-weight: 600;">کارمزد ثبت‌نام: 0.1 MATIC</p>
-                            <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 0.5rem;">
+                            <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 5px;">
                                 این مبلغ برای ورود به شبکه الزامی است
                             </p>
                         </div>
@@ -520,9 +494,7 @@
 
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
-                            ℹ️
-                        </div>
+                        <span>ℹ️</span>
                         <h3>راهنمای ثبت‌نام</h3>
                     </div>
                     
@@ -537,13 +509,12 @@
             </div>
         </div>
 
+        <!-- Miner Pool Tab -->
         <div id="minerTab" class="tab-content" style="display: none;">
-            <div class="grid">
+            <div class="action-grid">
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
-                            ⛏️
-                        </div>
+                        <span>⛏️</span>
                         <h3>استخر ماینر</h3>
                     </div>
                     
@@ -556,11 +527,8 @@
                         مشارکت در استخر
                     </button>
                     
-                    <hr style="border-color: var(--border); margin: 1.5rem 0;">
-                    
-                    <div class="form-group">
-                        <label class="form-label">عملیات ماینر</label>
-                        <button class="btn btn-success" onclick="buyMinerTokens()" style="margin-bottom: 0.5rem;">
+                    <div style="margin: 20px 0; padding: 20px 0; border-top: 1px solid var(--border);">
+                        <button class="btn btn-success" onclick="buyMinerTokens()" style="margin-bottom: 10px;">
                             خرید توکن ماینر
                         </button>
                         <button class="btn btn-warning" onclick="distributeMinerTokens()">
@@ -571,25 +539,23 @@
 
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">
-                            📊
-                        </div>
+                        <span>📊</span>
                         <h3>آمار استخر ماینر</h3>
                     </div>
                     
                     <div id="minerStats">
-                        <div style="margin-bottom: 1rem;">
-                            <p style="color: #9CA3AF; margin-bottom: 0.3rem;">کاربران واجد شرایط:</p>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #9CA3AF; margin-bottom: 5px;">کاربران واجد شرایط:</p>
                             <p style="font-size: 1.2rem; font-weight: bold;" id="eligibleUsers">0</p>
                         </div>
                         
-                        <div style="margin-bottom: 1rem;">
-                            <p style="color: #9CA3AF; margin-bottom: 0.3rem;">تعداد کل شبکه‌ای‌ها:</p>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #9CA3AF; margin-bottom: 5px;">تعداد کل شبکه‌ای‌ها:</p>
                             <p style="font-size: 1.2rem; font-weight: bold;" id="networkerCount">0</p>
                         </div>
                         
-                        <div style="margin-bottom: 1rem;">
-                            <p style="color: #9CA3AF; margin-bottom: 0.3rem;">توکن‌های باقیمانده:</p>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #9CA3AF; margin-bottom: 5px;">توکن‌های باقیمانده:</p>
                             <p style="font-size: 1.2rem; font-weight: bold;" id="totalRemain">0</p>
                         </div>
                     </div>
@@ -597,23 +563,19 @@
             </div>
         </div>
 
+        <!-- Withdraw Tab -->
         <div id="withdrawTab" class="tab-content" style="display: none;">
-            <div class="grid">
+            <div class="action-grid">
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);">
-                            💸
-                        </div>
+                        <span>💸</span>
                         <h3>برداشت از استخر</h3>
                     </div>
                     
                     <div class="form-group">
-                        <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 10px;">
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 10px;">
                             <p style="color: var(--secondary); font-weight: 600;">موجودی قابل برداشت:</p>
-                            <p style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;" id="withdrawableBalance">0 MATIC</p>
-                            <p style="color: #9CA3AF; font-size: 0.9rem;">
-                                این مبلغ از فعالیت زیرمجموعه‌های شما جمع‌آوری شده است
-                            </p>
+                            <p style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;" id="withdrawableBalance">0 MATIC</p>
                         </div>
                     </div>
                     
@@ -621,52 +583,40 @@
                         برداشت از استخر
                     </button>
                     
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 10px;">
-                        <p style="color: var(--warning); margin-bottom: 0.5rem;">⚠️ توجه:</p>
-                        <p style="color: #D1D5DB; font-size: 0.9rem;">
-                            برداشت فقط زمانی امکان‌پذیر است که شرایط قرارداد فراهم باشد
-                        </p>
-                    </div>
+                    <button class="btn btn-primary" onclick="withdrawSpecials()" style="margin-top: 15px;">
+                        برداشت پاداش ویژه
+                    </button>
                 </div>
 
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">
-                            🎁
-                        </div>
-                        <h3>برداشت پاداش ویژه</h3>
+                        <span>⚠️</span>
+                        <h3>توجه</h3>
                     </div>
                     
-                    <div class="form-group">
-                        <div style="background: rgba(139, 92, 246, 0.1); padding: 1rem; border-radius: 10px;">
-                            <p style="color: #8B5CF6; font-weight: 600;">پاداش ویژه شما:</p>
-                            <p style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;" id="specialRewards">0 MATIC</p>
-                            <p style="color: #9CA3AF; font-size: 0.9rem;">
-                                پاداش‌های ویژه از طریق فعالیت‌های خاص شبکه
-                            </p>
-                        </div>
+                    <div style="color: #D1D5DB; line-height: 1.8;">
+                        <p>✅ برداشت فقط زمانی امکان‌پذیر است که شرایط قرارداد فراهم باشد</p>
+                        <p>✅ کارمزد شبکه (Gas Fee) پرداخت می‌شود</p>
+                        <p>✅ تراکنش‌ها در پلی‌اسکن قابل پیگیری هستند</p>
+                        <p>✅ حداقل موجودی برای برداشت: 0.001 MATIC</p>
+                        <p>✅ زمان تایید تراکنش: 15-30 ثانیه</p>
                     </div>
-                    
-                    <button class="btn btn-primary" onclick="withdrawSpecials()" id="withdrawSpecialBtn">
-                        برداشت پاداش ویژه
-                    </button>
                 </div>
             </div>
         </div>
 
+        <!-- Admin Tab -->
         <div id="adminTab" class="tab-content" style="display: none;">
-            <div class="grid">
+            <div class="action-grid">
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
-                            ⚙️
-                        </div>
+                        <span>⚙️</span>
                         <h3>تنظیمات قرارداد</h3>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">کارمزد جدید ورود (wei)</label>
-                        <input type="number" id="newEntryFee" class="form-input" placeholder="مثلاً: 100000000000000000">
+                        <input type="number" id="newEntryFee" class="form-input" placeholder="100000000000000000">
                     </div>
                     
                     <button class="btn btn-danger" onclick="updateEntryFee()">
@@ -676,16 +626,13 @@
 
                 <div class="card">
                     <div class="card-title">
-                        <div class="card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
-                            🚫
-                        </div>
+                        <span>🚫</span>
                         <h3>مدیریت ماینرها</h3>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">آدرس‌ها برای حذف</label>
-                        <textarea id="minersToRemove" class="form-input" placeholder="آدرس‌ها را با کاما جدا کنید
-مثال: 0x123..., 0x456..." rows="4"></textarea>
+                        <label class="form-label">آدرس‌ها برای حذف (با کاما جدا کنید)</label>
+                        <textarea id="minersToRemove" class="form-input" rows="4" placeholder="0x123..., 0x456..."></textarea>
                     </div>
                     
                     <button class="btn btn-danger" onclick="batchRemoveMiners()">
@@ -695,31 +642,41 @@
             </div>
         </div>
 
+        <!-- Log Container -->
+        <div class="card">
+            <div class="card-title">
+                <span>📋</span>
+                <h3>لاگ سیستم</h3>
+            </div>
+            <div class="log-container" id="logContainer">
+                <div class="log-item">SPS DApp آماده است...</div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
         <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
             <div class="loading">
                 <div class="spinner"></div>
-                <p style="margin-top: 1rem;">در حال پردازش تراکنش...</p>
-                <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 0.5rem;" id="txHash"></p>
+                <p style="margin-top: 15px; font-size: 1.1rem;">در حال پردازش...</p>
+                <p style="color: #9CA3AF; font-size: 0.9rem; margin-top: 5px;" id="txHash"></p>
             </div>
         </div>
-    </div>
 
-    <footer>
-        <div class="container">
+        <footer>
             <p>SPS Network © 2024 | آدرس قرارداد: 0x7a7b06D49129B34976D07B3854d4D72D01588191</p>
-            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #6B7280;">
-                این رابط کاربری با Web3.js ساخته شده و قابلیت اجرای تمام توابع قرارداد را دارد
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #6B7280;">
+                ساخته شده با Ethers.js | شبکه Polygon Mainnet
             </p>
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <script>
         // ==================== تنظیمات ====================
         const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
-        const POLYGON_RPC = "https://polygon-rpc.com";
+        const POLYGON_CHAIN_ID = "0x89"; // 137 در هگز
         const ENTRY_FEE = "100000000000000000"; // 0.1 MATIC in wei
         
-        // ABI کامل قرارداد - تصحیح شده
+        // ABI کامل قرارداد
         const CONTRACT_ABI = [
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
             {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
@@ -774,18 +731,34 @@
             {"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}
         ];
         
-        let web3;
+        // متغیرهای اصلی
+        let provider;
+        let signer;
         let contract;
         let userAddress;
         let isOwner = false;
         
         // ==================== توابع کمکی ====================
         
+        function log(message) {
+            console.log(message);
+            const logContainer = document.getElementById('logContainer');
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.prepend(logItem);
+            
+            // محدود کردن تعداد لاگ‌ها
+            if (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+        
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <p style="font-weight: 600; margin-bottom: 0.3rem;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</p>
+                <p style="font-weight: 600; margin-bottom: 5px;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</p>
                 <p>${message}</p>
             `;
             
@@ -813,10 +786,47 @@
             }
         }
         
-        // ==================== اتصال کیف پول - تصحیح شده ====================
+        async function switchToPolygon() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: POLYGON_CHAIN_ID }],
+                });
+                log('شبکه به Polygon تغییر کرد');
+                return true;
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: POLYGON_CHAIN_ID,
+                                chainName: 'Polygon Mainnet',
+                                nativeCurrency: {
+                                    name: 'MATIC',
+                                    symbol: 'MATIC',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://polygon-rpc.com'],
+                                blockExplorerUrls: ['https://polygonscan.com']
+                            }],
+                        });
+                        log('شبکه Polygon اضافه شد');
+                        return true;
+                    } catch (addError) {
+                        log('خطا در اضافه کردن شبکه: ' + addError.message);
+                        return false;
+                    }
+                }
+                log('خطا در تغییر شبکه: ' + switchError.message);
+                return false;
+            }
+        }
+        
+        // ==================== اتصال کیف پول ====================
         
         async function connectWallet() {
-            console.log('Connecting wallet...');
+            log('در حال اتصال به کیف پول...');
             
             if (typeof window.ethereum === 'undefined') {
                 showToast('لطفاً MetaMask را نصب کنید', 'error');
@@ -826,45 +836,40 @@
             try {
                 showLoading(true);
                 
-                // درخواست اتصال
-                const accounts = await window.ethereum.request({ 
-                    method: 'eth_requestAccounts' 
+                // درخواست اتصال حساب‌ها
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
                 });
                 
                 userAddress = accounts[0];
-                console.log('Connected to:', userAddress);
+                log('اتصال موفق به آدرس: ' + userAddress);
                 
-                // تنظیم Web3 با Provider درست
-                web3 = new Web3(window.ethereum);
+                // بررسی شبکه
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
                 
-                // تست اتصال Web3
-                const networkId = await web3.eth.net.getId();
-                console.log('Network ID:', networkId);
-                
-                // چک شبکه Polygon (137)
-                if (networkId !== 137) {
-                    showToast('لطفاً به شبکه Polygon Mainnet سوئیچ کنید (Chain ID: 137)', 'error');
-                    showLoading(false);
-                    return;
+                if (chainId !== POLYGON_CHAIN_ID) {
+                    showToast('لطفاً به شبکه Polygon سوئیچ کنید', 'info');
+                    const switched = await switchToPolygon();
+                    if (!switched) {
+                        showLoading(false);
+                        return;
+                    }
                 }
                 
-                // ساخت قرارداد
-                contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-                console.log('Contract instance created:', contract);
+                // ایجاد provider و signer
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                
+                // ایجاد قرارداد
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                log('قرارداد ساخته شد');
                 
                 // تست قرارداد
                 try {
-                    const contractBalance = await web3.eth.getBalance(CONTRACT_ADDRESS);
-                    console.log('Contract balance:', web3.utils.fromWei(contractBalance, 'ether'), 'MATIC');
-                    
-                    const entryFee = await contract.methods.ENTRY_FEE().call();
-                    console.log('Entry fee from contract:', entryFee);
-                    
-                } catch (contractError) {
-                    console.error('Contract test failed:', contractError);
-                    showToast('خطا در اتصال به قرارداد هوشمند', 'error');
-                    showLoading(false);
-                    return;
+                    const totalUsers = await contract.totalUsers();
+                    log('تست قرارداد موفق: ' + totalUsers + ' کاربر');
+                } catch (error) {
+                    log('تست قرارداد با مشکل مواجه شد: ' + error.message);
                 }
                 
                 // نمایش اطلاعات کیف پول
@@ -874,139 +879,140 @@
                     `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
                 
                 // بارگذاری اطلاعات
-                await loadDashboardData();
-                await loadUserInfo();
-                await checkIfOwner();
+                await refreshDashboard();
                 
                 showToast('کیف پول با موفقیت متصل شد', 'success');
                 
-                // گوش دادن به تغییر حساب
+                // گوش دادن به تغییرات
                 window.ethereum.on('accountsChanged', handleAccountsChanged);
                 window.ethereum.on('chainChanged', handleChainChanged);
                 
             } catch (error) {
-                console.error('Connection error:', error);
-                showToast(`خطا در اتصال: ${error.message}`, 'error');
+                log('خطا در اتصال: ' + error.message);
+                showToast('خطا در اتصال کیف پول', 'error');
             } finally {
                 showLoading(false);
             }
         }
         
         async function handleAccountsChanged(accounts) {
-            console.log('Accounts changed:', accounts);
+            log('حساب تغییر کرد');
             if (accounts.length === 0) {
                 disconnectWallet();
             } else {
                 userAddress = accounts[0];
                 document.getElementById('walletAddress').textContent = 
                     `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
-                await loadUserInfo();
+                await refreshDashboard();
             }
         }
         
         function handleChainChanged(chainId) {
-            console.log('Chain changed to:', chainId);
-            window.location.reload();
+            log('شبکه تغییر کرد: ' + chainId);
+            if (chainId === POLYGON_CHAIN_ID) {
+                window.location.reload();
+            } else {
+                showToast('لطفاً به شبکه Polygon برگردید', 'warning');
+            }
         }
         
         function disconnectWallet() {
             userAddress = null;
             document.getElementById('connectWalletBtn').style.display = 'block';
             document.getElementById('connectedWallet').style.display = 'none';
-            document.getElementById('userInfo').innerHTML = '<p>لطفاً کیف پول خود را متصل کنید</p>';
-            showToast('کیف پول قطع شد', 'info');
+            document.getElementById('userInfo').innerHTML = '<p style="text-align: center; padding: 20px;">لطفاً کیف پول خود را متصل کنید</p>';
+            log('کیف پول قطع شد');
         }
         
-        // ==================== توابع خواندن - تصحیح شده ====================
+        // ==================== توابع خواندن ====================
         
-        async function loadDashboardData() {
+        async function refreshDashboard() {
             try {
-                console.log('Loading dashboard data...');
+                showLoading(true);
                 
-                // تست قرارداد
-                if (!contract || !contract.methods) {
-                    console.error('Contract not initialized');
-                    return;
+                if (!contract) {
+                    const tempProvider = new ethers.JsonRpcProvider('https://polygon-rpc.com');
+                    const tempContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, tempProvider);
+                    
+                    const [totalUsers, poolBalance, minerPool, specialPool] = await Promise.all([
+                        tempContract.totalUsers().catch(() => 0),
+                        tempContract.poolBalance().catch(() => 0),
+                        tempContract.minerTokenPool().catch(() => 0),
+                        tempContract.specialRewardPool().catch(() => 0)
+                    ]);
+                    
+                    document.getElementById('totalUsers').textContent = totalUsers.toString();
+                    document.getElementById('poolBalance').textContent = ethers.formatEther(poolBalance) + ' MATIC';
+                    document.getElementById('minerPool').textContent = ethers.formatEther(minerPool) + ' MATIC';
+                    document.getElementById('specialPool').textContent = ethers.formatEther(specialPool) + ' MATIC';
+                } else {
+                    const [totalUsers, poolBalance, minerPool, specialPool] = await Promise.all([
+                        contract.totalUsers().catch(() => 0),
+                        contract.poolBalance().catch(() => 0),
+                        contract.minerTokenPool().catch(() => 0),
+                        contract.specialRewardPool().catch(() => 0)
+                    ]);
+                    
+                    document.getElementById('totalUsers').textContent = totalUsers.toString();
+                    document.getElementById('poolBalance').textContent = ethers.formatEther(poolBalance) + ' MATIC';
+                    document.getElementById('minerPool').textContent = ethers.formatEther(minerPool) + ' MATIC';
+                    document.getElementById('specialPool').textContent = ethers.formatEther(specialPool) + ' MATIC';
+                    
+                    // بارگذاری اطلاعات کاربر
+                    if (userAddress) {
+                        await loadUserInfo();
+                    }
                 }
                 
-                // بارگذاری آمار کلی با timeout
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Timeout loading data')), 10000)
-                );
-                
-                const dataPromise = Promise.all([
-                    contract.methods.totalUsers().call(),
-                    contract.methods.poolBalance().call(),
-                    contract.methods.minerTokenPool().call(),
-                    contract.methods.specialRewardPool().call()
-                ]);
-                
-                const [totalUsers, poolBalance, minerTokenPool, specialRewardPool] = 
-                    await Promise.race([dataPromise, timeoutPromise]);
-                
-                // نمایش داده‌ها
-                document.getElementById('totalUsers').textContent = totalUsers;
-                document.getElementById('poolBalance').textContent = 
-                    parseFloat(web3.utils.fromWei(poolBalance, 'ether')).toFixed(4) + ' MATIC';
-                document.getElementById('minerPool').textContent = 
-                    parseFloat(web3.utils.fromWei(minerTokenPool, 'ether')).toFixed(4) + ' MATIC';
-                document.getElementById('specialPool').textContent = 
-                    parseFloat(web3.utils.fromWei(specialRewardPool, 'ether')).toFixed(4) + ' MATIC';
-                
-                console.log('Dashboard data loaded successfully');
+                log('اطلاعات بروزرسانی شد');
                 
             } catch (error) {
-                console.error('Error loading dashboard:', error);
-                showToast('خطا در بارگذاری اطلاعات داشبورد', 'error');
+                log('خطا در بروزرسانی: ' + error.message);
+            } finally {
+                showLoading(false);
             }
         }
         
         async function loadUserInfo() {
             try {
-                console.log('Loading user info for:', userAddress);
+                if (!contract || !userAddress) return;
                 
-                if (!userAddress || !contract) {
-                    console.error('User address or contract not available');
-                    return;
-                }
-                
-                const userInfo = await contract.methods.getUserInfo(userAddress).call();
+                const userInfo = await contract.getUserInfo(userAddress);
                 
                 document.getElementById('userInfo').innerHTML = `
                     <div style="text-align: right;">
-                        <p><strong>ID کاربر:</strong> ${userInfo[0] || '0'}</p>
-                        <p><strong>آپلاین ID:</strong> ${userInfo[1] || '0'}</p>
-                        <p><strong>تعداد چپ:</strong> ${userInfo[2] || '0'}</p>
-                        <p><strong>تعداد راست:</strong> ${userInfo[3] || '0'}</p>
-                        <p><strong>موجودی:</strong> ${userInfo[6] || '0'}</p>
-                        <p><strong>پاداش ویژه:</strong> ${userInfo[7] || '0'}</p>
-                        <p><strong>پاداش ماینر:</strong> ${web3.utils.fromWei(userInfo[8] || '0', 'ether')} MATIC</p>
+                        <p><strong>ID کاربر:</strong> ${userInfo[0].toString()}</p>
+                        <p><strong>آپلاین ID:</strong> ${userInfo[1].toString()}</p>
+                        <p><strong>تعداد چپ:</strong> ${userInfo[2].toString()}</p>
+                        <p><strong>تعداد راست:</strong> ${userInfo[3].toString()}</p>
+                        <p><strong>موجودی:</strong> ${userInfo[6].toString()}</p>
+                        <p><strong>پاداش ویژه:</strong> ${userInfo[7].toString()}</p>
+                        <p><strong>پاداش ماینر:</strong> ${ethers.formatEther(userInfo[8])} MATIC</p>
                         <p><strong>ماینر:</strong> ${userInfo[10] ? '✅' : '❌'}</p>
                     </div>
                 `;
                 
-                console.log('User info loaded successfully');
+                // بررسی مالک بودن
+                await checkIfOwner();
                 
             } catch (error) {
-                console.error('Error loading user info:', error);
-                document.getElementById('userInfo').innerHTML = `
-                    <p style="color: #EF4444;">خطا در بارگذاری اطلاعات کاربر</p>
-                    <p style="color: #9CA3AF; font-size: 0.9rem;">${error.message}</p>
-                `;
+                log('خطا در دریافت اطلاعات کاربر: ' + error.message);
             }
         }
         
         async function checkIfOwner() {
             try {
-                const owner = await contract.methods.owner().call();
+                if (!contract) return;
+                
+                const owner = await contract.owner();
                 isOwner = owner.toLowerCase() === userAddress.toLowerCase();
                 
                 if (isOwner) {
-                    document.getElementById('adminTab').style.display = 'inline-block';
-                    console.log('User is contract owner');
+                    document.getElementById('adminTab').style.display = 'block';
+                    log('کاربر مالک قرارداد است');
                 }
             } catch (error) {
-                console.error('Error checking owner:', error);
+                log('خطا در بررسی مالک: ' + error.message);
             }
         }
         
@@ -1031,20 +1037,21 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.register(uplineCode, selectedPosition)
-                    .send({
-                        from: userAddress,
-                        value: ENTRY_FEE,
-                        gas: 300000
-                    });
+                const tx = await contract.register(uplineCode, selectedPosition, {
+                    value: ENTRY_FEE
+                });
+                
+                log('ثبت‌نام ارسال شد: ' + tx.hash);
+                showToast('تراکنش ثبت‌نام ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ ثبت‌نام با موفقیت انجام شد', 'success');
-                await loadUserInfo();
-                await loadDashboardData();
+                await refreshDashboard();
                 
             } catch (error) {
-                console.error('Registration error:', error);
-                showToast(`خطا در ثبت‌نام: ${error.message}`, 'error');
+                log('خطا در ثبت‌نام: ' + error.message);
+                showToast('خطا در ثبت‌نام: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1061,21 +1068,23 @@
             try {
                 showLoading(true);
                 
-                const amountInWei = web3.utils.toWei(amount, 'ether');
+                const amountInWei = ethers.parseEther(amount);
                 
-                const tx = await contract.methods.contributeToMinerPool()
-                    .send({
-                        from: userAddress,
-                        value: amountInWei,
-                        gas: 200000
-                    });
+                const tx = await contract.contributeToMinerPool({
+                    value: amountInWei
+                });
+                
+                log('مشارکت ارسال شد: ' + tx.hash);
+                showToast('تراکنش مشارکت ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ مشارکت با موفقیت انجام شد', 'success');
-                await loadDashboardData();
+                await refreshDashboard();
                 
             } catch (error) {
-                console.error('Contribution error:', error);
-                showToast(`خطا در مشارکت: ${error.message}`, 'error');
+                log('خطا در مشارکت: ' + error.message);
+                showToast('خطا در مشارکت: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1085,17 +1094,18 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.buyMinerTokens()
-                    .send({
-                        from: userAddress,
-                        gas: 300000
-                    });
+                const tx = await contract.buyMinerTokens();
+                
+                log('خرید توکن ارسال شد: ' + tx.hash);
+                showToast('تراکنش خرید ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ خرید توکن ماینر با موفقیت انجام شد', 'success');
                 
             } catch (error) {
-                console.error('Buy tokens error:', error);
-                showToast(`خطا در خرید: ${error.message}`, 'error');
+                log('خطا در خرید توکن: ' + error.message);
+                showToast('خطا در خرید توکن: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1105,17 +1115,18 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.distributeMinerTokens()
-                    .send({
-                        from: userAddress,
-                        gas: 500000
-                    });
+                const tx = await contract.distributeMinerTokens();
+                
+                log('توزیع ارسال شد: ' + tx.hash);
+                showToast('تراکنش توزیع ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ توزیع توکن‌ها با موفقیت انجام شد', 'success');
                 
             } catch (error) {
-                console.error('Distribution error:', error);
-                showToast(`خطا در توزیع: ${error.message}`, 'error');
+                log('خطا در توزیع: ' + error.message);
+                showToast('خطا در توزیع: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1125,27 +1136,19 @@
             try {
                 showLoading(true);
                 
-                // بررسی امکان برداشت
-                const isWithdrawable = await contract.methods.isPoolWithdrawable().call();
+                const tx = await contract.withdrawPool();
                 
-                if (!isWithdrawable) {
-                    showToast('در حال حاضر امکان برداشت وجود ندارد', 'error');
-                    showLoading(false);
-                    return;
-                }
+                log('برداشت ارسال شد: ' + tx.hash);
+                showToast('تراکنش برداشت ارسال شد', 'info');
                 
-                const tx = await contract.methods.withdrawPool()
-                    .send({
-                        from: userAddress,
-                        gas: 300000
-                    });
+                await tx.wait();
                 
                 showToast('✅ برداشت از استخر با موفقیت انجام شد', 'success');
-                await loadUserInfo();
+                await refreshDashboard();
                 
             } catch (error) {
-                console.error('Withdraw error:', error);
-                showToast(`خطا در برداشت: ${error.message}`, 'error');
+                log('خطا در برداشت: ' + error.message);
+                showToast('خطا در برداشت: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1155,18 +1158,19 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.withdrawSpecials()
-                    .send({
-                        from: userAddress,
-                        gas: 300000
-                    });
+                const tx = await contract.withdrawSpecials();
+                
+                log('برداشت ویژه ارسال شد: ' + tx.hash);
+                showToast('تراکنش برداشت ویژه ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ برداشت پاداش ویژه با موفقیت انجام شد', 'success');
-                await loadUserInfo();
+                await refreshDashboard();
                 
             } catch (error) {
-                console.error('Withdraw specials error:', error);
-                showToast(`خطا در برداشت: ${error.message}`, 'error');
+                log('خطا در برداشت ویژه: ' + error.message);
+                showToast('خطا در برداشت ویژه: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1190,17 +1194,18 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.updateEntryFee(newFee)
-                    .send({
-                        from: userAddress,
-                        gas: 200000
-                    });
+                const tx = await contract.updateEntryFee(newFee);
+                
+                log('بروزرسانی کارمزد ارسال شد: ' + tx.hash);
+                showToast('تراکنش بروزرسانی ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast('✅ کارمزد با موفقیت بروزرسانی شد', 'success');
                 
             } catch (error) {
-                console.error('Update fee error:', error);
-                showToast(`خطا در بروزرسانی: ${error.message}`, 'error');
+                log('خطا در بروزرسانی کارمزد: ' + error.message);
+                showToast('خطا در بروزرسانی کارمزد: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1221,7 +1226,7 @@
             
             const addresses = addressesText.split(',')
                 .map(addr => addr.trim())
-                .filter(addr => web3.utils.isAddress(addr));
+                .filter(addr => ethers.isAddress(addr));
             
             if (addresses.length === 0) {
                 showToast('هیچ آدرس معتبری یافت نشد', 'error');
@@ -1231,17 +1236,18 @@
             try {
                 showLoading(true);
                 
-                const tx = await contract.methods.batchRemoveMiners(addresses)
-                    .send({
-                        from: userAddress,
-                        gas: 500000
-                    });
+                const tx = await contract.batchRemoveMiners(addresses);
+                
+                log('حذف ماینرها ارسال شد: ' + tx.hash);
+                showToast('تراکنش حذف ارسال شد', 'info');
+                
+                await tx.wait();
                 
                 showToast(`✅ ${addresses.length} ماینر با موفقیت حذف شدند`, 'success');
                 
             } catch (error) {
-                console.error('Remove miners error:', error);
-                showToast(`خطا در حذف: ${error.message}`, 'error');
+                log('خطا در حذف ماینرها: ' + error.message);
+                showToast('خطا در حذف ماینرها: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
@@ -1250,73 +1256,76 @@
         // ==================== مدیریت تب‌ها ====================
         
         function showTab(tabName) {
+            // مخفی کردن همه تب‌ها
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.style.display = 'none';
             });
             
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.classList.remove('active');
+            // غیرفعال کردن همه دکمه‌های تب
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
             
+            // نمایش تب انتخاب شده
             document.getElementById(`${tabName}Tab`).style.display = 'block';
+            
+            // فعال کردن دکمه تب
             event.target.classList.add('active');
             
+            // بارگذاری اطلاعات اگر نیاز باشد
             if (tabName === 'dashboard') {
-                if (userAddress) {
-                    loadDashboardData();
-                    loadUserInfo();
-                }
+                refreshDashboard();
             } else if (tabName === 'miner') {
                 loadMinerStats();
-            } else if (tabName === 'withdraw') {
-                loadWithdrawInfo();
             }
         }
         
         async function loadMinerStats() {
             try {
-                const stats = await contract.methods.getMinerStats().call();
-                document.getElementById('eligibleUsers').textContent = stats[1] || '0';
-                document.getElementById('networkerCount').textContent = stats[3] || '0';
-                document.getElementById('totalRemain').textContent = stats[2] || '0';
+                if (!contract) return;
+                
+                const stats = await contract.getMinerStats();
+                document.getElementById('eligibleUsers').textContent = stats[1].toString();
+                document.getElementById('networkerCount').textContent = stats[3].toString();
+                document.getElementById('totalRemain').textContent = stats[2].toString();
+                
             } catch (error) {
-                console.error('Error loading miner stats:', error);
-            }
-        }
-        
-        async function loadWithdrawInfo() {
-            try {
-                const userInfo = await contract.methods.getUserInfo(userAddress).call();
-                document.getElementById('withdrawableBalance').textContent = 
-                    web3.utils.fromWei(userInfo[6] || '0', 'ether') + ' MATIC';
-                document.getElementById('specialRewards').textContent = 
-                    web3.utils.fromWei(userInfo[7] || '0', 'ether') + ' MATIC';
-            } catch (error) {
-                console.error('Error loading withdraw info:', error);
+                log('خطا در بارگذاری آمار ماینر: ' + error.message);
             }
         }
         
         // ==================== مقداردهی اولیه ====================
         
         window.onload = function() {
-            console.log('SPS DApp initialized');
+            log('SPS Atomic DApp بارگذاری شد');
             
+            // تنظیم تب پیش‌فرض
             showTab('dashboard');
             
+            // رویداد اتصال کیف پول
             document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
             
+            // رویداد رفرش
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F5') {
+                    e.preventDefault();
+                    refreshDashboard();
+                }
+            });
+            
+            // اگر قبلاً متصل شده
             if (typeof window.ethereum !== 'undefined') {
-                window.ethereum.on('accountsChanged', handleAccountsChanged);
-                window.ethereum.on('chainChanged', handleChainChanged);
-                
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts.length > 0) {
-                            console.log('Auto-connecting to wallet...');
+                            log('اتصال خودکار به کیف پول...');
                             connectWallet();
                         }
                     });
             }
+            
+            // بارگذاری اولیه اطلاعات
+            refreshDashboard();
         };
     </script>
 </body>
