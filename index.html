@@ -740,13 +740,12 @@
 
     <script>
         // ==================== تنظیمات ====================
-        const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
-        const POLYGON_RPC = "https://polygon-rpc.com";
-        const ENTRY_FEE = "100000000000000000"; // 0.1 MATIC in wei
-        
-        // ABI کامل قرارداد - مهم!
-        
-        const CONTRACT_ABI = [
+const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+const POLYGON_RPC = "https://polygon-rpc.com";
+const ENTRY_FEE = "100000000000000000"; // 0.1 MATIC in wei
+
+// ABI کامل قرارداد
+const CONTRACT_ABI = [
     {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
     {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
     {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},
@@ -799,6 +798,7 @@
     {"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},
     {"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}
 ];
+        
         let web3;
         let contract;
         let userAddress;
