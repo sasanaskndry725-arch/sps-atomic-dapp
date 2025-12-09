@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
     
     <style>
-        /* Reset و استایل پایه */
         * {
             margin: 0;
             padding: 0;
@@ -35,14 +34,12 @@
             line-height: 1.6;
         }
         
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
         
-        /* Header */
         header {
             background: rgba(16, 24, 39, 0.8);
             backdrop-filter: blur(20px);
@@ -90,7 +87,6 @@
             font-size: 0.9rem;
         }
         
-        /* Wallet Button */
         .wallet-section {
             display: flex;
             align-items: center;
@@ -135,7 +131,6 @@
             font-size: 0.8rem;
         }
         
-        /* Navigation */
         nav {
             padding: 1rem 0;
             border-top: 1px solid var(--border);
@@ -162,7 +157,6 @@
             color: var(--primary);
         }
         
-        /* Cards */
         .card {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid var(--border);
@@ -201,7 +195,6 @@
             font-size: 1.2rem;
         }
         
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -228,7 +221,6 @@
             font-size: 0.9rem;
         }
         
-        /* Forms */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -257,7 +249,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
-        /* Buttons */
         .btn {
             padding: 1rem 2rem;
             border: none;
@@ -301,7 +292,6 @@
             transform: none !important;
         }
         
-        /* Grid Layout */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -309,7 +299,6 @@
             margin: 2rem 0;
         }
         
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 0.5rem;
@@ -333,7 +322,6 @@
             color: var(--primary);
         }
         
-        /* Loading */
         .loading {
             text-align: center;
             padding: 2rem;
@@ -354,7 +342,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -367,6 +354,7 @@
             transform: translateX(150%);
             transition: transform 0.3s ease;
             z-index: 10000;
+            max-width: 400px;
         }
         
         .toast.show {
@@ -385,7 +373,6 @@
             border-left: 4px solid var(--primary);
         }
         
-        /* Footer */
         footer {
             margin-top: 4rem;
             padding: 2rem 0;
@@ -395,7 +382,6 @@
             font-size: 0.9rem;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -414,7 +400,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="container">
             <div class="header-content">
@@ -453,12 +438,9 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Toast Container -->
         <div id="toastContainer"></div>
 
-        <!-- Dashboard Tab -->
         <div id="dashboardTab" class="tab-content">
             <div class="stats-grid">
                 <div class="card stat-card">
@@ -486,7 +468,6 @@
                 </div>
             </div>
 
-            <!-- User Info -->
             <div class="card" style="margin-bottom: 2rem;">
                 <div class="card-title">
                     <div class="card-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">
@@ -500,7 +481,6 @@
             </div>
         </div>
 
-        <!-- Register Tab -->
         <div id="registerTab" class="tab-content" style="display: none;">
             <div class="grid">
                 <div class="card">
@@ -557,7 +537,6 @@
             </div>
         </div>
 
-        <!-- Miner Pool Tab -->
         <div id="minerTab" class="tab-content" style="display: none;">
             <div class="grid">
                 <div class="card">
@@ -618,7 +597,6 @@
             </div>
         </div>
 
-        <!-- Withdraw Tab -->
         <div id="withdrawTab" class="tab-content" style="display: none;">
             <div class="grid">
                 <div class="card">
@@ -676,7 +654,6 @@
             </div>
         </div>
 
-        <!-- Admin Tab -->
         <div id="adminTab" class="tab-content" style="display: none;">
             <div class="grid">
                 <div class="card">
@@ -718,7 +695,6 @@
             </div>
         </div>
 
-        <!-- Loading Overlay -->
         <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
             <div class="loading">
                 <div class="spinner"></div>
@@ -728,7 +704,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <p>SPS Network © 2024 | آدرس قرارداد: 0x7a7b06D49129B34976D07B3854d4D72D01588191</p>
@@ -744,7 +719,7 @@
         const POLYGON_RPC = "https://polygon-rpc.com";
         const ENTRY_FEE = "100000000000000000"; // 0.1 MATIC in wei
         
-        // ABI کامل قرارداد
+        // ABI کامل قرارداد - تصحیح شده
         const CONTRACT_ABI = [
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
             {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
@@ -838,9 +813,11 @@
             }
         }
         
-        // ==================== اتصال کیف پول ====================
+        // ==================== اتصال کیف پول - تصحیح شده ====================
         
         async function connectWallet() {
+            console.log('Connecting wallet...');
+            
             if (typeof window.ethereum === 'undefined') {
                 showToast('لطفاً MetaMask را نصب کنید', 'error');
                 return;
@@ -850,15 +827,45 @@
                 showLoading(true);
                 
                 // درخواست اتصال
-                const accounts = await ethereum.request({ 
+                const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
                 
                 userAddress = accounts[0];
+                console.log('Connected to:', userAddress);
                 
-                // تنظیم Web3
+                // تنظیم Web3 با Provider درست
                 web3 = new Web3(window.ethereum);
+                
+                // تست اتصال Web3
+                const networkId = await web3.eth.net.getId();
+                console.log('Network ID:', networkId);
+                
+                // چک شبکه Polygon (137)
+                if (networkId !== 137) {
+                    showToast('لطفاً به شبکه Polygon Mainnet سوئیچ کنید (Chain ID: 137)', 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                // ساخت قرارداد
                 contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+                console.log('Contract instance created:', contract);
+                
+                // تست قرارداد
+                try {
+                    const contractBalance = await web3.eth.getBalance(CONTRACT_ADDRESS);
+                    console.log('Contract balance:', web3.utils.fromWei(contractBalance, 'ether'), 'MATIC');
+                    
+                    const entryFee = await contract.methods.ENTRY_FEE().call();
+                    console.log('Entry fee from contract:', entryFee);
+                    
+                } catch (contractError) {
+                    console.error('Contract test failed:', contractError);
+                    showToast('خطا در اتصال به قرارداد هوشمند', 'error');
+                    showLoading(false);
+                    return;
+                }
                 
                 // نمایش اطلاعات کیف پول
                 document.getElementById('connectWalletBtn').style.display = 'none';
@@ -866,20 +873,19 @@
                 document.getElementById('walletAddress').textContent = 
                     `${userAddress.substring(0, 6)}...${userAddress.substring(38)}`;
                 
-                // بررسی مالک بودن
-                await checkIfOwner();
-                
                 // بارگذاری اطلاعات
                 await loadDashboardData();
                 await loadUserInfo();
+                await checkIfOwner();
                 
                 showToast('کیف پول با موفقیت متصل شد', 'success');
                 
                 // گوش دادن به تغییر حساب
-                ethereum.on('accountsChanged', handleAccountsChanged);
-                ethereum.on('chainChanged', handleChainChanged);
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
                 
             } catch (error) {
+                console.error('Connection error:', error);
                 showToast(`خطا در اتصال: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -887,6 +893,7 @@
         }
         
         async function handleAccountsChanged(accounts) {
+            console.log('Accounts changed:', accounts);
             if (accounts.length === 0) {
                 disconnectWallet();
             } else {
@@ -898,6 +905,7 @@
         }
         
         function handleChainChanged(chainId) {
+            console.log('Chain changed to:', chainId);
             window.location.reload();
         }
         
@@ -909,47 +917,82 @@
             showToast('کیف پول قطع شد', 'info');
         }
         
-        // ==================== توابع خواندن ====================
+        // ==================== توابع خواندن - تصحیح شده ====================
         
         async function loadDashboardData() {
             try {
-                // بارگذاری آمار کلی
-                const totalUsers = await contract.methods.totalUsers().call();
-                const poolBalance = await contract.methods.poolBalance().call();
-                const minerTokenPool = await contract.methods.minerTokenPool().call();
-                const specialRewardPool = await contract.methods.specialRewardPool().call();
+                console.log('Loading dashboard data...');
                 
+                // تست قرارداد
+                if (!contract || !contract.methods) {
+                    console.error('Contract not initialized');
+                    return;
+                }
+                
+                // بارگذاری آمار کلی با timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout loading data')), 10000)
+                );
+                
+                const dataPromise = Promise.all([
+                    contract.methods.totalUsers().call(),
+                    contract.methods.poolBalance().call(),
+                    contract.methods.minerTokenPool().call(),
+                    contract.methods.specialRewardPool().call()
+                ]);
+                
+                const [totalUsers, poolBalance, minerTokenPool, specialRewardPool] = 
+                    await Promise.race([dataPromise, timeoutPromise]);
+                
+                // نمایش داده‌ها
                 document.getElementById('totalUsers').textContent = totalUsers;
-                document.getElementById('poolBalance').textContent = web3.utils.fromWei(poolBalance, 'ether') + ' MATIC';
-                document.getElementById('minerPool').textContent = web3.utils.fromWei(minerTokenPool, 'ether') + ' MATIC';
-                document.getElementById('specialPool').textContent = web3.utils.fromWei(specialRewardPool, 'ether') + ' MATIC';
+                document.getElementById('poolBalance').textContent = 
+                    parseFloat(web3.utils.fromWei(poolBalance, 'ether')).toFixed(4) + ' MATIC';
+                document.getElementById('minerPool').textContent = 
+                    parseFloat(web3.utils.fromWei(minerTokenPool, 'ether')).toFixed(4) + ' MATIC';
+                document.getElementById('specialPool').textContent = 
+                    parseFloat(web3.utils.fromWei(specialRewardPool, 'ether')).toFixed(4) + ' MATIC';
+                
+                console.log('Dashboard data loaded successfully');
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
+                showToast('خطا در بارگذاری اطلاعات داشبورد', 'error');
             }
         }
         
         async function loadUserInfo() {
             try {
+                console.log('Loading user info for:', userAddress);
+                
+                if (!userAddress || !contract) {
+                    console.error('User address or contract not available');
+                    return;
+                }
+                
                 const userInfo = await contract.methods.getUserInfo(userAddress).call();
                 
                 document.getElementById('userInfo').innerHTML = `
                     <div style="text-align: right;">
-                        <p><strong>ID کاربر:</strong> ${userInfo[0]}</p>
-                        <p><strong>آپلاین ID:</strong> ${userInfo[1]}</p>
-                        <p><strong>تعداد چپ:</strong> ${userInfo[2]}</p>
-                        <p><strong>تعداد راست:</strong> ${userInfo[3]}</p>
-                        <p><strong>تعداد چپ ذخیره:</strong> ${userInfo[4]}</p>
-                        <p><strong>تعداد راست ذخیره:</strong> ${userInfo[5]}</p>
-                        <p><strong>موجودی:</strong> ${userInfo[6]}</p>
-                        <p><strong>پاداش ویژه:</strong> ${userInfo[7]}</p>
-                        <p><strong>پاداش ماینر:</strong> ${web3.utils.fromWei(userInfo[8], 'ether')} MATIC</p>
+                        <p><strong>ID کاربر:</strong> ${userInfo[0] || '0'}</p>
+                        <p><strong>آپلاین ID:</strong> ${userInfo[1] || '0'}</p>
+                        <p><strong>تعداد چپ:</strong> ${userInfo[2] || '0'}</p>
+                        <p><strong>تعداد راست:</strong> ${userInfo[3] || '0'}</p>
+                        <p><strong>موجودی:</strong> ${userInfo[6] || '0'}</p>
+                        <p><strong>پاداش ویژه:</strong> ${userInfo[7] || '0'}</p>
+                        <p><strong>پاداش ماینر:</strong> ${web3.utils.fromWei(userInfo[8] || '0', 'ether')} MATIC</p>
                         <p><strong>ماینر:</strong> ${userInfo[10] ? '✅' : '❌'}</p>
                     </div>
                 `;
                 
+                console.log('User info loaded successfully');
+                
             } catch (error) {
                 console.error('Error loading user info:', error);
+                document.getElementById('userInfo').innerHTML = `
+                    <p style="color: #EF4444;">خطا در بارگذاری اطلاعات کاربر</p>
+                    <p style="color: #9CA3AF; font-size: 0.9rem;">${error.message}</p>
+                `;
             }
         }
         
@@ -960,6 +1003,7 @@
                 
                 if (isOwner) {
                     document.getElementById('adminTab').style.display = 'inline-block';
+                    console.log('User is contract owner');
                 }
             } catch (error) {
                 console.error('Error checking owner:', error);
@@ -968,7 +1012,7 @@
         
         // ==================== توابع نوشتن ====================
         
-        let selectedPosition = true; // true = left, false = right
+        let selectedPosition = true;
         
         function selectPosition(isLeft) {
             selectedPosition = isLeft;
@@ -999,6 +1043,7 @@
                 await loadDashboardData();
                 
             } catch (error) {
+                console.error('Registration error:', error);
                 showToast(`خطا در ثبت‌نام: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1029,6 +1074,7 @@
                 await loadDashboardData();
                 
             } catch (error) {
+                console.error('Contribution error:', error);
                 showToast(`خطا در مشارکت: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1048,6 +1094,7 @@
                 showToast('✅ خرید توکن ماینر با موفقیت انجام شد', 'success');
                 
             } catch (error) {
+                console.error('Buy tokens error:', error);
                 showToast(`خطا در خرید: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1067,6 +1114,7 @@
                 showToast('✅ توزیع توکن‌ها با موفقیت انجام شد', 'success');
                 
             } catch (error) {
+                console.error('Distribution error:', error);
                 showToast(`خطا در توزیع: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1096,6 +1144,7 @@
                 await loadUserInfo();
                 
             } catch (error) {
+                console.error('Withdraw error:', error);
                 showToast(`خطا در برداشت: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1116,6 +1165,7 @@
                 await loadUserInfo();
                 
             } catch (error) {
+                console.error('Withdraw specials error:', error);
                 showToast(`خطا در برداشت: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1149,6 +1199,7 @@
                 showToast('✅ کارمزد با موفقیت بروزرسانی شد', 'success');
                 
             } catch (error) {
+                console.error('Update fee error:', error);
                 showToast(`خطا در بروزرسانی: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1189,6 +1240,7 @@
                 showToast(`✅ ${addresses.length} ماینر با موفقیت حذف شدند`, 'success');
                 
             } catch (error) {
+                console.error('Remove miners error:', error);
                 showToast(`خطا در حذف: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1198,26 +1250,22 @@
         // ==================== مدیریت تب‌ها ====================
         
         function showTab(tabName) {
-            // مخفی کردن همه تب‌ها
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.style.display = 'none';
             });
             
-            // غیرفعال کردن همه لینک‌ها
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.remove('active');
             });
             
-            // نمایش تب انتخاب شده
             document.getElementById(`${tabName}Tab`).style.display = 'block';
-            
-            // فعال کردن لینک مربوطه
             event.target.classList.add('active');
             
-            // بارگذاری اطلاعات تب
             if (tabName === 'dashboard') {
-                loadDashboardData();
-                if (userAddress) loadUserInfo();
+                if (userAddress) {
+                    loadDashboardData();
+                    loadUserInfo();
+                }
             } else if (tabName === 'miner') {
                 loadMinerStats();
             } else if (tabName === 'withdraw') {
@@ -1228,9 +1276,9 @@
         async function loadMinerStats() {
             try {
                 const stats = await contract.methods.getMinerStats().call();
-                document.getElementById('eligibleUsers').textContent = stats[1];
-                document.getElementById('networkerCount').textContent = stats[3];
-                document.getElementById('totalRemain').textContent = stats[2];
+                document.getElementById('eligibleUsers').textContent = stats[1] || '0';
+                document.getElementById('networkerCount').textContent = stats[3] || '0';
+                document.getElementById('totalRemain').textContent = stats[2] || '0';
             } catch (error) {
                 console.error('Error loading miner stats:', error);
             }
@@ -1239,12 +1287,10 @@
         async function loadWithdrawInfo() {
             try {
                 const userInfo = await contract.methods.getUserInfo(userAddress).call();
-                const poolBalance = await contract.methods.poolBalance().call();
-                
                 document.getElementById('withdrawableBalance').textContent = 
-                    web3.utils.fromWei(userInfo[6], 'ether') + ' MATIC';
+                    web3.utils.fromWei(userInfo[6] || '0', 'ether') + ' MATIC';
                 document.getElementById('specialRewards').textContent = 
-                    web3.utils.fromWei(userInfo[7], 'ether') + ' MATIC';
+                    web3.utils.fromWei(userInfo[7] || '0', 'ether') + ' MATIC';
             } catch (error) {
                 console.error('Error loading withdraw info:', error);
             }
@@ -1253,21 +1299,20 @@
         // ==================== مقداردهی اولیه ====================
         
         window.onload = function() {
-            // تنظیم تب پیش‌فرض
+            console.log('SPS DApp initialized');
+            
             showTab('dashboard');
             
-            // رویداد اتصال کیف پول
             document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
             
-            // اگر متامسک وجود داشت
             if (typeof window.ethereum !== 'undefined') {
-                ethereum.on('accountsChanged', handleAccountsChanged);
-                ethereum.on('chainChanged', handleChainChanged);
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
                 
-                // بررسی اگر قبلاً متصل شده
-                ethereum.request({ method: 'eth_accounts' })
+                window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts.length > 0) {
+                            console.log('Auto-connecting to wallet...');
                             connectWallet();
                         }
                     });
