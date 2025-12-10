@@ -3,26 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPS DApp - اجرای کامل قرارداد</title>
+    <title>SPS DApp - نسخه بهبود یافته</title>
     
-    <!-- Ethers.js از Cloudflare - قطعی ندارد -->
+    <!-- Ethers.js از Cloudflare -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     
     <style>
-        /* Reset */
+        /* Reset و متغیرها */
+        :root {
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.6);
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: Tahoma, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
             min-height: 100vh;
-            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* زمینه متحرک */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .particle {
+            position: absolute;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+            opacity: 0.1;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100vw, 100vh) rotate(360deg); }
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
         
         /* Header */
@@ -33,35 +75,63 @@
             padding: 20px;
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
-        }
-        
-        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .logo {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             background: linear-gradient(90deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected { background: #10b981; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .wallet-btn {
             background: linear-gradient(90deg, #3b82f6, #6366f1);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         
         .wallet-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
         
         /* Tabs */
@@ -71,34 +141,26 @@
             margin: 20px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 10px;
+            flex-wrap: wrap;
         }
         
         .tab-btn {
             background: none;
             border: none;
             color: #94a3b8;
-            padding: 10px 20px;
+            padding: 12px 24px;
             cursor: pointer;
             border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
         }
         
         .tab-btn.active {
             background: rgba(59, 130, 246, 0.2);
             color: #3b82f6;
-        }
-        
-        /* Cards */
-        .card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .card h3 {
-            margin-bottom: 15px;
-            color: #e2e8f0;
         }
         
         /* Stats */
@@ -113,8 +175,13 @@
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            padding: 15px;
+            padding: 20px;
             text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-5px);
         }
         
         .stat-value {
@@ -129,36 +196,91 @@
             font-size: 14px;
         }
         
+        /* Tree Structure */
+        .tree-container {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+            overflow-x: auto;
+        }
+        
+        .tree-node {
+            padding: 10px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 8px;
+            margin: 5px 0;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .tree-children {
+            margin-right: 30px;
+            margin-top: 10px;
+            border-right: 2px dashed rgba(59, 130, 246, 0.3);
+            padding-right: 15px;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            margin-bottom: 20px;
+            color: #e2e8f0;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            padding-bottom: 10px;
+        }
+        
         /* Forms */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #cbd5e1;
+            font-weight: 500;
         }
         
         .form-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             color: white;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
         }
         
         /* Buttons */
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
         .btn {
-            width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
             transition: all 0.3s;
+            text-align: center;
         }
         
         .btn-primary {
@@ -198,28 +320,58 @@
                 grid-template-columns: 1fr;
             }
             
-            .header-content {
+            .header {
                 flex-direction: column;
-                gap: 15px;
+                text-align: center;
+            }
+            
+            .tabs {
+                justify-content: center;
             }
         }
         
-        /* Log */
-        .log-box {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+        /* Status Messages */
+        .status {
             padding: 15px;
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
         }
         
-        .log-item {
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Transaction Link */
+        .tx-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 6px;
+            color: #60a5fa;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .tx-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateX(-5px);
         }
         
         /* Loading */
@@ -240,8 +392,8 @@
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-top: 4px solid #3b82f6;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
         }
         
@@ -250,34 +402,10 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Status */
-        .status {
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .status.success {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-        }
-        
-        .status.error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-        }
-        
-        .status.info {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
-        
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 40px;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #94a3b8;
@@ -286,29 +414,37 @@
     </style>
 </head>
 <body>
+    <!-- زمینه متحرک -->
+    <div class="bg-animation">
+        <div class="particles" id="particles"></div>
+    </div>
+    
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-content">
-                <div class="logo">SPS NETWORK</div>
-                <button class="wallet-btn" id="connectBtn">اتصال کیف پول</button>
+            <div class="logo-section">
+                <div class="logo">SPS</div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="networkStatus">اتصال شبکه</span>
+                </div>
             </div>
             
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('dashboard')">داشبورد</button>
-                <button class="tab-btn" onclick="showTab('register')">ثبت‌نام</button>
-                <button class="tab-btn" onclick="showTab('actions')">عملیات</button>
-                <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display:none">مدیریت</button>
-            </div>
+            <button class="wallet-btn" id="connectBtn">اتصال کیف پول</button>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">داشبورد</button>
+            <button class="tab-btn" onclick="showTab('register')">ثبت‌نام</button>
+            <button class="tab-btn" onclick="showTab('miner')">ماینر</button>
+            <button class="tab-btn" onclick="showTab('actions')">عملیات</button>
+            <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display:none">مدیریت</button>
         </div>
         
         <!-- Dashboard Tab -->
         <div id="dashboardTab">
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-label">کاربران کل</div>
-                    <div class="stat-value" id="totalUsers">0</div>
-                </div>
                 <div class="stat-box">
                     <div class="stat-label">موجودی استخر</div>
                     <div class="stat-value" id="poolBalance">0 MATIC</div>
@@ -321,12 +457,27 @@
                     <div class="stat-label">پاداش ویژه</div>
                     <div class="stat-value" id="specialPool">0 MATIC</div>
                 </div>
+                <div class="stat-box">
+                    <div class="stat-label">کارمزد ورود</div>
+                    <div class="stat-value" id="entryFeeDisplay">0 MATIC</div>
+                </div>
             </div>
             
-            <div class="card">
-                <h3>👤 اطلاعات کاربری</h3>
-                <div id="userInfo" class="status info">
-                    کیف پول متصل نیست
+            <div class="grid-2">
+                <div class="card">
+                    <h3>👤 اطلاعات کاربری</h3>
+                    <div id="userInfo" class="status info">
+                        کیف پول متصل نیست
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>🌳 ساختار درختی شما</h3>
+                    <div class="tree-container" id="treeContainer">
+                        <div class="tree-node">
+                            <strong>🔄 ابتدا کیف پول را متصل کنید</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -347,13 +498,41 @@
                             <option value="false">راست</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="register()">ثبت‌نام (0.1 MATIC)</button>
+                    <button class="btn btn-primary" onclick="register()">ثبت‌نام (300 MATIC)</button>
+                    <div id="registerResult"></div>
                 </div>
                 
                 <div class="card">
                     <h3>📊 اطلاعات ثبت‌نام</h3>
                     <div id="registerInfo" class="status info">
-                        اطلاعات ثبت‌نام
+                        پس از اتصال کیف پول، اطلاعات نمایش داده می‌شود
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Miner Tab -->
+        <div id="minerTab" style="display:none">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>⛏️ عملیات ماینر</h3>
+                    <div class="form-group">
+                        <label class="form-label">مقدار مشارکت (MATIC)</label>
+                        <input type="text" id="contribution" class="form-input" placeholder="0.1">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" onclick="contribute()">مشارکت</button>
+                        <button class="btn btn-warning" onclick="buyTokens()">خرید توکن</button>
+                        <button class="btn btn-primary" onclick="sellTokens()">فروش توکن</button>
+                        <button class="btn btn-success" onclick="distribute()">توزیع توکن‌ها</button>
+                    </div>
+                    <div id="minerResult"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>📊 اطلاعات ماینر</h3>
+                    <div id="minerInfo" class="status info">
+                        اطلاعات ماینر شما
                     </div>
                 </div>
             </div>
@@ -363,20 +542,19 @@
         <div id="actionsTab" style="display:none">
             <div class="grid-2">
                 <div class="card">
-                    <h3>⛏️ استخر ماینر</h3>
-                    <div class="form-group">
-                        <label class="form-label">مقدار مشارکت (MATIC)</label>
-                        <input type="text" id="contribution" class="form-input" placeholder="0.1">
+                    <h3>💸 برداشت از استخرها</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-success" onclick="withdrawPool()">برداشت از استخر اصلی</button>
+                        <button class="btn btn-primary" onclick="withdrawSpecial()">برداشت پاداش ویژه</button>
                     </div>
-                    <button class="btn btn-success" onclick="contribute()">مشارکت</button>
-                    <button class="btn btn-warning" onclick="buyTokens()">خرید توکن</button>
-                    <button class="btn btn-primary" onclick="distribute()">توزیع توکن‌ها</button>
+                    <div id="withdrawResult"></div>
                 </div>
                 
                 <div class="card">
-                    <h3>💸 برداشت‌ها</h3>
-                    <button class="btn btn-success" onclick="withdrawPool()">برداشت از استخر</button>
-                    <button class="btn btn-primary" onclick="withdrawSpecial()">برداشت پاداش ویژه</button>
+                    <h3>📈 وضعیت برداشت</h3>
+                    <div id="withdrawInfo" class="status info">
+                        وضعیت برداشت‌های شما
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,30 +563,23 @@
         <div id="adminTab" style="display:none">
             <div class="grid-2">
                 <div class="card">
-                    <h3>⚙️ تنظیمات</h3>
+                    <h3>⚙️ تنظیمات قرارداد</h3>
                     <div class="form-group">
                         <label class="form-label">کارمزد جدید (wei)</label>
-                        <input type="number" id="newFee" class="form-input" placeholder="100000000000000000">
+                        <input type="number" id="newFee" class="form-input" placeholder="300000000000000000000">
                     </div>
                     <button class="btn btn-danger" onclick="updateFee()">بروزرسانی کارمزد</button>
+                    <div id="adminResult"></div>
                 </div>
                 
                 <div class="card">
-                    <h3>🚫 مدیریت</h3>
+                    <h3>🚫 مدیریت ماینرها</h3>
                     <div class="form-group">
                         <label class="form-label">آدرس‌های حذف (با کاما جدا)</label>
                         <textarea id="addresses" class="form-input" rows="4" placeholder="0x123...,0x456..."></textarea>
                     </div>
                     <button class="btn btn-danger" onclick="removeMiners()">حذف ماینرها</button>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Log Box -->
-        <div class="card">
-            <h3>📋 لاگ سیستم</h3>
-            <div class="log-box" id="logBox">
-                <div class="log-item">سیستم آماده است...</div>
             </div>
         </div>
         
@@ -427,9 +598,9 @@
         // ==================== تنظیمات اصلی ====================
         const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
         const POLYGON_CHAIN_ID = "0x89";
-        const ENTRY_FEE = "100000000000000000"; // 0.1 MATIC
+        const ENTRY_FEE = "300000000000000000000"; // 300 MATIC
         
-        // ABI کامل قرارداد
+        // ABI کامل قرارداد (همان نسخه قبلی)
         const CONTRACT_ABI = [
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
             {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
@@ -486,26 +657,14 @@
         
         // متغیرهای اصلی
         let provider, signer, contract, userAddress, isOwner = false;
+        let userTreeData = {};
         
         // ==================== توابع کمکی ====================
-        function log(message) {
-            console.log(message);
-            const box = document.getElementById('logBox');
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            item.textContent = `[${new Date().toLocaleTimeString('fa-IR')}] ${message}`;
-            box.prepend(item);
-            
-            if (box.children.length > 20) {
-                box.removeChild(box.lastChild);
-            }
-        }
-        
-        function showStatus(message, type = 'info') {
-            const el = document.getElementById('userInfo');
+        function showStatus(message, type = 'info', targetId = 'userInfo') {
+            const el = document.getElementById(targetId);
             el.className = `status ${type}`;
             el.innerHTML = message;
-            log(message);
+            console.log(`[${type.toUpperCase()}] ${message.replace(/<[^>]*>/g, '')}`);
         }
         
         function showLoading(show) {
@@ -513,60 +672,160 @@
         }
         
         function showTab(tabName) {
-            // Hide all tabs
-            ['dashboardTab', 'registerTab', 'actionsTab', 'adminTab'].forEach(id => {
-                document.getElementById(id).style.display = 'none';
+            const tabs = ['dashboard', 'register', 'miner', 'actions', 'admin'];
+            tabs.forEach(id => {
+                document.getElementById(id + 'Tab').style.display = 'none';
             });
             
-            // Remove active class from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Show selected tab
             document.getElementById(tabName + 'Tab').style.display = 'block';
             event.target.classList.add('active');
             
-            // Refresh data if needed
             if (tabName === 'dashboard') {
                 loadDashboard();
             }
         }
         
-        // ==================== اتصال کیف پول ====================
-        async function connectWallet() {
-            log('🔗 در حال اتصال به کیف پول...');
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 10 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 20}s`;
+                particles.appendChild(particle);
+            }
+        }
+        
+        function updateNetworkStatus(connected) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('networkStatus');
             
-            if (typeof window.ethereum === 'undefined') {
-                showStatus('❌ کیف پول یافت نشد', 'error');
+            if (connected) {
+                dot.className = 'status-dot connected';
+                text.textContent = 'Polygon Mainnet';
+            } else {
+                dot.className = 'status-dot';
+                text.textContent = 'اتصال شبکه';
+            }
+        }
+        
+        function showTransactionLink(txHash, targetId) {
+            const link = `https://polygonscan.com/tx/${txHash}`;
+            const html = `
+                <div class="status success">
+                    ✅ تراکنش ارسال شد
+                    <a href="${link}" target="_blank" class="tx-link">
+                        🔍 مشاهده در Polygonscan
+                    </a>
+                </div>
+            `;
+            document.getElementById(targetId).innerHTML = html;
+        }
+        
+        // ==================== ساختار درختی ====================
+        async function loadTreeStructure(userId) {
+            try {
+                const container = document.getElementById('treeContainer');
+                container.innerHTML = '<div class="tree-node">🔄 در حال بارگذاری...</div>';
+                
+                const userInfo = await contract.getUserInfo(userAddress);
+                const [leftId, rightId] = await contract.getUserDirects(userId);
+                
+                let treeHtml = `
+                    <div class="tree-node">
+                        <strong>👤 شما (ID: ${userId})</strong><br>
+                        📊 چپ: ${userInfo[2]} | راست: ${userInfo[3]}
+                    </div>
+                    <div class="tree-children">
+                `;
+                
+                if (leftId > 0 || rightId > 0) {
+                    if (leftId > 0) {
+                        treeHtml += `<div class="tree-node">← چپ: ID ${leftId}</div>`;
+                    }
+                    if (rightId > 0) {
+                        treeHtml += `<div class="tree-node">→ راست: ID ${rightId}</div>`;
+                    }
+                } else {
+                    treeHtml += `<div class="tree-node">📭 هیچ زیرمجموعه‌ای وجود ندارد</div>`;
+                }
+                
+                treeHtml += '</div>';
+                container.innerHTML = treeHtml;
+                
+            } catch (error) {
+                console.error('خطا در بارگذاری ساختار درختی:', error);
+                document.getElementById('treeContainer').innerHTML = 
+                    '<div class="tree-node">⚠️ خطا در بارگذاری ساختار</div>';
+            }
+        }
+        
+        // ==================== فروش توکن ====================
+        async function sellTokens() {
+            if (!contract) {
+                alert('لطفاً ابتدا کیف پول را متصل کنید');
                 return;
             }
             
             try {
                 showLoading(true);
+                showStatus('🔄 در حال پردازش فروش توکن...', 'info', 'minerResult');
                 
-                // درخواست حساب‌ها
+                // NOTE: این تابع در قرارداد فعلی وجود ندارد
+                // برای استفاده نیاز به اضافه شدن تابع sellMinerTokens در قرارداد دارید
+                // const tx = await contract.sellMinerTokens();
+                
+                // فعلاً پیام شبیه‌سازی می‌کنیم
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                showStatus(`
+                    ⚠️ تابع فروش توکن در قرارداد فعلی موجود نیست<br>
+                    نیاز به اضافه شدن تابع sellMinerTokens در Smart Contract
+                `, 'warning', 'minerResult');
+                
+            } catch (error) {
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'minerResult');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ==================== اتصال کیف پول ====================
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                showStatus('❌ کیف پول (مثل MetaMask) یافت نشد', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                showStatus('🔗 در حال اتصال...', 'info');
+                
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts'
                 });
                 
                 userAddress = accounts[0];
-                log(`✅ متصل شد: ${userAddress.substring(0, 6)}...${userAddress.substring(38)}`);
+                updateNetworkStatus(false);
                 
                 // بررسی شبکه
                 const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                log(`🌐 شبکه: ${chainId}`);
                 
-                // اگر شبکه Polygon نیست
                 if (chainId !== POLYGON_CHAIN_ID) {
-                    showStatus('🔄 در حال تغییر به شبکه Polygon...', 'info');
+                    showStatus('🔄 تغییر به شبکه Polygon...', 'info');
                     
                     try {
                         await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: POLYGON_CHAIN_ID }],
                         });
-                        log('✅ شبکه به Polygon تغییر کرد');
                     } catch (switchError) {
                         if (switchError.code === 4902) {
                             await window.ethereum.request({
@@ -574,59 +833,38 @@
                                 params: [{
                                     chainId: POLYGON_CHAIN_ID,
                                     chainName: 'Polygon Mainnet',
-                                    nativeCurrency: {
-                                        name: 'MATIC',
-                                        symbol: 'MATIC',
-                                        decimals: 18
-                                    },
+                                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
                                     rpcUrls: ['https://polygon-rpc.com'],
                                     blockExplorerUrls: ['https://polygonscan.com']
                                 }],
                             });
-                            log('✅ شبکه Polygon اضافه شد');
                         }
                     }
                     
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                 }
                 
-                // ایجاد provider و signer
+                // اتصال
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
-                
-                // ساخت قرارداد
                 contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                log('📜 قرارداد ساخته شد');
                 
-                // تغییر UI
-                document.getElementById('connectBtn').style.display = 'none';
+                // بروزرسانی UI
                 document.getElementById('connectBtn').outerHTML = `
-                    <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">
-                        ✅ متصل: ${userAddress.substring(0, 6)}...${userAddress.substring(38)}
+                    <div style="background: linear-gradient(90deg, #10b981, #34d399); color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold;">
+                        ✅ ${userAddress.substring(0, 6)}...${userAddress.substring(38)}
                     </div>
                 `;
                 
-                // بارگذاری اطلاعات
+                updateNetworkStatus(true);
                 await loadDashboard();
-                
-                showStatus('✅ کیف پول با موفقیت متصل شد', 'success');
+                showStatus('✅ کیف پول متصل شد', 'success');
                 
                 // گوش دادن به تغییرات
-                window.ethereum.on('accountsChanged', (accounts) => {
-                    if (accounts.length === 0) {
-                        location.reload();
-                    } else {
-                        userAddress = accounts[0];
-                        loadDashboard();
-                    }
-                });
-                
-                window.ethereum.on('chainChanged', () => {
-                    location.reload();
-                });
+                window.ethereum.on('accountsChanged', () => location.reload());
+                window.ethereum.on('chainChanged', () => location.reload());
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
                 showStatus(`❌ خطا: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -638,50 +876,53 @@
             if (!contract) return;
             
             try {
-                log('📊 در حال بارگذاری اطلاعات...');
-                
                 // اطلاعات اصلی
-                const [totalUsers, poolBalance, minerPool, specialPool] = await Promise.all([
-                    contract.totalUsers().catch(() => 0),
+                const [poolBalance, minerPool, specialPool, entryFee] = await Promise.all([
                     contract.poolBalance().catch(() => 0),
                     contract.minerTokenPool().catch(() => 0),
-                    contract.specialRewardPool().catch(() => 0)
+                    contract.specialRewardPool().catch(() => 0),
+                    contract.ENTRY_FEE().catch(() => ENTRY_FEE)
                 ]);
                 
-                document.getElementById('totalUsers').textContent = totalUsers.toString();
-                document.getElementById('poolBalance').textContent = ethers.formatEther(poolBalance).substring(0, 8) + ' MATIC';
-                document.getElementById('minerPool').textContent = ethers.formatEther(minerPool).substring(0, 8) + ' MATIC';
-                document.getElementById('specialPool').textContent = ethers.formatEther(specialPool).substring(0, 8) + ' MATIC';
+                document.getElementById('poolBalance').textContent = 
+                    ethers.formatEther(poolBalance).substring(0, 10) + ' MATIC';
+                document.getElementById('minerPool').textContent = 
+                    ethers.formatEther(minerPool).substring(0, 10) + ' MATIC';
+                document.getElementById('specialPool').textContent = 
+                    ethers.formatEther(specialPool).substring(0, 10) + ' MATIC';
+                document.getElementById('entryFeeDisplay').textContent = 
+                    ethers.formatEther(entryFee) + ' MATIC';
                 
                 // اطلاعات کاربر
                 const userInfo = await contract.getUserInfo(userAddress).catch(() => null);
                 if (userInfo) {
+                    const userId = userInfo[0];
                     showStatus(`
-                        👤 کاربر #${userInfo[0]}<br>
-                        📊 موجودی: ${userInfo[6]}<br>
+                        <strong>👤 کاربر #${userId}</strong><br>
+                        📊 موجودی: ${userInfo[6]} واحد<br>
                         🎁 پاداش ویژه: ${userInfo[7]}<br>
-                        ⛏️ ماینر: ${userInfo[10] ? '✅' : '❌'}
+                        ⛏️ ماینر: ${userInfo[10] ? '✅' : '❌'}<br>
+                        💰 مجموع پاداش‌ها: ${ethers.formatEther(userInfo[8])} MATIC
                     `, 'success');
+                    
+                    // بارگذاری ساختار درختی
+                    await loadTreeStructure(userId);
                     
                     // بررسی مالک بودن
                     const owner = await contract.owner().catch(() => null);
                     if (owner && owner.toLowerCase() === userAddress.toLowerCase()) {
                         isOwner = true;
                         document.getElementById('adminTab').style.display = 'block';
-                        log('👑 کاربر مالک قرارداد است');
                     }
                 }
                 
-                log('✅ اطلاعات بارگذاری شد');
-                
             } catch (error) {
-                log(`❌ خطا در بارگذاری: ${error.message}`);
+                console.error('خطا در بارگذاری:', error);
             }
         }
         
         // ==================== توابع اصلی ====================
         
-        // ثبت‌نام
         async function register() {
             const uplineCode = document.getElementById('uplineCode').value;
             const position = document.getElementById('position').value === 'true';
@@ -693,30 +934,30 @@
             
             try {
                 showLoading(true);
-                log(`📝 ثبت‌نام با آپلاین ${uplineCode} و موقعیت ${position ? 'چپ' : 'راست'}`);
+                showStatus('🔄 در حال ثبت‌نام...', 'info', 'registerResult');
                 
                 const tx = await contract.register(uplineCode, position, {
                     value: ENTRY_FEE
                 });
                 
-                log(`⏳ تراکنش ارسال شد: ${tx.hash}`);
-                alert('تراکنش ثبت‌نام ارسال شد. منتظر تایید باشید...');
+                showTransactionLink(tx.hash, 'registerResult');
                 
                 const receipt = await tx.wait();
-                log(`✅ ثبت‌نام موفق: ${receipt.hash}`);
-                alert('✅ ثبت‌نام با موفقیت انجام شد!');
+                showStatus(`
+                    ✅ ثبت‌نام موفق<br>
+                    🎉 کاربر جدید ایجاد شد<br>
+                    🔗 <a href="https://polygonscan.com/tx/${tx.hash}" target="_blank" class="tx-link">مشاهده تراکنش</a>
+                `, 'success', 'registerResult');
                 
                 await loadDashboard();
                 
             } catch (error) {
-                log(`❌ خطا در ثبت‌نام: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'registerResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // مشارکت در استخر ماینر
         async function contribute() {
             const amount = document.getElementById('contribution').value;
             if (!amount || amount <= 0) {
@@ -726,120 +967,100 @@
             
             try {
                 showLoading(true);
-                log(`💰 مشارکت ${amount} MATIC در استخر ماینر`);
+                showStatus('🔄 در حال ارسال مشارکت...', 'info', 'minerResult');
                 
                 const tx = await contract.contributeToMinerPool({
                     value: ethers.parseEther(amount)
                 });
                 
-                log(`⏳ تراکنش: ${tx.hash}`);
-                alert('تراکنش ارسال شد');
-                
+                showTransactionLink(tx.hash, 'minerResult');
                 await tx.wait();
-                log('✅ مشارکت موفق');
-                alert('✅ مشارکت با موفقیت انجام شد');
+                showStatus('✅ مشارکت با موفقیت انجام شد', 'success', 'minerResult');
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'minerResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // خرید توکن ماینر
         async function buyTokens() {
             try {
                 showLoading(true);
-                log('🛒 خرید توکن ماینر');
+                showStatus('🔄 در حال خرید توکن...', 'info', 'minerResult');
                 
                 const tx = await contract.buyMinerTokens();
-                log(`⏳ تراکنش: ${tx.hash}`);
+                showTransactionLink(tx.hash, 'minerResult');
                 
                 await tx.wait();
-                log('✅ خرید موفق');
-                alert('✅ خرید توکن با موفقیت انجام شد');
+                showStatus('✅ خرید توکن با موفقیت انجام شد', 'success', 'minerResult');
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'minerResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // توزیع توکن‌ها
         async function distribute() {
             try {
                 showLoading(true);
-                log('📤 توزیع توکن‌های ماینر');
+                showStatus('🔄 در حال توزیع توکن‌ها...', 'info', 'minerResult');
                 
                 const tx = await contract.distributeMinerTokens();
-                log(`⏳ تراکنش: ${tx.hash}`);
+                showTransactionLink(tx.hash, 'minerResult');
                 
                 await tx.wait();
-                log('✅ توزیع موفق');
-                alert('✅ توزیع توکن‌ها با موفقیت انجام شد');
+                showStatus('✅ توزیع توکن‌ها انجام شد', 'success', 'minerResult');
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'minerResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // برداشت از استخر
         async function withdrawPool() {
             try {
                 showLoading(true);
-                log('💸 برداشت از استخر');
+                showStatus('🔄 در حال برداشت از استخر...', 'info', 'withdrawResult');
                 
                 const tx = await contract.withdrawPool();
-                log(`⏳ تراکنش: ${tx.hash}`);
-                alert('تراکنش برداشت ارسال شد');
+                showTransactionLink(tx.hash, 'withdrawResult');
                 
                 await tx.wait();
-                log('✅ برداشت موفق');
-                alert('✅ برداشت با موفقیت انجام شد');
-                
+                showStatus('✅ برداشت با موفقیت انجام شد', 'success', 'withdrawResult');
                 await loadDashboard();
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'withdrawResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // برداشت پاداش ویژه
         async function withdrawSpecial() {
             try {
                 showLoading(true);
-                log('🎁 برداشت پاداش ویژه');
+                showStatus('🔄 در حال برداشت پاداش ویژه...', 'info', 'withdrawResult');
                 
                 const tx = await contract.withdrawSpecials();
-                log(`⏳ تراکنش: ${tx.hash}`);
+                showTransactionLink(tx.hash, 'withdrawResult');
                 
                 await tx.wait();
-                log('✅ برداشت موفق');
-                alert('✅ برداشت پاداش ویژه با موفقیت انجام شد');
-                
+                showStatus('✅ پاداش ویژه برداشت شد', 'success', 'withdrawResult');
                 await loadDashboard();
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'withdrawResult');
             } finally {
                 showLoading(false);
             }
         }
         
-        // توابع ادمین
         async function updateFee() {
             if (!isOwner) {
-                alert('❌ شما مجاز به این عملیات نیستید');
+                alert('❌ دسترسی رد شد: فقط مالک قرارداد');
                 return;
             }
             
@@ -851,18 +1072,16 @@
             
             try {
                 showLoading(true);
-                log(`⚙️ بروزرسانی کارمزد به ${newFee}`);
+                showStatus('🔄 در حال بروزرسانی کارمزد...', 'info', 'adminResult');
                 
                 const tx = await contract.updateEntryFee(newFee);
-                log(`⏳ تراکنش: ${tx.hash}`);
+                showTransactionLink(tx.hash, 'adminResult');
                 
                 await tx.wait();
-                log('✅ بروزرسانی موفق');
-                alert('✅ کارمزد بروزرسانی شد');
+                showStatus('✅ کارمزد بروزرسانی شد', 'success', 'adminResult');
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'adminResult');
             } finally {
                 showLoading(false);
             }
@@ -870,7 +1089,7 @@
         
         async function removeMiners() {
             if (!isOwner) {
-                alert('❌ شما مجاز به این عملیات نیستید');
+                alert('❌ دسترسی رد شد: فقط مالک قرارداد');
                 return;
             }
             
@@ -888,18 +1107,16 @@
             
             try {
                 showLoading(true);
-                log(`🚫 حذف ${addresses.length} ماینر`);
+                showStatus(`🔄 در حال حذف ${addresses.length} ماینر...`, 'info', 'adminResult');
                 
                 const tx = await contract.batchRemoveMiners(addresses);
-                log(`⏳ تراکنش: ${tx.hash}`);
+                showTransactionLink(tx.hash, 'adminResult');
                 
                 await tx.wait();
-                log('✅ حذف موفق');
-                alert(`✅ ${addresses.length} ماینر حذف شدند`);
+                showStatus(`✅ ${addresses.length} ماینر حذف شدند`, 'success', 'adminResult');
                 
             } catch (error) {
-                log(`❌ خطا: ${error.message}`);
-                alert(`خطا: ${error.message}`);
+                showStatus(`❌ خطا: ${error.message}`, 'error', 'adminResult');
             } finally {
                 showLoading(false);
             }
@@ -907,24 +1124,34 @@
         
         // ==================== راه‌اندازی اولیه ====================
         window.onload = function() {
-            log('🚀 SPS DApp راه‌اندازی شد');
+            console.log('🚀 SPS DApp نسخه بهبود یافته راه‌اندازی شد');
+            
+            // ایجاد زمینه متحرک
+            createParticles();
             
             // اتصال دکمه
             document.getElementById('connectBtn').onclick = connectWallet;
             
-            // اگر کیف پول قبلاً متصل شده
+            // تنظیم تب ماینر
+            const minerTabBtn = document.querySelector('.tab-btn[onclick*="miner"]');
+            if (minerTabBtn) {
+                minerTabBtn.onclick = function() { showTab('miner'); };
+            }
+            
+            // بررسی اتصال خودکار
             if (typeof window.ethereum !== 'undefined') {
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts.length > 0) {
-                            log('🔗 اتصال خودکار به کیف پول...');
-                            connectWallet();
+                            setTimeout(() => connectWallet(), 1000);
                         }
                     });
             }
             
-            // بارگذاری اولیه اطلاعات از RPC عمومی
-            loadDashboard();
+            // بارگذاری اولیه اطلاعات
+            setTimeout(() => {
+                if (!provider) loadDashboard();
+            }, 500);
         };
     </script>
 </body>
