@@ -1,171 +1,126 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SPS DApp - Ultra Premium</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SPS DApp — Ultra Release (Premium + Radial Tree)</title>
 
-<!-- ethers.js (unchanged logic) -->
+<!-- ethers.js (logic unchanged) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
 <style>
-  /* ----------------- Theme (Premium Elegant) ----------------- */
-  :root{
-    --bg-1: #040615;
-    --bg-2: #071029;
-    --glass: rgba(255,255,255,0.03);
-    --card: rgba(255,255,255,0.02);
-    --muted: #9fb3cf;
-    --primary: #3b82f6;
-    --accent: #8b5cf6;
-    --neon: #00ffd5;
-    --neon-2: #7c3aed;
-    --success: #10b981;
-    --danger: #ef4444;
-    --glass-border: rgba(255,255,255,0.04);
-  }
+:root{
+  --bg-1:#040615; --bg-2:#071029;
+  --muted:#9fb3cf; --primary:#3b82f6; --accent:#8b5cf6;
+  --neon:#00ffd5; --neon-2:#7c3aed; --success:#10b981; --danger:#ef4444;
+  --glass-border: rgba(255,255,255,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html[dir="rtl"]{direction:rtl} html[dir="ltr"]{direction:ltr}
+body{
+  font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+  background:
+    radial-gradient(800px 320px at 10% 10%, rgba(139,92,246,0.03), transparent),
+    radial-gradient(700px 280px at 90% 90%, rgba(0,255,213,0.02), transparent),
+    linear-gradient(180deg,var(--bg-1) 0%,var(--bg-2) 100%);
+  color:#e6eef8; min-height:100vh; padding:20px; -webkit-font-smoothing:antialiased;
+}
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  html[dir="rtl"]{ direction: rtl; }
-  html[dir="ltr"]{ direction: ltr; }
+/* Canvas layers */
+#neuralWave{position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:screen}
+#neonParticles, #confetti{position:fixed;inset:0;z-index:0;pointer-events:none}
+#confetti{z-index:12000;display:none}
 
-  body{
-    font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
-    background:
-      radial-gradient(800px 320px at 10% 10%, rgba(139,92,246,0.04), transparent),
-      radial-gradient(700px 280px at 90% 90%, rgba(0,255,213,0.02), transparent),
-      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
-    color: #e6eef8;
-    min-height:100vh;
-    padding:20px;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-x:hidden;
-  }
+/* Layout */
+.container{max-width:1200px;margin:0 auto;position:relative;z-index:5}
+.header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:12px;padding:14px;border:1px solid var(--glass-border);
+  box-shadow:0 12px 40px rgba(2,8,20,0.6);backdrop-filter:blur(6px) saturate(120%);
+}
 
-  /* ---------- Canvas layers (neural wave + particles + confetti) ---------- */
-  #neuralWave {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(40% 25% at 10% 20%, rgba(124,58,237,0.03), transparent),
-                radial-gradient(30% 20% at 90% 80%, rgba(0,255,213,0.02), transparent);
-    mix-blend-mode: screen;
-  }
-  #neonParticles, #confetti { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  #confetti { z-index: 10000; display:none; }
+/* Logo */
+.logo-3d{width:96px;height:46px;perspective:1000px;display:flex;align-items:center;justify-content:center}
+.logo-card{width:96px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:10px;position:relative;transform-style:preserve-3d;transition:transform .7s}
+.logo-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;backface-visibility:hidden}
+.logo-face.front svg{width:78px;height:28px}
+.logo-face.back{transform:rotateY(180deg);font-weight:900;font-size:20px;color:var(--neon);text-shadow:0 0 12px rgba(0,255,213,0.18)}
+.logo-glow{position:absolute;inset:-20%;z-index:-1;filter:blur(28px);opacity:0.6;border-radius:14px;background:
+  radial-gradient(circle at 20% 30%, rgba(59,130,246,0.12), transparent 20%),
+  radial-gradient(circle at 80% 70%, rgba(124,58,237,0.10), transparent 20%),
+  radial-gradient(circle at 50% 50%, rgba(0,255,213,0.06), transparent 30%)}
+@keyframes logoPulse{0%{transform:scale(0.985)}50%{transform:scale(1.02)}100%{transform:scale(0.985)}}
+.logo-card.pulse{animation:logoPulse 3.6s ease-in-out infinite}
 
-  /* ---------- Container ---------- */
-  .container{ max-width:1200px; margin:0 auto; position:relative; z-index:5; }
+/* Status and language */
+.status-ind{display:flex;gap:10px;align-items:center}
+.status-dot{width:12px;height:12px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px rgba(239,68,68,0.2)}
+.status-dot.connected{background:var(--success);box-shadow:0 0 18px rgba(16,185,129,0.14)}
+.network-text{font-weight:700;color:var(--muted)}
+.lang-switch{display:flex;gap:8px;align-items:center}
+.lang-btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;background:transparent;color:var(--muted);font-weight:700}
+.lang-btn.active{background:linear-gradient(90deg,var(--primary),var(--accent));color:#041426;box-shadow:0 8px 26px rgba(59,130,246,0.12)}
 
-  /* ---------- Header ---------- */
-  .header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:12px; padding:14px; border:1px solid var(--glass-border);
-    box-shadow: 0 12px 40px rgba(11,26,43,0.6);
-    position:relative; overflow:hidden;
-    backdrop-filter: blur(6px) saturate(120%);
-  }
+/* Tabs */
+.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap;z-index:5}
+.tab-btn{padding:10px 12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.02);color:var(--muted);cursor:pointer;font-weight:700}
+.tab-btn.active{background:linear-gradient(90deg, rgba(59,130,246,0.12), rgba(139,92,246,0.06));color:var(--primary);box-shadow:0 10px 30px rgba(59,130,246,0.06)}
 
-  /* ---------- Logo: SVG + flip to $ ---------- */
-  .logo-3d{ width:96px; height:46px; perspective:1000px; display:flex; align-items:center; justify-content:center; }
-  .logo-card{
-    width:96px; height:46px; display:flex; align-items:center; justify-content:center;
-    border-radius:10px; position:relative; transform-style:preserve-3d;
-    transition: transform 0.7s cubic-bezier(.2,.9,.3,1);
-  }
-  .logo-face{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    transform-style: preserve-3d;
-  }
-  .logo-face.front svg { width:78px; height:28px; }
-  .logo-face.back { transform: rotateY(180deg); font-weight:900; font-size:20px; color:var(--neon); text-shadow: 0 0 12px rgba(0,255,213,0.18), 0 0 36px rgba(124,58,237,0.06); }
+/* Cards */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:14px 0;z-index:5}
+.stat-box{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:14px;border:1px solid var(--glass-border);box-shadow:0 12px 30px rgba(2,8,20,0.6);position:relative;overflow:hidden;backdrop-filter:blur(6px)}
+.stat-label{color:var(--muted);font-size:13px;margin-bottom:8px}
+.stat-value{font-size:18px;font-weight:900;color:#dff5ff;text-shadow:0 6px 18px rgba(59,130,246,0.06)}
+.stat-box:hover{transform:translateY(-6px);transition:transform .28s}
 
-  .logo-glow {
-    position:absolute; inset:-20%; z-index:-1; filter: blur(28px); opacity:0.6;
-    background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.12), transparent 20%),
-                radial-gradient(circle at 80% 70%, rgba(124,58,237,0.10), transparent 20%),
-                radial-gradient(circle at 50% 50%, rgba(0,255,213,0.06), transparent 30%);
-    border-radius:14px;
-  }
-  /* pulsing subtle glow */
-  @keyframes logoPulse { 0%{ transform:scale(0.985) } 50%{ transform:scale(1.02) } 100%{ transform:scale(0.985) } }
-  .logo-card.pulse { animation: logoPulse 3.6s ease-in-out infinite; }
+/* Grid layout */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px;z-index:5}
+.card{padding:14px;border-radius:12px;border:1px solid var(--glass-border);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));box-shadow:0 12px 30px rgba(5,10,25,0.6);backdrop-filter:blur(6px)}
+.help{color:var(--muted);margin-top:8px;font-size:13px}
 
-  /* ---------- Status / language ---------- */
-  .status-ind{ display:flex; gap:10px; align-items:center }
-  .status-dot{ width:12px; height:12px; border-radius:50%; background:var(--danger); box-shadow:0 0 10px rgba(239,68,68,0.2) }
-  .status-dot.connected{ background:var(--success); box-shadow:0 0 18px rgba(16,185,129,0.14) }
-  .network-text{ font-weight:700; color:var(--muted) }
+/* Buttons */
+.btn{padding:12px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
+.btn-primary{background:linear-gradient(90deg,var(--primary),var(--accent));color:white;box-shadow:0 12px 30px rgba(59,130,246,0.08)}
+.btn-success{background:linear-gradient(90deg,var(--success),#34d399);color:#031612}
+.btn-danger{background:linear-gradient(90deg,var(--danger),#f87171);color:#2b0e0e}
+.btn.disabled{opacity:0.45;pointer-events:none;filter:grayscale(0.4)}
+.btn-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 
-  .lang-switch{ display:flex; gap:8px; align-items:center }
-  .lang-btn{ padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); cursor:pointer; background:transparent; color:var(--muted); font-weight:700 }
-  .lang-btn.active{ background: linear-gradient(90deg,var(--primary),var(--accent)); color:#041426; box-shadow:0 8px 26px rgba(59,130,246,0.12) }
+/* Countdown */
+.countdown{display:flex;align-items:center;gap:12px;justify-content:center;padding:12px;border-radius:12px;background:linear-gradient(90deg, rgba(59,130,246,0.04), rgba(124,58,237,0.03));border:1px solid rgba(255,255,255,0.02);box-shadow:0 12px 30px rgba(11,26,43,0.6);font-weight:900}
+.time-segment{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.01);min-width:64px}
+.time-value{font-size:18px;color:#e6f8ff;font-weight:900;text-shadow:0 8px 20px rgba(59,130,246,0.08)}
+.time-label{color:var(--muted);font-size:12px}
 
-  /* ---------- Tabs ---------- */
-  .tabs{ display:flex; gap:8px; margin:16px 0; flex-wrap:wrap; z-index:5; }
-  .tab-btn{ padding:10px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.02); color:var(--muted); cursor:pointer; font-weight:700 }
-  .tab-btn.active{ background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(139,92,246,0.06)); color:var(--primary); box-shadow: 0 10px 30px rgba(59,130,246,0.06) }
+/* Loading */
+.loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center}
+.spinner{width:80px;height:80px;border-radius:50%;border:6px solid rgba(255,255,255,0.04);border-top-color:var(--neon);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ---------- Stats / Cards (Glassmorphism + cinematic shadows) ---------- */
-  .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:14px 0; z-index:5; }
-  .stat-box{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    padding:16px; border-radius:14px; border:1px solid var(--glass-border);
-    box-shadow: 0 12px 30px rgba(2,8,20,0.6), inset 0 1px 0 rgba(255,255,255,0.01);
-    position:relative; overflow:hidden; backdrop-filter: blur(6px) saturate(120%);
-    transition: transform .36s ease, box-shadow .36s ease;
-  }
-  .stat-box:hover { transform: translateY(-8px); box-shadow: 0 28px 60px rgba(11,26,43,0.7); }
-  .stat-label{ color:var(--muted); font-size:13px; margin-bottom:8px; }
-  .stat-value{ font-size:18px; font-weight:900; color:#dff5ff; text-shadow: 0 6px 18px rgba(59,130,246,0.06); }
+/* Trust toast */
+.trust-toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:linear-gradient(90deg,rgba(0,0,0,0.6),rgba(255,255,255,0.02));padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 12px 40px rgba(2,8,20,0.6);z-index:13000;display:flex;gap:12px;align-items:center;opacity:0;transition:opacity .28s,transform .28s
+}
+.trust-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.trust-toast .txlink{color:#9ecbff;text-decoration:none;font-weight:800}
 
-  /* fancy border accent */
-  .stat-box:after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background: linear-gradient(90deg, rgba(59,130,246,0.06), rgba(124,58,237,0.04));
-    mix-blend-mode: screen; border-radius:14px; opacity:0.3;
-  }
+/* Radial Tree container */
+#radialTreeWrap{width:100%;height:520px;background:linear-gradient(180deg, rgba(255,255,255,0.005), transparent);border-radius:12px;border:1px solid var(--glass-border);position:relative;overflow:hidden}
+#radialSVG{width:100%;height:100%}
+.node-circle{cursor:pointer;transition:transform .18s}
+.node-circle:hover{transform:scale(1.06)}
 
-  /* ---------- Tree ---------- */
-  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:12px; z-index:5; }
-  .card{ padding:14px; border-radius:12px; border:1px solid var(--glass-border); background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); box-shadow: 0 12px 30px rgba(5,10,25,0.6); backdrop-filter: blur(6px) }
-  .tree-container{ max-height:540px; overflow:auto; padding:12px; border-radius:10px; }
-  .node{ padding:12px; border-radius:10px; margin-bottom:12px; background: rgba(12,16,28,0.6); border:1px solid rgba(59,130,246,0.06); display:flex; justify-content:space-between; align-items:center; gap:12px; transition: transform .28s, box-shadow .28s; }
-  .node:hover{ transform: translateY(-6px); box-shadow: 0 16px 40px rgba(44,95,227,0.06); }
-  .meta{ color:var(--muted); font-size:13px; }
+/* small labels */
+.node-label{font-size:12px;fill:#e6eef8;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,0.6)}
+.node-meta{font-size:11px;fill:var(--muted)}
 
-  .toggle-btn{ background:transparent;border:1px solid rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; color:var(--primary); cursor:pointer; font-weight:700 }
-
-  /* ---------- Buttons ---------- */
-  .btn{ padding:12px; border-radius:10px; border:none; cursor:pointer; font-weight:800 }
-  .btn-primary{ background: linear-gradient(90deg,var(--primary),var(--accent)); color:white; box-shadow: 0 12px 30px rgba(59,130,246,0.08); }
-  .btn-success{ background: linear-gradient(90deg,var(--success),#34d399); color:#031612; }
-  .btn-danger{ background: linear-gradient(90deg,var(--danger),#f87171); color:#2b0e0e; }
-  .btn.disabled{ opacity:0.45; pointer-events:none; filter:grayscale(0.4) }
-
-  .btn-group{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px }
-
-  /* ---------- Countdown (premium look) ---------- */
-  .countdown{ display:flex; align-items:center; gap:12px; justify-content:center; padding:12px; border-radius:12px; background: linear-gradient(90deg, rgba(59,130,246,0.04), rgba(124,58,237,0.03)); border:1px solid rgba(255,255,255,0.02); box-shadow: 0 12px 30px rgba(11,26,43,0.6); font-weight:900; }
-  .time-segment{ display:flex; flex-direction:column; align-items:center; padding:8px 12px; border-radius:8px; background: rgba(255,255,255,0.01); min-width:64px; }
-  .time-value{ font-size:18px; color:#e6f8ff; font-weight:900; text-shadow:0 8px 20px rgba(59,130,246,0.08) }
-  .time-label{ color:var(--muted); font-size:12px; }
-
-  /* ---------- Loading ---------- */
-  .loading{ display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center }
-  .spinner{ width:80px; height:80px; border-radius:50%; border:6px solid rgba(255,255,255,0.04); border-top-color:var(--neon); animation: spin 1s linear infinite; }
-  @keyframes spin{ to{ transform: rotate(360deg) } }
-
-  /* ---------- Footer ---------- */
-  footer{ margin-top:20px; text-align:center; color:var(--muted); font-size:13px; z-index:5; position:relative; }
-
-  /* responsive */
-  @media (max-width:980px){ .grid-2{ grid-template-columns:1fr } .header{ flex-direction:column; align-items:flex-start } .logo-3d{ margin-bottom:8px } }
+/* responsive */
+@media (max-width:980px){.grid-2{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.logo-3d{margin-bottom:8px}}
 </style>
 </head>
 <body>
-  <!-- Canvas layers -->
+  <!-- visuals -->
   <div id="neuralWave"></div>
   <canvas id="neonParticles"></canvas>
   <canvas id="confetti"></canvas>
@@ -175,29 +130,17 @@
     <div class="header">
       <div style="display:flex;align-items:center;gap:14px">
         <div class="logo-3d" aria-hidden="true">
-          <div id="logoCard" class="logo-card pulse" role="img" aria-label="SPS">
+          <div id="logoCard" class="logo-card pulse" role="img" aria-label="SPS Logo">
             <div class="logo-face front" id="logoFront">
-              <!-- SVG SPS logo (guaranteed render) -->
               <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <defs>
-                  <linearGradient id="g1" x1="0" x2="1">
-                    <stop offset="0" stop-color="#3b82f6"/>
-                    <stop offset="1" stop-color="#8b5cf6"/>
-                  </linearGradient>
-                  <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="6" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
+                  <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                  <filter id="neon" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                 </defs>
-                <g filter="url(#neon)">
-                  <!-- Big bold SPS text drawn as vector using <text> (safe fallback) -->
-                  <text x="50%" y="55%" text-anchor="middle" font-family="Inter, Tahoma, Arial" font-weight="800" font-size="36" fill="url(#g1)" style="letter-spacing:2px">SPS</text>
-                </g>
+                <g filter="url(#neon)"><text x="50%" y="55%" text-anchor="middle" font-family="Inter, Tahoma, Arial" font-weight="800" font-size="36" fill="url(#g1)" style="letter-spacing:2px">SPS</text></g>
               </svg>
             </div>
-            <div class="logo-face back" id="logoBack" aria-hidden="true">
-              $ 
-            </div>
+            <div class="logo-face back" id="logoBack" aria-hidden="true">$</div>
             <div class="logo-glow" aria-hidden="true"></div>
           </div>
         </div>
@@ -239,6 +182,7 @@
         <div class="stat-box">
           <div class="stat-label" id="label-minerPool">استخر ماینر</div>
           <div class="stat-value" id="minerPool">0 pToken</div>
+          <div style="margin-top:8px;color:var(--muted);font-size:13px" id="ptokenPriceInfo">قیمت pToken: —</div>
         </div>
 
         <div class="stat-box">
@@ -257,14 +201,17 @@
           <h3 id="h-userinfo">👤 اطلاعات کاربری</h3>
           <div id="userInfo" class="status info">کیف پول متصل نیست</div>
           <div class="help" id="help-userinfo">پس از اتصال کیف پول، اطلاعات و لینک تراکنش‌ها در اینجا نشان داده می‌شوند.</div>
+          <div style="margin-top:10px" id="contractLinks" class="help">
+            <!-- clickable contract links inserted here -->
+          </div>
         </div>
 
         <div class="card">
-          <h3 id="h-tree">🌳 ساختار درختی شما</h3>
-          <div class="tree-container" id="treeContainer">
-            <div class="node">🔄 ابتدا کیف پول را متصل کنید</div>
+          <h3 id="h-tree">🌌 نقشه شبکه (Galaxy Radial)</h3>
+          <div id="radialTreeWrap">
+            <svg id="radialSVG" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet"></svg>
           </div>
-          <div class="help" id="help-tree">روی هر گره کلیک کن تا زیرمجموعه‌ها باز/بسته شوند — Left/Right IDs کنار هر گره نمایش داده می‌شود.</div>
+          <div class="help" id="help-tree">نمایش تمام نودهای شما به صورت لایه‌ای — کلیک روی نود برای اطلاعات بیشتر.</div>
         </div>
       </div>
     </div>
@@ -272,7 +219,7 @@
     <!-- Register -->
     <div id="registerTab" style="display:none">
       <div class="grid-2">
-        <div class="card">
+        <div class="card" id="registerCard">
           <h3 id="h-register">📝 ثبت‌نام</h3>
           <div class="form-group">
             <label class="form-label" id="label-upline">کد آپلاین</label>
@@ -306,13 +253,15 @@
             <input id="contribution" class="form-input" placeholder="0.1"/>
           </div>
 
+          <div style="margin:8px 0;color:var(--muted)" id="ptokenPriceDisplay">قیمت pToken: —</div>
+
           <div class="btn-group">
             <button class="btn btn-success" onclick="contribute()" id="btn-contrib">مشارکت</button>
             <button class="btn btn-primary" onclick="buyTokens()" id="btn-buy">خرید توکن ماینر</button>
             <button class="btn btn-success" onclick="distribute()" id="btn-distrib">توزیع توکن‌ها</button>
           </div>
 
-          <div id="minerResult"></div>
+          <div id="minerResult" style="margin-top:12px"></div>
         </div>
 
         <div class="card">
@@ -322,7 +271,7 @@
       </div>
     </div>
 
-    <!-- Actions (timers moved here) -->
+    <!-- Actions -->
     <div id="actionsTab" style="display:none">
       <div class="grid-2">
         <div class="card">
@@ -379,7 +328,16 @@
 
     <div class="loading" id="loading"><div class="spinner"></div></div>
 
-    <footer id="footerText">SPS Network • Contract: 0x7a7b06D49129B34976D07B3854d4D72D01588191 • Polygon Mainnet</footer>
+    <footer id="footerText" style="z-index:5;position:relative;margin-top:20px;text-align:center;color:var(--muted);font-size:13px">
+      SPS Network • Polygon Mainnet
+    </footer>
+  </div>
+
+  <!-- Trust toast (shows after confirmed tx) -->
+  <div id="trustToast" class="trust-toast" role="status" aria-live="polite">
+    <div id="trustIcon">✅</div>
+    <div id="trustMessage" style="min-width:220px">تراکنش تأیید شد</div>
+    <a id="trustLink" class="txlink" href="#" target="_blank" rel="noreferrer">View on Polygonscan</a>
   </div>
 
 <script>
@@ -388,32 +346,31 @@ const translations = {
   fa: { dashboard:"داشبورد", register:"ثبت‌نام", miner:"ماینر", actions:"عملیات", admin:"مدیریت",
         connect_wallet:"اتصال کیف پول", pool_balance:"موجودی استخر", miner_pool:"استخر ماینر",
         special_pool:"پاداش ویژه", entry_fee:"کارمزد ورود", user_info:"اطلاعات کاربری",
-        tree_title:"ساختار درختی شما", register_label:"کد آپلاین", position:"موقعیت",
+        tree_title:"نقشه شبکه", register_label:"کد آپلاین", position:"موقعیت",
         contribution:"مقدار مشارکت (MATIC)", buy_miner:"خرید توکن ماینر", distribute:"توزیع توکن‌ها",
         withdraw_pool:"برداشت از استخر اصلی", withdraw_special:"برداشت پاداش ویژه",
         last_pool_label:"اخرین برداشت", special_label:"برداشت ویژه بعدی",
-        registration_fee_text:"ثبت‌نام (300 MATIC)", miner_info:"اطلاعات ماینر شما",
-        pool_timer_title:"زمان تا برداشت بعدی استخر اصلی" },
+        registration_fee_text:"ثبت‌نام (300 MATIC)", miner_info:"اطلاعات ماینر شما", view_contract:"مشاهده قرارداد" },
   en: { dashboard:"Dashboard", register:"Register", miner:"Miner", actions:"Operations", admin:"Admin",
         connect_wallet:"Connect Wallet", pool_balance:"Pool Balance", miner_pool:"Miner Pool",
         special_pool:"Special Reward", entry_fee:"Entry Fee", user_info:"User Info",
-        tree_title:"Your Tree Structure", register_label:"Upline Code", position:"Position",
+        tree_title:"Network Map", register_label:"Upline Code", position:"Position",
         contribution:"Contribution (MATIC)", buy_miner:"Buy Miner Token", distribute:"Distribute Tokens",
         withdraw_pool:"Withdraw Main Pool", withdraw_special:"Withdraw Special",
         last_pool_label:"Last Withdraw", special_label:"Next Special Withdraw",
-        registration_fee_text:"Register (300 MATIC)", miner_info:"Your Miner Info",
-        pool_timer_title:"Time until next main-pool withdraw" }
+        registration_fee_text:"Register (300 MATIC)", miner_info:"Your Miner Info", view_contract:"View Contract" }
 };
 let lang = localStorage.getItem('sps_lang') || 'fa';
 function t(k){ return translations[lang] && translations[lang][k] ? translations[lang][k] : k; }
 
-/* ================= CONSTANTS + ABI (NO LOGIC CHANGES) ================= */
+/* ================= CONSTANTS & ABI (NO LOGIC CHANGE) ================= */
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+const PTOKEN_CONTRACT = "0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa";
 const POLYGON_CHAIN_ID = "0x89";
 const ENTRY_FEE = "300000000000000000000"; // 300 MATIC
 
 const CONTRACT_ABI = [
-  /* ABI unchanged - same functions as before */
+  /* Full ABI kept as before - unchanged logic */
   {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
   {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
   {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},
@@ -469,124 +426,99 @@ const CONTRACT_ABI = [
 
 /* ================= STATE ================= */
 let provider, signer, contract, userAddress, isOwner=false;
+let radialNodes = {}; // id -> node {id,left,right,leftCount,rightCount}
+let radialEdges = []; // edges pairs
+let userIdGlobal = 0;
 
 /* ================= UI HELPERS ================= */
 function showStatus(message, type='info', targetId='userInfo'){
   const el = document.getElementById(targetId);
-  if(!el) return console.log('missing target', targetId);
+  if(!el) return console.log('missing',targetId);
   el.className = `status ${type}`;
   el.innerHTML = message;
-  console.log(`[${type.toUpperCase()}] ${message.replace(/<[^>]*>/g,'')}`);
 }
-function showLoading(show){ const el = document.getElementById('loading'); if(el) el.style.display = show ? 'flex' : 'none'; }
-function showPending(txHash, targetId){
+function showLoading(show){ const el=document.getElementById('loading'); if(el) el.style.display = show ? 'flex' : 'none'; }
+function showPending(txHash,targetId){
   const link = `https://polygonscan.com/tx/${txHash}`;
-  const el = document.getElementById(targetId);
-  if(el) el.innerHTML = `<div class="status info">⏳ Transaction sent — pending...<div style="margin-top:8px"><a href="${link}" target="_blank" class="tx-link">View on Polygonscan</a></div></div>`;
+  const el=document.getElementById(targetId);
+  if(el) el.innerHTML = `<div class="status info">⏳ Transaction sent — pending...<div style="margin-top:8px"><a href="${link}" target="_blank" class="txlink">View on Polygonscan</a></div></div>`;
 }
-function showTransactionLink(txHash, targetId){
+function showTransactionLink(txHash,targetId){
   const link = `https://polygonscan.com/tx/${txHash}`;
-  const el = document.getElementById(targetId);
-  if(el) el.innerHTML = `<div class="status success">✅ Transaction mined<div style="margin-top:8px"><a href="${link}" target="_blank" class="tx-link">View on Polygonscan</a></div></div>`;
+  const el=document.getElementById(targetId);
+  if(el) el.innerHTML = `<div class="status success">✅ Transaction mined<div style="margin-top:8px"><a href="${link}" target="_blank" class="txlink">View on Polygonscan</a></div></div>`;
+  // Show trust toast
+  setTimeout(()=> showTrustToast(txHash), 250);
 }
 
-/* ================= Confetti (visual) ================= */
+/* ============== Trust toast ============== */
+let trustTimeout = null;
+function showTrustToast(txHash){
+  const toast = document.getElementById('trustToast');
+  const link = `https://polygonscan.com/tx/${txHash}`;
+  document.getElementById('trustLink').href = link;
+  document.getElementById('trustMessage').textContent = lang==='en' ? `Transaction confirmed: ${txHash.substring(0,10)}...` : `تراکنش تأیید شد: ${txHash.substring(0,10)}...`;
+  toast.classList.add('show');
+  if(trustTimeout) clearTimeout(trustTimeout);
+  trustTimeout = setTimeout(()=> { toast.classList.remove('show'); }, 8000);
+}
+
+/* ============== Confetti ============== */
 const confettiCanvas = document.getElementById('confetti');
 const confettiCtx = confettiCanvas.getContext ? confettiCanvas.getContext('2d') : null;
 let confettiPieces = [];
-function resizeConfetti(){ if(confettiCanvas){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; } }
+function resizeConfetti(){ if(confettiCanvas){ confettiCanvas.width=window.innerWidth; confettiCanvas.height=window.innerHeight; } }
 window.addEventListener('resize', resizeConfetti);
 function spawnConfetti(){
   if(!confettiCtx) return;
-  confettiCanvas.style.display = 'block';
+  confettiCanvas.style.display='block';
   for(let i=0;i<120;i++){
-    confettiPieces.push({ x: Math.random()*confettiCanvas.width, y: -Math.random()*confettiCanvas.height, vx:(Math.random()-0.5)*6, vy:2+Math.random()*6, size:6+Math.random()*8, color:['#3b82f6','#8b5cf6','#00ffd5','#ffb86b'][Math.floor(Math.random()*4)], rot:Math.random()*360, rotV:(Math.random()-0.5)*10 });
+    confettiPieces.push({x:Math.random()*confettiCanvas.width,y:-Math.random()*confettiCanvas.height,vx:(Math.random()-0.5)*6,vy:2+Math.random()*6,size:6+Math.random()*8,color:['#3b82f6','#8b5cf6','#00ffd5','#ffb86b'][Math.floor(Math.random()*4)],rot:Math.random()*360,rotV:(Math.random()-0.5)*10});
   }
-  let anim;
   function draw(){
-    confettiCtx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
     confettiPieces.forEach((p,i)=>{
-      confettiCtx.save();
-      confettiCtx.translate(p.x,p.y);
-      confettiCtx.rotate(p.rot*Math.PI/180);
-      confettiCtx.fillStyle = p.color;
-      confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
-      confettiCtx.restore();
-      p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-      if(p.y > confettiCanvas.height+50){ confettiPieces.splice(i,1); }
+      confettiCtx.save(); confettiCtx.translate(p.x,p.y); confettiCtx.rotate(p.rot*Math.PI/180);
+      confettiCtx.fillStyle=p.color; confettiCtx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6); confettiCtx.restore();
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+      if(p.y>confettiCanvas.height+50) confettiPieces.splice(i,1);
     });
-    if(confettiPieces.length>0) requestAnimationFrame(draw);
-    else { confettiCanvas.style.display='none'; }
+    if(confettiPieces.length>0) requestAnimationFrame(draw); else confettiCanvas.style.display='none';
   }
   draw();
 }
 
-/* ================= Neon Particles (premium, optimized) ================= */
+/* ============== Neon Particles (premium) ============== */
 const neonCanvas = document.getElementById('neonParticles');
 const neonCtx = neonCanvas.getContext ? neonCanvas.getContext('2d') : null;
 let neonParticles = [];
-function resizeNeon(){ if(neonCanvas){ neonCanvas.width = window.innerWidth; neonCanvas.height = window.innerHeight; } }
+function resizeNeon(){ if(neonCanvas){ neonCanvas.width=window.innerWidth; neonCanvas.height=window.innerHeight; } }
 window.addEventListener('resize', resizeNeon);
-
 function initNeonParticles(count=70){
-  neonParticles = [];
-  for(let i=0;i<count;i++){
-    neonParticles.push({
-      x: Math.random()*window.innerWidth,
-      y: Math.random()*window.innerHeight,
-      r: 1 + Math.random()*3,
-      vx: (Math.random()-0.5)*0.25,
-      vy: (Math.random()-0.5)*0.45,
-      hue: 200 + Math.random()*120,
-      alpha: 0.06 + Math.random()*0.24,
-      pulse: Math.random()*2 + 0.8,
-      t: Math.random()*1000
-    });
-  }
+  neonParticles=[];
+  for(let i=0;i<count;i++) neonParticles.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:1+Math.random()*3,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.45,hue:200+Math.random()*120,alpha:0.06+Math.random()*0.24,pulse:Math.random()*2+0.8,t:Math.random()*1000});
 }
 function drawNeon(){
   if(!neonCtx) return;
-  neonCtx.clearRect(0,0,neonCanvas.width, neonCanvas.height);
+  neonCtx.clearRect(0,0,neonCanvas.width,neonCanvas.height);
   neonParticles.forEach(p=>{
-    p.t += 0.01;
-    p.x += p.vx + Math.sin(p.t*0.4)*0.15;
-    p.y += p.vy + Math.cos(p.t*0.3)*0.12;
-    if(p.x < -60) p.x = neonCanvas.width + 60;
-    if(p.x > neonCanvas.width + 60) p.x = -60;
-    if(p.y < -60) p.y = neonCanvas.height + 60;
-    if(p.y > neonCanvas.height + 60) p.y = -60;
-
+    p.t+=0.01; p.x+=p.vx+Math.sin(p.t*0.4)*0.15; p.y+=p.vy+Math.cos(p.t*0.3)*0.12;
+    if(p.x<-60) p.x=neonCanvas.width+60; if(p.x>neonCanvas.width+60) p.x=-60;
+    if(p.y<-60) p.y=neonCanvas.height+60; if(p.y>neonCanvas.height+60) p.y=-60;
     const glowR = p.r*8 + Math.abs(Math.sin(p.t))*6;
-    const g = neonCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR*1.6);
+    const g = neonCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,glowR*1.6);
     g.addColorStop(0, `hsla(${p.hue},100%,65%,${p.alpha})`);
     g.addColorStop(1, `hsla(${(p.hue+40)%360},80%,55%,${p.alpha*0.06})`);
-    neonCtx.fillStyle = g;
-    neonCtx.beginPath();
-    neonCtx.arc(p.x, p.y, glowR, 0, Math.PI*2);
-    neonCtx.fill();
-
-    neonCtx.fillStyle = `hsla(${p.hue},100%,70%,0.9)`;
-    neonCtx.beginPath();
-    neonCtx.arc(p.x, p.y, p.r*(1+Math.abs(Math.sin(p.t))*0.6), 0, Math.PI*2);
-    neonCtx.fill();
+    neonCtx.fillStyle=g; neonCtx.beginPath(); neonCtx.arc(p.x,p.y,glowR,0,Math.PI*2); neonCtx.fill();
+    neonCtx.fillStyle=`hsla(${p.hue},100%,70%,0.9)`; neonCtx.beginPath(); neonCtx.arc(p.x,p.y,p.r*(1+Math.abs(Math.sin(p.t))*0.6),0,Math.PI*2); neonCtx.fill();
   });
   requestAnimationFrame(drawNeon);
 }
-
-/* initialize visuals */
 function startVisuals(){ resizeConfetti(); resizeNeon(); initNeonParticles(70); drawNeon(); }
 
-/* ================= Language switcher (full FA/EN) ================= */
-document.getElementById('btn-fa').onclick = ()=>{
-  lang = 'fa'; localStorage.setItem('sps_lang','fa');
-  document.getElementById('btn-fa').classList.add('active'); document.getElementById('btn-en').classList.remove('active');
-  setLanguage();
-};
-document.getElementById('btn-en').onclick = ()=>{
-  lang = 'en'; localStorage.setItem('sps_lang','en');
-  document.getElementById('btn-en').classList.add('active'); document.getElementById('btn-fa').classList.remove('active');
-  setLanguage();
-};
+/* ============== Language switcher ============== */
+document.getElementById('btn-fa').onclick = ()=>{ lang='fa'; localStorage.setItem('sps_lang','fa'); document.getElementById('btn-fa').classList.add('active'); document.getElementById('btn-en').classList.remove('active'); setLanguage(); };
+document.getElementById('btn-en').onclick = ()=>{ lang='en'; localStorage.setItem('sps_lang','en'); document.getElementById('btn-en').classList.add('active'); document.getElementById('btn-fa').classList.remove('active'); setLanguage(); };
 if(lang==='fa') document.getElementById('btn-fa').classList.add('active'); else document.getElementById('btn-en').classList.add('active');
 
 function setLanguage(){
@@ -594,6 +526,7 @@ function setLanguage(){
   const tabBtns = document.querySelectorAll('.tab-btn');
   if(lang==='fa'){ tabBtns[0].textContent = translations.fa.dashboard; tabBtns[1].textContent = translations.fa.register; tabBtns[2].textContent = translations.fa.miner; tabBtns[3].textContent = translations.fa.actions; tabBtns[4].textContent = translations.fa.admin; }
   else { tabBtns[0].textContent = translations.en.dashboard; tabBtns[1].textContent = translations.en.register; tabBtns[2].textContent = translations.en.miner; tabBtns[3].textContent = translations.en.actions; tabBtns[4].textContent = translations.en.admin; }
+
   document.getElementById('connectBtn').textContent = t('connect_wallet');
   document.getElementById('label-poolBalance').textContent = t('pool_balance');
   document.getElementById('label-minerPool').textContent = t('miner_pool');
@@ -613,70 +546,24 @@ function setLanguage(){
   document.getElementById('footerText').textContent = lang==='en' ? `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet` : `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet`;
 }
 
-/* ================= TX handler (unchanged logic) ================= */
-async function handleTx(txPromise, targetId){
+/* ============== TX Handler (with trust popup and confetti) ============== */
+async function handleTx(txPromise,targetId){
   try{
     showLoading(true);
     const tx = await txPromise;
-    showPending(tx.hash, targetId);
+    showPending(tx.hash,targetId);
     const receipt = await tx.wait();
-    showTransactionLink(tx.hash, targetId);
+    showTransactionLink(tx.hash,targetId);
     spawnConfetti();
     return receipt;
   }catch(err){
-    const el = document.getElementById(targetId);
+    const el=document.getElementById(targetId);
     if(el) el.innerHTML = `<div class="status error">❌ ${err.message}</div>`;
     throw err;
   }finally{ showLoading(false); }
 }
 
-/* ================= Tree: show Left/Right IDs + counts (unchanged logic) ================= */
-async function buildTreeHtml(nodeId, depth=0, maxDepth=6){
-  try{
-    if(depth > maxDepth) return '';
-    const info = await contract._getSpecialUserInfoForMigrateToNewFork(nodeId).catch(()=>null);
-    const directs = await contract.getUserDirects(nodeId).catch(()=>[0,0]);
-    const leftId = directs[0] ? Number(directs[0]) : 0;
-    const rightId = directs[1] ? Number(directs[1]) : 0;
-    let leftCount=0, rightCount=0;
-    if(info){ leftCount = info[2] ? Number(info[2]) : 0; rightCount = info[3] ? Number(info[3]) : 0; }
-    let html = `<div class="node" data-id="${nodeId}" style="margin-${document.documentElement.dir==='rtl'?'right':'left'}:${depth*12}px">`;
-    html += `<div style="display:flex;flex-direction:column;gap:6px"><div style="font-weight:800">${lang==='en'?'User #':'کاربر #'}${nodeId}</div>`;
-    html += `<div class="meta">${lang==='en'?'Left:':'چپ:'} ${leftId?('#'+leftId):'—'}  |  ${lang==='en'?'Right:':'راست:'} ${rightId?('#'+rightId):'—'}</div>`;
-    html += `<div class="meta">${lang==='en'?'L Count':'چپ'}: ${leftCount}  |  ${lang==='en'?'R Count':'راست'}: ${rightCount}  |  ${lang==='en'?'Total':'جمع'}: ${leftCount+rightCount}</div>`;
-    html += `</div>`;
-    if(leftId>0 || rightId>0) html += `<div><button class="toggle-btn" data-target="${nodeId}">${lang==='en'?'[toggle]':'[باز/بسته]'}</button></div>`;
-    html += `</div>`;
-    if(leftId>0 || rightId>0){
-      html += `<div class="children" id="children-${nodeId}" style="display:none">`;
-      if(leftId>0) html += await buildTreeHtml(leftId, depth+1, maxDepth);
-      if(rightId>0) html += await buildTreeHtml(rightId, depth+1, maxDepth);
-      html += `</div>`;
-    }
-    return html;
-  }catch(e){
-    console.error('buildTreeHtml error', e);
-    return `<div class="node">⚠️ ${lang==='en'?'Error loading node':'خطا در بارگذاری گره'} ${nodeId}</div>`;
-  }
-}
-async function loadTreeStructure(userId){
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = `<div class="node">🔄 ${lang==='en'?'Loading tree...':'در حال بارگذاری ساختار...'}</div>`;
-  try{
-    const html = await buildTreeHtml(userId);
-    container.innerHTML = html || `<div class="node">📭 ${lang==='en'?'No descendants':'هیچ زیرمجموعه‌ای وجود ندارد'}</div>`;
-    container.querySelectorAll('.toggle-btn').forEach(btn=>{
-      btn.onclick = ()=>{
-        const id = btn.getAttribute('data-target');
-        const el = document.getElementById('children-'+id);
-        if(!el) return;
-        el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
-      };
-    });
-  }catch(err){ console.error('loadTreeStructure error', err); container.innerHTML = `<div class="node">⚠️ ${lang==='en'?'Tree load error':'خطا در بارگذاری ساختار'}</div>`; }
-}
-
-/* ================ PRE-CHECKS BEFORE WITHDRAW ================ */
+/* ============== Pre-checks before withdraw ============== */
 async function canWithdrawPool(){
   try{
     if(!contract) return {ok:false, reason: lang==='en' ? 'Contract not initialized' : 'قرارداد آماده نیست'};
@@ -690,56 +577,60 @@ async function canWithdrawPool(){
   }catch(e){ console.error('canWithdrawPool error', e); return {ok:false, reason: lang==='en' ? 'Pre-check failed' : 'بررسی پیش از ارسال ناموفق بود'}; }
 }
 
-/* ================ CORE ACTIONS (unchanged logic) ================ */
-async function register(){ 
-  const uplineCode = document.getElementById('uplineCode').value; 
-  const position = document.getElementById('position').value === 'true'; 
-  if(!uplineCode){ alert(lang==='en'?'Please enter upline code':'لطفاً کد آپلاین را وارد کنید'); return; } 
-  try{ showStatus('🔄 '+(lang==='en'?'Registering...':'در حال ثبت‌نام...'), 'info', 'registerResult'); 
-    const txPromise = contract.register(uplineCode, position, { value: ENTRY_FEE }); 
-    const receipt = await handleTx(txPromise, 'registerResult'); 
-    showStatus('✅ '+(lang==='en'?'Registration successful':'ثبت‌نام موفق'), 'success', 'registerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'registerResult'); } 
+/* ============== CORE ACTIONS (unchanged logic) ============== */
+async function register(){
+  const uplineCode = document.getElementById('uplineCode').value;
+  const position = document.getElementById('position').value === 'true';
+  if(!uplineCode){ alert(lang==='en'?'Please enter upline code':'لطفاً کد آپلاین را وارد کنید'); return; }
+  try{
+    showStatus('🔄 '+(lang==='en'?'Registering...':'در حال ثبت‌نام...'), 'info', 'registerResult');
+    const txPromise = contract.register(uplineCode, position, { value: ENTRY_FEE });
+    const receipt = await handleTx(txPromise, 'registerResult');
+    showStatus('✅ '+(lang==='en'?'Registration successful':'ثبت‌نام موفق'), 'success', 'registerResult');
+    await loadDashboard();
+  }catch(err){ showStatus('❌ '+err.message, 'error', 'registerResult'); }
 }
 
-async function contribute(){ 
-  const amount = document.getElementById('contribution').value; 
-  if(!amount || amount <= 0){ alert(lang==='en'?'Enter valid amount':'لطفاً مقدار معتبر وارد کنید'); return; } 
-  try{ showStatus('🔄 '+(lang==='en'?'Sending contribution...':'در حال ارسال مشارکت...'), 'info', 'minerResult'); 
-    const txPromise = contract.contributeToMinerPool({ value: ethers.parseEther(amount) }); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Contribution success':'مشارکت با موفقیت انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
+async function contribute(){
+  const amount = document.getElementById('contribution').value;
+  if(!amount || amount <= 0){ alert(lang==='en'?'Enter valid amount':'لطفاً مقدار معتبر وارد کنید'); return; }
+  try{
+    showStatus('🔄 '+(lang==='en'?'Sending contribution...':'در حال ارسال مشارکت...'), 'info', 'minerResult');
+    const txPromise = contract.contributeToMinerPool({ value: ethers.parseEther(amount) });
+    await handleTx(txPromise, 'minerResult');
+    showStatus('✅ '+(lang==='en'?'Contribution success':'مشارکت با موفقیت انجام شد'), 'success', 'minerResult');
+    await loadDashboard();
+  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); }
 }
 
-async function buyTokens(){ 
-  try{ showStatus('🔄 '+(lang==='en'?'Buying tokens...':'در حال خرید توکن...'), 'info', 'minerResult'); 
-    const txPromise = contract.buyMinerTokens(); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Purchase successful':'خرید توکن با موفقیت انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
+async function buyTokens(){
+  try{
+    showStatus('🔄 '+(lang==='en'?'Buying tokens...':'در حال خرید توکن...'), 'info', 'minerResult');
+    const txPromise = contract.buyMinerTokens();
+    await handleTx(txPromise, 'minerResult');
+    showStatus('✅ '+(lang==='en'?'Purchase successful':'خرید توکن با موفقیت انجام شد'), 'success', 'minerResult');
+    await loadDashboard();
+  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); }
 }
 
-async function distribute(){ 
-  try{ showStatus('🔄 '+(lang==='en'?'Distributing tokens...':'در حال توزیع توکن‌ها...'), 'info', 'minerResult'); 
-    const txPromise = contract.distributeMinerTokens(); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Distributed':'توزیع توکن‌ها انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
+async function distribute(){
+  try{
+    showStatus('🔄 '+(lang==='en'?'Distributing tokens...':'در حال توزیع توکن‌ها...'), 'info', 'minerResult');
+    const txPromise = contract.distributeMinerTokens();
+    await handleTx(txPromise, 'minerResult');
+    showStatus('✅ '+(lang==='en'?'Distributed':'توزیع توکن‌ها انجام شد'), 'success', 'minerResult');
+    await loadDashboard();
+  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); }
 }
 
-/* ================ Withdraw (pre-checks) ================ */
+/* ============== Withdraws ============== */
 async function withdrawPool(){
   try{
     showStatus('🔄 '+(lang==='en'?'Checking pool withdraw conditions...':'در حال بررسی شرایط برداشت...'), 'info', 'withdrawResult');
     const check = await canWithdrawPool();
     if(!check.ok){
       showStatus(`⛔ ${check.reason}`, 'error', 'withdrawResult');
-      const btn = document.getElementById('withdrawMainBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'), 4000);
+      const btn=document.getElementById('withdrawMainBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'),4000);
       return;
     }
     showStatus('🔄 '+(lang==='en'?'Withdrawing main pool...':'در حال برداشت از استخر...'), 'info', 'withdrawResult');
@@ -747,10 +638,7 @@ async function withdrawPool(){
     await handleTx(txPromise, 'withdrawResult');
     showStatus('✅ '+(lang==='en'?'Withdraw success':'برداشت با موفقیت انجام شد'), 'success', 'withdrawResult');
     await loadDashboard();
-  }catch(err){
-    console.error('withdrawPool error', err);
-    showStatus('❌ '+(err && err.message ? err.message : (lang==='en'?'Withdraw failed':'برداشت ناموفق')) , 'error', 'withdrawResult');
-  }
+  }catch(err){ console.error('withdrawPool error', err); showStatus('❌ '+(err && err.message ? err.message : (lang==='en'?'Withdraw failed':'برداشت ناموفق')) , 'error', 'withdrawResult'); }
 }
 
 async function withdrawSpecial(){
@@ -758,7 +646,7 @@ async function withdrawSpecial(){
     const eligible = await contract.eligibleSpecialUserCount().catch(()=>0);
     if(Number(eligible) === 0){
       showStatus((lang==='en'?'No eligible special rewards for you at this time':'در این زمان پاداش ویژه‌ای برای شما وجود ندارد'), 'error', 'withdrawResult');
-      const btn = document.getElementById('withdrawSpecialBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'), 4000);
+      const btn=document.getElementById('withdrawSpecialBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'),4000);
       return;
     }
     showStatus('🔄 '+(lang==='en'?'Withdrawing special...':'در حال برداشت پاداش ویژه...'), 'info', 'withdrawResult');
@@ -769,74 +657,234 @@ async function withdrawSpecial(){
   }catch(err){ console.error('withdrawSpecial error', err); showStatus('❌ '+(err.message || (lang==='en'?'Special withdraw failed':'برداشت ویژه ناموفق')), 'error', 'withdrawResult'); }
 }
 
-/* ================ Timers (in Actions tab) ================ */
-let poolTimerInterval = null;
-function startPoolTimer(lastWithdrawUnix = 0, cycleDurationSec = 0){
+/* ============== Timers (in Actions tab) ============== */
+let poolTimerInterval=null, specialTimerInterval=null;
+function startPoolTimer(lastWithdrawUnix=0, cycleDurationSec=0){
   if(poolTimerInterval) clearInterval(poolTimerInterval);
   function render(){
-    const now = Math.floor(Date.now()/1000);
-    const nextUnlock = (lastWithdrawUnix && cycleDurationSec) ? (lastWithdrawUnix + cycleDurationSec) : 0;
+    const now=Math.floor(Date.now()/1000);
+    const nextUnlock=(lastWithdrawUnix && cycleDurationSec) ? (lastWithdrawUnix + cycleDurationSec) : 0;
     let remaining = nextUnlock > now ? nextUnlock - now : 0;
     const lastDate = lastWithdrawUnix ? new Date(lastWithdrawUnix*1000).toUTCString() : '—';
     document.getElementById('poolTimerLabel').textContent = `${t('last_pool_label')}: ${ lastWithdrawUnix ? lastDate : '—' }`;
-    const segContainer = document.getElementById('poolTimerSegments');
-    const withdrawBtn = document.getElementById('withdrawMainBtn');
-    if(remaining === 0){
-      segContainer.innerHTML = `<div style="font-weight:700;color:var(--success)">${lang==='en'?'Withdrawable Now':'قابل برداشت اکنون'}</div>`;
-      withdrawBtn.classList.remove('disabled');
-    } else {
-      const days = Math.floor(remaining / 86400); remaining %= 86400;
-      const hours = Math.floor(remaining / 3600); remaining %= 3600;
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
+    const segContainer=document.getElementById('poolTimerSegments');
+    const withdrawBtn=document.getElementById('withdrawMainBtn');
+    if(remaining===0){ segContainer.innerHTML=`<div style="font-weight:700;color:var(--success)">${lang==='en'?'Withdrawable Now':'قابل برداشت اکنون'}</div>`; withdrawBtn.classList.remove('disabled');}
+    else {
+      const days=Math.floor(remaining/86400); remaining%=86400; const hours=Math.floor(remaining/3600); remaining%=3600; const minutes=Math.floor(remaining/60); const seconds=remaining%60;
       segContainer.innerHTML = `<div class="time-segment"><div class="time-value">${String(days).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Days':'روز'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
+        <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
+        <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
+        <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
       withdrawBtn.classList.add('disabled');
     }
   }
-  render();
-  poolTimerInterval = setInterval(render, 1000);
+  render(); poolTimerInterval=setInterval(render,1000);
 }
-
-let specialTimerInterval = null;
 function startSpecialTimer(){
   if(specialTimerInterval) clearInterval(specialTimerInterval);
   function renderSpecial(){
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const day = now.getUTCDate();
+    const now=new Date(); const year=now.getUTCFullYear(); const month=now.getUTCMonth(); const day=now.getUTCDate();
     let target;
-    if(day < 3 || (day === 3 && now.getUTCHours() < 24)) target = new Date(Date.UTC(year, month, 3, 0, 0, 0));
-    else target = new Date(Date.UTC(year, month+1, 3, 0, 0, 0));
-    let diff = Math.floor((target - now) / 1000);
-    if(diff < 0) diff = 0;
-    const days = Math.floor(diff / 86400); diff %= 86400;
-    const hours = Math.floor(diff / 3600); diff %= 3600;
-    const minutes = Math.floor(diff / 60); const seconds = diff % 60;
-    const seg = document.getElementById('specialTimerSegments');
+    if(day<3 || (day===3 && now.getUTCHours()<24)) target=new Date(Date.UTC(year,month,3,0,0,0));
+    else target=new Date(Date.UTC(year,month+1,3,0,0,0));
+    let diff=Math.floor((target-now)/1000); if(diff<0) diff=0;
+    const days=Math.floor(diff/86400); diff%=86400; const hours=Math.floor(diff/3600); diff%=3600; const minutes=Math.floor(diff/60); const seconds=diff%60;
+    const seg=document.getElementById('specialTimerSegments');
     seg.innerHTML = `<div class="time-segment"><div class="time-value">${String(days).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Days':'روز'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
+      <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
+      <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
+      <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
   }
-  renderSpecial();
-  specialTimerInterval = setInterval(renderSpecial, 1000);
+  renderSpecial(); specialTimerInterval=setInterval(renderSpecial,1000);
 }
 
-/* ================ Dashboard loader (unchanged logic) ================ */
+/* ============== Radial Tree (Galaxy Orbit) ============== */
+/*
+  Approach:
+  - BFS from user's id using contract.getUserDirects(id) to gather all reachable nodes.
+  - Keep nodes map { id, leftId, rightId, leftCount, rightCount } and edges.
+  - Render using SVG: center is user, nodes placed in concentric rings by depth.
+  - Add a slow rotation animation on a <g> wrapper to produce orbit effect.
+*/
+const radialSVG = document.getElementById('radialSVG');
+
+async function gatherTree(startId, maxNodes=2000){
+  radialNodes = {}; radialEdges = [];
+  const q=[{id:startId, depth:0}];
+  radialNodes[startId] = { id:startId, left:0, right:0, leftCount:0, rightCount:0, depth:0 };
+  let idx=0;
+  while(q.length && Object.keys(radialNodes).length < maxNodes){
+    const cur=q.shift();
+    try{
+      const directs = await contract.getUserDirects(cur.id).catch(()=>[0,0]);
+      const leftId = Number(directs[0]) || 0; const rightId = Number(directs[1]) || 0;
+      // fetch counts from special info if available
+      const info = await contract._getSpecialUserInfoForMigrateToNewFork(cur.id).catch(()=>null);
+      const leftCount = info ? Number(info[2]) : 0; const rightCount = info ? Number(info[3]) : 0;
+      radialNodes[cur.id] = { id:cur.id, left:leftId, right:rightId, leftCount, rightCount, depth:cur.depth };
+      if(leftId && !radialNodes[leftId]){ radialNodes[leftId] = { id:leftId, left:0, right:0, leftCount:0, rightCount:0, depth:cur.depth+1 }; q.push({id:leftId, depth:cur.depth+1}); radialEdges.push([cur.id,leftId]); }
+      if(rightId && !radialNodes[rightId]){ radialNodes[rightId] = { id:rightId, left:0, right:0, leftCount:0, rightCount:0, depth:cur.depth+1 }; q.push({id:rightId, depth:cur.depth+1}); radialEdges.push([cur.id,rightId]); }
+      // stop if very deep to avoid freezing
+      idx++; if(idx>4000) break;
+    }catch(e){ console.error('gatherTree err', e); break; }
+  }
+  // second pass: populate counts for nodes we added
+  const ids = Object.keys(radialNodes).map(x=>Number(x));
+  for(const id of ids.slice(0,1000)){
+    try{
+      const info = await contract._getSpecialUserInfoForMigrateToNewFork(id).catch(()=>null);
+      if(info){ radialNodes[id].leftCount = Number(info[2]); radialNodes[id].rightCount = Number(info[3]); }
+    }catch(e){}
+  }
+  return {nodes:radialNodes, edges:radialEdges};
+}
+
+function renderRadial(nodes, edges, centerLabel){
+  // clear svg
+  while(radialSVG.firstChild) radialSVG.removeChild(radialSVG.firstChild);
+  const W = radialSVG.viewBox.baseVal.width || 1000;
+  const H = radialSVG.viewBox.baseVal.height || 520;
+  const cx = W/2; const cy = H/2;
+  // group with rotation animation
+  const gOrbit = document.createElementNS('http://www.w3.org/2000/svg','g');
+  gOrbit.setAttribute('id','gOrbit');
+  radialSVG.appendChild(gOrbit);
+
+  // bucket nodes by depth
+  const byDepth = {};
+  let maxDepth = 0;
+  for(const k in nodes){ const n=nodes[k]; maxDepth = Math.max(maxDepth, n.depth); if(!byDepth[n.depth]) byDepth[n.depth]=[]; byDepth[n.depth].push(n); }
+  const rings = Math.max(1, maxDepth+1);
+  const ringGap = Math.min(160, Math.floor((Math.min(W,H)/2 - 60) / (rings+1)));
+  // draw edges as lines
+  edges.forEach(e=>{
+    const a = nodes[e[0]]; const b = nodes[e[1]];
+    if(!a||!b) return;
+    // positions will be computed after nodes placed - so we'll store edge references to connect later
+  });
+
+  // compute positions for nodes per depth
+  const positions = {};
+  for(let depth=0; depth<=maxDepth; depth++){
+    const list = byDepth[depth] || [];
+    const r = 40 + depth * ringGap;
+    const count = list.length;
+    for(let i=0;i<count;i++){
+      // distribute nodes evenly on circle
+      const angle = (2*Math.PI) * (i / Math.max(1,count));
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      positions[list[i].id] = {x,y,angle,depth};
+    }
+  }
+  // center node (depth 0) ensure center
+  if(byDepth[0] && byDepth[0].length>0){
+    const root = byDepth[0][0];
+    positions[root.id] = {x:cx,y:cy,angle:0,depth:0};
+  }
+
+  // draw edges lines now
+  edges.forEach(e=>{
+    const a = positions[e[0]]; const b = positions[e[1]];
+    if(!a||!b) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x); line.setAttribute('y1',a.y); line.setAttribute('x2',b.x); line.setAttribute('y2',b.y);
+    line.setAttribute('stroke','rgba(124,58,237,0.12)'); line.setAttribute('stroke-width','1.6'); line.setAttribute('stroke-linecap','round');
+    gOrbit.appendChild(line);
+  });
+
+  // draw nodes
+  for(const idStr in nodes){
+    const id = Number(idStr); const n = nodes[id];
+    const pos = positions[id];
+    if(!pos) continue;
+    const gNode = document.createElementNS('http://www.w3.org/2000/svg','g');
+    gNode.setAttribute('transform',`translate(${pos.x},${pos.y})`);
+    gNode.setAttribute('data-id',id);
+    // circle
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    const radius = (n.depth===0) ? 18 : 12;
+    circle.setAttribute('r', radius);
+    circle.setAttribute('class','node-circle');
+    // color by depth
+    const hue = 200 + (n.depth * 20) % 140;
+    const fill = (n.depth===0) ? 'url(#rootGrad)' : `rgba(124,58,237,0.18)`;
+    circle.setAttribute('fill', fill);
+    circle.setAttribute('stroke','rgba(255,255,255,0.04)'); circle.setAttribute('stroke-width','1.2');
+    gNode.appendChild(circle);
+
+    // label (id)
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('class','node-label');
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('y','-22');
+    label.textContent = `#${id}`;
+    gNode.appendChild(label);
+
+    // meta (counts)
+    const meta = document.createElementNS('http://www.w3.org/2000/svg','text');
+    meta.setAttribute('class','node-meta');
+    meta.setAttribute('text-anchor','middle');
+    meta.setAttribute('y','24');
+    meta.textContent = `${lang==='en' ? 'L:' : 'چپ:'}${n.left ? '#'+n.left : '—'} ${lang==='en' ? 'R:' : 'راست:'}${n.right ? '#'+n.right : '—'}`;
+    gNode.appendChild(meta);
+
+    // click handler
+    gNode.style.cursor='pointer';
+    gNode.addEventListener('click', ()=> {
+      // show simple modal-like info: display in userInfo area
+      const html = `<strong>👤 ${lang==='en'?'User #':'کاربر #'}${id}</strong><br>
+        ${lang==='en'?'Left ID':'چپ'}: ${n.left ? '#'+n.left : '—'} &nbsp; ${lang==='en'?'Right ID':'راست'}: ${n.right ? '#'+n.right : '—'}<br>
+        ${lang==='en'?'Left Count':'تعداد چپ'}: ${n.leftCount} &nbsp; ${lang==='en'?'Right Count':'تعداد راست'}: ${n.rightCount}`;
+      showStatus(html,'success','userInfo');
+    });
+
+    gOrbit.appendChild(gNode);
+  }
+
+  // add defs for root gradient
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  const grad = document.createElementNS('http://www.w3.org/2000/svg','radialGradient');
+  grad.setAttribute('id','rootGrad');
+  const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop'); stop1.setAttribute('offset','0%'); stop1.setAttribute('stop-color','#3b82f6'); const stop2=document.createElementNS('http://www.w3.org/2000/svg','stop'); stop2.setAttribute('offset','100%'); stop2.setAttribute('stop-color','#8b5cf6');
+  grad.appendChild(stop1); grad.appendChild(stop2); defs.appendChild(grad);
+  radialSVG.insertBefore(defs, radialSVG.firstChild);
+
+  // animate rotation (slow)
+  let angle = 0;
+  const rotateSpeed = 0.02; // degrees per frame - very slow
+  function rotateFrame(){
+    angle = (angle + rotateSpeed) % 360;
+    gOrbit.setAttribute('transform',`rotate(${angle} ${W/2} ${H/2})`);
+    requestAnimationFrame(rotateFrame);
+  }
+  rotateFrame();
+}
+
+/* ============== Gather + Render wrapper ============== */
+async function loadRadialForUser(userId){
+  try{
+    // show loading placeholder
+    const svg = document.getElementById('radialSVG');
+    svg.innerHTML = `<text x="50%" y="50%" fill="#9fb3cf" text-anchor="middle">${lang==='en'?'Loading network map...':'در حال بارگذاری نقشه شبکه...'}</text>`;
+    const result = await gatherTree(userId, 2000);
+    renderRadial(result.nodes, result.edges);
+  }catch(e){ console.error('loadRadialForUser', e); radialSVG.innerHTML = `<text x="50%" y="50%" fill="#ffb3b3" text-anchor="middle">${lang==='en'?'Error loading map':'خطا در بارگذاری نقشه'}</text>`; }
+}
+
+/* ============== Dashboard loader (including pToken price & contract links) ============== */
 async function loadDashboard(){
   if(!contract) return;
   try{
-    const [poolBalance, minerPool, specialPool, entryFee, lastPoolWithdrawTime, cycleDuration] = await Promise.all([
+    const [poolBalance, minerPool, specialPool, entryFee, lastPoolWithdrawTime, cycleDuration, tokenPriceRaw] = await Promise.all([
       contract.poolBalance().catch(()=>0),
       contract.minerTokenPool().catch(()=>0),
       contract.specialRewardPool().catch(()=>0),
       contract.ENTRY_FEE().catch(()=>ENTRY_FEE),
       contract.lastPoolWithdrawTime().catch(()=>0),
-      contract.CYCLE_DURATION().catch(()=>0)
+      contract.CYCLE_DURATION().catch(()=>0),
+      contract.getTokenPrice().catch(()=>0)
     ]);
 
     document.getElementById('poolBalance').textContent = (ethers.formatEther(poolBalance).substring(0,12) || '0') + ' MATIC';
@@ -844,22 +892,50 @@ async function loadDashboard(){
     document.getElementById('specialPool').textContent = (ethers.formatEther(specialPool).substring(0,12) || '0') + ' MATIC';
     document.getElementById('entryFeeDisplay').textContent = (ethers.formatEther(entryFee) || '0') + ' MATIC';
 
-    // timers (actions tab)
+    // price handling: contract may return in wei or scaled units; try to format safely
+    let priceText = '—';
+    try{
+      const p = Number(ethers.formatEther(tokenPriceRaw));
+      priceText = isFinite(p) ? `${p.toFixed(6)} MATIC` : '—';
+    }catch(e){ priceText='—'; }
+    document.getElementById('ptokenPriceInfo').textContent = (lang==='en' ? 'pToken price: ' : 'قیمت pToken: ') + priceText;
+    document.getElementById('ptokenPriceDisplay').textContent = (lang==='en' ? 'pToken price: ' : 'قیمت pToken: ') + priceText;
+
+    // timers
     startPoolTimer(Number(lastPoolWithdrawTime), Number(cycleDuration));
     startSpecialTimer();
 
+    // contract links
+    const linksHtml = `<div><a href="https://polygonscan.com/address/${CONTRACT_ADDRESS}" target="_blank" rel="noreferrer" class="txlink">${lang==='en'?'Smart Contract':'قرارداد هوشمند'}</a> · <a href="https://polygonscan.com/address/${PTOKEN_CONTRACT}#code" target="_blank" rel="noreferrer" class="txlink">${lang==='en'?'pToken Contract':'قرارداد توکن p'}</a></div>`;
+    document.getElementById('contractLinks').innerHTML = linksHtml;
+
+    // load user info
     const userInfo = await contract.getUserInfo(userAddress).catch(()=>null);
     if(userInfo){
-      const userId = Number(userInfo[0]);
-      showStatus(`<strong>👤 ${lang==='en'?'User #':'کاربر #'}${userId}</strong><br>📊 ${lang==='en'?'Balance':'موجودی'}: ${userInfo[6]}<br>🎁 ${lang==='en'?'Specials':'پاداش ویژه'}: ${userInfo[7]}<br>⛏️ ${userInfo[10] ? '✅':'❌'}<br>💰 ${lang==='en'?'Total rewards':'مجموع پاداش‌ها'}: ${ethers.formatEther(userInfo[8])} MATIC`, 'success', 'userInfo');
-      await loadTreeStructure(userId);
+      const userId = Number(userInfo[0]); userIdGlobal = userId;
+      if(userId && userId>0){
+        // hide register tab and show active user name in its place
+        document.getElementById('registerTab').style.display = 'none';
+        document.getElementById('registerCard').style.display = 'none';
+        showStatus(`<strong>👤 ${lang==='en'?'User #':'کاربر #'}${userId}</strong><br>💰 ${lang==='en'?'Total rewards':'مجموع پاداش‌ها'}: ${ethers.formatEther(userInfo[8])} MATIC`, 'success', 'userInfo');
+        // load radial map
+        await loadRadialForUser(userId);
+      } else {
+        // no ID -> make register tab visible and prompt
+        document.getElementById('registerTab').style.display = 'block';
+        document.getElementById('registerCard').style.display = 'block';
+        showStatus(lang==='en'?'No ID found — please register':'شما هنوز شناسه ندارید — لطفاً ثبت‌نام کنید', 'info', 'userInfo');
+        // empty radial map
+        radialSVG.innerHTML = `<text x="50%" y="50%" fill="#9fb3cf" text-anchor="middle">${lang==='en'?'Connect and register to see your network':'برای دیدن نقشه، کیف پول را وصل و ثبت‌نام کنید'}</text>`;
+      }
+      // owner?
       const owner = await contract.owner().catch(()=>null);
-      if(owner && owner.toLowerCase() === userAddress.toLowerCase()){ isOwner = true; document.getElementById('adminTab').style.display = 'block'; }
+      if(owner && owner.toLowerCase() === userAddress.toLowerCase()){ isOwner=true; document.getElementById('adminTab').style.display='block'; }
     }
   }catch(e){ console.error('loadDashboard error', e); }
 }
 
-/* ================ Connect wallet (unchanged logic) ================ */
+/* ============== Connect Wallet (no logic changes) ============== */
 async function connectWallet(){
   if(typeof window.ethereum === 'undefined'){ showStatus('❌ '+(lang==='en'?'Wallet (MetaMask) not found':'کیف پول (مثل MetaMask) یافت نشد'),'error'); return; }
   try{
@@ -886,64 +962,41 @@ async function connectWallet(){
 }
 document.getElementById('connectBtn').onclick = connectWallet;
 
-/* ================ Tabs ================ */
+/* ============== Tabs ============== */
 function showTab(tabName){
   const tabs = ['dashboard','register','miner','actions','admin'];
-  tabs.forEach(t => document.getElementById(t+'Tab').style.display = 'none');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabName + 'Tab').style.display = 'block';
-  document.querySelectorAll('.tab-btn').forEach(b=>{
-    if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active');
-  });
+  tabs.forEach(t => { const el=document.getElementById(t+'Tab'); if(el) el.style.display='none'; });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const selected = document.getElementById(tabName + 'Tab'); if(selected) selected.style.display='block';
+  document.querySelectorAll('.tab-btn').forEach(b=>{ if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active'); });
   if(tabName === 'dashboard') loadDashboard();
 }
 
-/* ================ Logo flip cycle (SPS <-> $) - robust via transform & opacity ================ */
+/* ============== Logo flip (robust) ============== */
 const logoCard = document.getElementById('logoCard');
 const logoFront = document.getElementById('logoFront');
 const logoBack = document.getElementById('logoBack');
+function showFront(){ logoFront.style.transform='rotateY(0deg)'; logoFront.style.opacity='1'; logoBack.style.transform='rotateY(180deg)'; logoBack.style.opacity='0'; logoCard.style.transform='rotateY(0deg)'; }
+function showBack(){ logoFront.style.transform='rotateY(-180deg)'; logoFront.style.opacity='0'; logoBack.style.transform='rotateY(0deg)'; logoBack.style.opacity='1'; logoCard.style.transform='rotateY(180deg)'; }
+function startLogoCycle(){ showFront(); setInterval(()=>{ showBack(); setTimeout(()=>showFront(),2000); },3000); }
 
-let logoCycleInterval = null;
-function showFront(){
-  logoFront.style.transform = 'rotateY(0deg) translateZ(0)';
-  logoFront.style.opacity = '1';
-  logoBack.style.transform = 'rotateY(180deg) translateZ(0)';
-  logoBack.style.opacity = '0';
-  logoCard.style.transform = 'rotateY(0deg)';
-}
-function showBack(){
-  logoFront.style.transform = 'rotateY(-180deg) translateZ(0)';
-  logoFront.style.opacity = '0';
-  logoBack.style.transform = 'rotateY(0deg) translateZ(0)';
-  logoBack.style.opacity = '1';
-  logoCard.style.transform = 'rotateY(180deg)';
-}
-function startLogoCycle(){
-  // start with SPS visible
-  showFront();
-  // flip every 3s: show back ($) for 2s, then back to front
-  logoCycleInterval = setInterval(()=>{
-    showBack();
-    setTimeout(()=> showFront(), 2000);
-  }, 3000);
-}
-
-/* ================ Init visuals & logo, and optional autorun connect ================ */
+/* ============== Init ============== */
 window.onload = function(){
   startVisuals();
   startLogoCycle();
   setLanguage();
   document.getElementById('connectBtn').onclick = connectWallet;
-  // auto-connect if previously authorized
-  if(typeof window.ethereum !== 'undefined'){
-    window.ethereum.request({ method:'eth_accounts' }).then(accounts=>{
-      if(accounts.length > 0) setTimeout(()=> connectWallet(), 800);
-    });
-  }
-
-  // resize canvases
+  if(typeof window.ethereum !== 'undefined'){ window.ethereum.request({ method:'eth_accounts' }).then(accounts=>{ if(accounts.length>0) setTimeout(()=> connectWallet(),800); }); }
   resizeNeon(); resizeConfetti();
 };
+
+/* ============== Utility: network status ============== */
+function updateNetworkStatus(connected){
+  const dot = document.getElementById('statusDot'); const txt = document.getElementById('networkStatus');
+  if(connected){ dot.classList.add('connected'); txt.textContent = lang==='en' ? 'Connected' : 'متصل'; }
+  else { dot.classList.remove('connected'); txt.textContent = lang==='en' ? 'Disconnected' : 'قطع اتصال'; }
+}
 </script>
 </body>
 </html>
+```0
