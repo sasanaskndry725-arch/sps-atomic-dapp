@@ -107,6 +107,194 @@
   .tab-btn{ padding:10px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.02); color:var(--muted); cursor:pointer; font-weight:700 }
   .tab-btn.active{ background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(139,92,246,0.06)); color:var(--primary); box-shadow: 0 10px 30px rgba(59,130,246,0.06) }
 
+  /* ---------- Contract Links ---------- */
+  .contract-links{
+    display:flex; gap:10px; margin:10px 0; flex-wrap:wrap; justify-content:center;
+  }
+  .contract-btn{
+    padding:8px 12px; border-radius:8px; background:rgba(59,130,246,0.08); 
+    border:1px solid rgba(59,130,246,0.15); color:var(--primary); 
+    text-decoration:none; font-size:13px; font-weight:700; display:flex; 
+    align-items:center; gap:6px; transition:all 0.3s;
+  }
+  .contract-btn:hover{
+    background:rgba(59,130,246,0.15); transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(59,130,246,0.1);
+  }
+  .contract-btn.ptoken{
+    background:rgba(139,92,246,0.08); border-color:rgba(139,92,246,0.15);
+    color:var(--accent);
+  }
+  .contract-btn.ptoken:hover{
+    background:rgba(139,92,246,0.15);
+    box-shadow:0 8px 20px rgba(139,92,246,0.1);
+  }
+
+  /* ---------- Mobile Hamburger Menu ---------- */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 32px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1000;
+  }
+
+  .hamburger span {
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    transform-origin: right;
+  }
+
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(-45deg) translateY(5px);
+  }
+
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(45deg) translateY(-5px);
+  }
+
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-2);
+    backdrop-filter: blur(20px);
+    box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    z-index: 999;
+    transition: right 0.3s ease;
+    padding: 80px 20px 20px;
+    overflow-y: auto;
+    border-left: 1px solid var(--glass-border);
+  }
+
+  .mobile-menu.active {
+    right: 0;
+  }
+
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
+    z-index: 998;
+  }
+
+  .mobile-overlay.active {
+    display: block;
+  }
+
+  .mobile-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-tab-btn {
+    padding: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    color: var(--muted);
+    text-align: right;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 16px;
+  }
+
+  .mobile-tab-btn.active {
+    background: linear-gradient(90deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
+    color: var(--primary);
+    box-shadow: 0 8px 20px rgba(59,130,246,0.1);
+  }
+
+  /* ---------- Transaction Hash Panel ---------- */
+  .tx-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: var(--bg-2);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    display: none;
+  }
+
+  .tx-panel.active {
+    display: block;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  .tx-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .tx-hash {
+    font-family: monospace;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 12px;
+    border-radius: 8px;
+    word-break: break-all;
+    font-size: 13px;
+    margin: 10px 0;
+    border: 1px solid var(--glass-border);
+  }
+
+  .tx-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .tx-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--glass);
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+
+  .tx-btn.primary {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white;
+  }
+
   /* ---------- Stats / Cards (Glassmorphism + cinematic shadows) ---------- */
   .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:14px 0; z-index:5; }
   .stat-box{
@@ -160,8 +348,33 @@
   /* ---------- Footer ---------- */
   footer{ margin-top:20px; text-align:center; color:var(--muted); font-size:13px; z-index:5; position:relative; }
 
-  /* responsive */
-  @media (max-width:980px){ .grid-2{ grid-template-columns:1fr } .header{ flex-direction:column; align-items:flex-start } .logo-3d{ margin-bottom:8px } }
+  /* ---------- Form ---------- */
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; margin-bottom: 6px; color: var(--muted); font-weight: 700; font-size: 14px; }
+  .form-input { width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: white; font-size: 16px; }
+  .form-input:focus { outline: none; border-color: var(--primary); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 980px){ 
+    .grid-2{ grid-template-columns:1fr } 
+    .header{ flex-direction:column; align-items:flex-start } 
+    .logo-3d{ margin-bottom:8px } 
+  }
+
+  @media (max-width: 768px){
+    .tabs { display: none; }
+    .hamburger { display: flex; }
+    .header { flex-direction: row; justify-content: space-between; }
+    .container { padding: 10px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 480px){
+    .stats-grid { grid-template-columns: 1fr; }
+    .btn-group { grid-template-columns: 1fr; }
+    .contract-links { flex-direction: column; }
+    .contract-btn { justify-content: center; }
+  }
 </style>
 </head>
 <body>
@@ -170,10 +383,31 @@
   <canvas id="neonParticles"></canvas>
   <canvas id="confetti"></canvas>
 
+  <!-- Transaction Hash Panel -->
+  <div class="tx-panel" id="txPanel">
+    <div class="tx-header">
+      <h3 style="margin:0;color:var(--primary)">🎉 تراکنش موفق</h3>
+      <button onclick="closeTxPanel()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px">×</button>
+    </div>
+    <div style="color:var(--muted);margin-bottom:8px">هش تراکنش:</div>
+    <div class="tx-hash" id="txHashDisplay"></div>
+    <div class="tx-actions">
+      <button class="tx-btn" onclick="copyTxHash()">📋 کپی هش</button>
+      <button class="tx-btn primary" onclick="viewOnPolygonscan()">🔍 مشاهده در Polygonscan</button>
+    </div>
+  </div>
+
   <div class="container">
     <!-- Header -->
     <div class="header">
       <div style="display:flex;align-items:center;gap:14px">
+        <!-- Hamburger Menu Button (Mobile) -->
+        <button class="hamburger" id="hamburgerBtn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
         <div class="logo-3d" aria-hidden="true">
           <div id="logoCard" class="logo-card pulse" role="img" aria-label="SPS">
             <div class="logo-face front" id="logoFront">
@@ -219,7 +453,31 @@
       </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Contract Links -->
+    <div class="contract-links">
+      <a href="https://polygonscan.com/address/0x7a7b06D49129B34976D07B3854d4D72D01588191" 
+         target="_blank" class="contract-btn">
+         📄 قرارداد SPS
+      </a>
+      <a href="https://polygonscan.com/address/0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa#code" 
+         target="_blank" class="contract-btn ptoken">
+         💎 قرارداد P-Token
+      </a>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <div class="mobile-tabs" id="mobileTabs"></div>
+      <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--glass-border)">
+        <div style="color:var(--muted);font-size:12px;margin-bottom:10px">آدرس کیف پول:</div>
+        <div id="mobileWalletAddress" style="word-break:break-all;font-size:13px;color:var(--primary);background:rgba(0,0,0,0.2);padding:8px;border-radius:6px"></div>
+      </div>
+    </div>
+
+    <!-- Tabs (Desktop) -->
     <div class="tabs" id="tabsRow">
       <button class="tab-btn active" onclick="showTab('dashboard')">داشبورد</button>
       <button class="tab-btn" onclick="showTab('register')">ثبت‌نام</button>
@@ -287,6 +545,9 @@
           </div>
           <button class="btn btn-primary" onclick="register()" id="btn-register">ثبت‌نام (300 MATIC)</button>
           <div id="registerResult"></div>
+          <div id="registerDisabledMessage" style="display:none;margin-top:15px;padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;border:1px solid rgba(239,68,68,0.2);color:#fca5a5">
+            ⚠️ شما قبلاً ثبت‌نام کرده‌اید و نیازی به ثبت‌نام مجدد ندارید.
+          </div>
         </div>
 
         <div class="card">
@@ -409,6 +670,7 @@ function t(k){ return translations[lang] && translations[lang][k] ? translations
 
 /* ================= CONSTANTS + ABI (NO LOGIC CHANGES) ================= */
 const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+const PTOKEN_ADDRESS = "0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa";
 const POLYGON_CHAIN_ID = "0x89";
 const ENTRY_FEE = "300000000000000000000"; // 300 MATIC
 
@@ -468,7 +730,186 @@ const CONTRACT_ABI = [
 ];
 
 /* ================= STATE ================= */
-let provider, signer, contract, userAddress, isOwner=false;
+let provider, signer, contract, userAddress, isOwner=false, currentTxHash=null, userHasId=false;
+
+/* ================= NEW FEATURES ================= */
+
+/* ================ Transaction Hash Panel ================ */
+function showTxPanel(txHash) {
+  currentTxHash = txHash;
+  const panel = document.getElementById('txPanel');
+  const hashDisplay = document.getElementById('txHashDisplay');
+  
+  hashDisplay.textContent = txHash;
+  panel.classList.add('active');
+  
+  // Auto-close after 30 seconds
+  setTimeout(() => {
+    if (panel.classList.contains('active')) {
+      closeTxPanel();
+    }
+  }, 30000);
+}
+
+function closeTxPanel() {
+  document.getElementById('txPanel').classList.remove('active');
+  currentTxHash = null;
+}
+
+function copyTxHash() {
+  if (!currentTxHash) return;
+  
+  navigator.clipboard.writeText(currentTxHash).then(() => {
+    const btn = document.querySelector('.tx-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '✅ کپی شد';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 2000);
+  });
+}
+
+function viewOnPolygonscan() {
+  if (!currentTxHash) return;
+  
+  window.open(`https://polygonscan.com/tx/${currentTxHash}`, '_blank');
+}
+
+/* ================ Mobile Menu Functions ================ */
+function initMobileMenu() {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const mobileMenu = document.getElementById('mobileMenu');
+  
+  if (!hamburgerBtn || !mobileOverlay || !mobileMenu) return;
+  
+  // Update mobile tabs on language change
+  updateMobileTabs();
+  
+  // Handle resize
+  window.addEventListener('resize', handleResize);
+  
+  // Initial check
+  handleResize();
+}
+
+function toggleMobileMenu() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const overlay = document.getElementById('mobileOverlay');
+  const menu = document.getElementById('mobileMenu');
+  
+  hamburger.classList.toggle('active');
+  overlay.classList.toggle('active');
+  menu.classList.toggle('active');
+}
+
+function closeMobileMenu() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const overlay = document.getElementById('mobileOverlay');
+  const menu = document.getElementById('mobileMenu');
+  
+  hamburger.classList.remove('active');
+  overlay.classList.remove('active');
+  menu.classList.remove('active');
+}
+
+function updateMobileTabs() {
+  const tabsContainer = document.getElementById('mobileTabs');
+  if (!tabsContainer) return;
+  
+  const tabs = [
+    { id: 'dashboard', name: { fa: 'داشبورد', en: 'Dashboard' } },
+    { id: 'register', name: { fa: 'ثبت‌نام', en: 'Register' } },
+    { id: 'miner', name: { fa: 'ماینر', en: 'Miner' } },
+    { id: 'actions', name: { fa: 'عملیات', en: 'Operations' } },
+    { id: 'admin', name: { fa: 'مدیریت', en: 'Admin' } }
+  ];
+  
+  tabsContainer.innerHTML = '';
+  
+  tabs.forEach(tab => {
+    const btn = document.createElement('button');
+    btn.className = 'mobile-tab-btn';
+    btn.textContent = lang === 'fa' ? tab.name.fa : tab.name.en;
+    
+    // Hide admin tab if not owner
+    if (tab.id === 'admin' && !isOwner) {
+      btn.style.display = 'none';
+    }
+    
+    btn.onclick = () => {
+      showTab(tab.id);
+      closeMobileMenu();
+    };
+    tabsContainer.appendChild(btn);
+  });
+  
+  // Update wallet address in mobile menu
+  if (userAddress) {
+    const mobileWallet = document.getElementById('mobileWalletAddress');
+    if (mobileWallet) {
+      mobileWallet.textContent = userAddress;
+    }
+  }
+}
+
+function handleResize() {
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const desktopTabs = document.querySelector('.tabs');
+  
+  if (window.innerWidth <= 768) {
+    // Mobile view
+    if (desktopTabs) desktopTabs.style.display = 'none';
+    if (hamburgerBtn) hamburgerBtn.style.display = 'flex';
+  } else {
+    // Desktop view
+    if (desktopTabs) desktopTabs.style.display = 'flex';
+    if (hamburgerBtn) hamburgerBtn.style.display = 'none';
+    
+    // Close mobile menu if open
+    closeMobileMenu();
+  }
+}
+
+/* ================ Register Tab Control ================ */
+function checkUserRegistration() {
+  if (!contract || !userAddress) return;
+  
+  contract.getUserInfo(userAddress).then(userInfo => {
+    const userId = Number(userInfo[0]);
+    const registerBtn = document.getElementById('btn-register');
+    const registerDisabledMsg = document.getElementById('registerDisabledMessage');
+    const registerTab = document.getElementById('registerTab');
+    
+    if (userId > 0) {
+      // User has ID - disable registration
+      userHasId = true;
+      if (registerBtn) registerBtn.style.display = 'none';
+      if (registerDisabledMsg) registerDisabledMsg.style.display = 'block';
+      
+      // Also hide register tab in mobile menu
+      const mobileRegisterBtn = document.querySelector('.mobile-tab-btn:nth-child(2)');
+      if (mobileRegisterBtn) mobileRegisterBtn.style.display = 'none';
+      
+      // Hide register tab in desktop if we're on register tab
+      if (registerTab.style.display !== 'none') {
+        showTab('dashboard');
+      }
+    } else {
+      // User doesn't have ID - enable registration
+      userHasId = false;
+      if (registerBtn) registerBtn.style.display = 'block';
+      if (registerDisabledMsg) registerDisabledMsg.style.display = 'none';
+      
+      // Show register tab in mobile menu
+      const mobileRegisterBtn = document.querySelector('.mobile-tab-btn:nth-child(2)');
+      if (mobileRegisterBtn) mobileRegisterBtn.style.display = 'block';
+    }
+  }).catch(() => {
+    // Error getting user info - assume no ID
+    userHasId = false;
+  });
+}
 
 /* ================= UI HELPERS ================= */
 function showStatus(message, type='info', targetId='userInfo'){
@@ -611,14 +1052,21 @@ function setLanguage(){
   document.getElementById('specialTimerLabel').textContent = t('special_label');
   document.getElementById('h-actions').textContent = (lang==='en' ? 'Operations' : 'عملیات');
   document.getElementById('footerText').textContent = lang==='en' ? `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet` : `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet`;
+  
+  // Update mobile menu tabs
+  updateMobileTabs();
 }
 
-/* ================= TX handler (unchanged logic) ================= */
+/* ================= TX handler (MODIFIED to show tx panel) ================= */
 async function handleTx(txPromise, targetId){
   try{
     showLoading(true);
     const tx = await txPromise;
     showPending(tx.hash, targetId);
+    
+    // Show transaction hash in panel
+    showTxPanel(tx.hash);
+    
     const receipt = await tx.wait();
     showTransactionLink(tx.hash, targetId);
     spawnConfetti();
@@ -690,8 +1138,14 @@ async function canWithdrawPool(){
   }catch(e){ console.error('canWithdrawPool error', e); return {ok:false, reason: lang==='en' ? 'Pre-check failed' : 'بررسی پیش از ارسال ناموفق بود'}; }
 }
 
-/* ================ CORE ACTIONS (unchanged logic) ================ */
+/* ================ CORE ACTIONS (MODIFIED to check registration) ================ */
 async function register(){ 
+  // Check if user already has ID
+  if (userHasId) {
+    showStatus('⚠️ ' + (lang==='en'?'You are already registered':'شما قبلاً ثبت‌نام کرده‌اید'), 'error', 'registerResult');
+    return;
+  }
+  
   const uplineCode = document.getElementById('uplineCode').value; 
   const position = document.getElementById('position').value === 'true'; 
   if(!uplineCode){ alert(lang==='en'?'Please enter upline code':'لطفاً کد آپلاین را وارد کنید'); return; } 
@@ -700,6 +1154,8 @@ async function register(){
     const receipt = await handleTx(txPromise, 'registerResult'); 
     showStatus('✅ '+(lang==='en'?'Registration successful':'ثبت‌نام موفق'), 'success', 'registerResult'); 
     await loadDashboard(); 
+    // Re-check user registration status
+    checkUserRegistration();
   }catch(err){ showStatus('❌ '+err.message, 'error', 'registerResult'); } 
 }
 
@@ -769,6 +1225,31 @@ async function withdrawSpecial(){
   }catch(err){ console.error('withdrawSpecial error', err); showStatus('❌ '+(err.message || (lang==='en'?'Special withdraw failed':'برداشت ویژه ناموفق')), 'error', 'withdrawResult'); }
 }
 
+/* ================ Admin Functions ================ */
+async function updateFee(){
+  const newFee = document.getElementById('newFee').value;
+  if(!newFee){ alert('لطفاً کارمزد جدید را وارد کنید'); return; }
+  try{
+    showStatus('🔄 در حال بروزرسانی کارمزد...', 'info', 'adminResult');
+    const txPromise = contract.updateEntryFee(newFee);
+    await handleTx(txPromise, 'adminResult');
+    showStatus('✅ کارمزد با موفقیت بروزرسانی شد', 'success', 'adminResult');
+  }catch(err){ showStatus('❌ ' + err.message, 'error', 'adminResult'); }
+}
+
+async function removeMiners(){
+  const addressesText = document.getElementById('addresses').value;
+  if(!addressesText){ alert('لطفاً آدرس‌ها را وارد کنید'); return; }
+  const addresses = addressesText.split(',').map(addr => addr.trim()).filter(addr => addr.length > 0);
+  if(addresses.length === 0){ alert('آدرس معتبری وارد نشده است'); return; }
+  try{
+    showStatus('🔄 در حال حذف ماینرها...', 'info', 'adminResult');
+    const txPromise = contract.batchRemoveMiners(addresses);
+    await handleTx(txPromise, 'adminResult');
+    showStatus('✅ ماینرها با موفقیت حذف شدند', 'success', 'adminResult');
+  }catch(err){ showStatus('❌ ' + err.message, 'error', 'adminResult'); }
+}
+
 /* ================ Timers (in Actions tab) ================ */
 let poolTimerInterval = null;
 function startPoolTimer(lastWithdrawUnix = 0, cycleDurationSec = 0){
@@ -826,7 +1307,7 @@ function startSpecialTimer(){
   specialTimerInterval = setInterval(renderSpecial, 1000);
 }
 
-/* ================ Dashboard loader (unchanged logic) ================ */
+/* ================ Dashboard loader (MODIFIED to check registration) ================ */
 async function loadDashboard(){
   if(!contract) return;
   try{
@@ -853,13 +1334,36 @@ async function loadDashboard(){
       const userId = Number(userInfo[0]);
       showStatus(`<strong>👤 ${lang==='en'?'User #':'کاربر #'}${userId}</strong><br>📊 ${lang==='en'?'Balance':'موجودی'}: ${userInfo[6]}<br>🎁 ${lang==='en'?'Specials':'پاداش ویژه'}: ${userInfo[7]}<br>⛏️ ${userInfo[10] ? '✅':'❌'}<br>💰 ${lang==='en'?'Total rewards':'مجموع پاداش‌ها'}: ${ethers.formatEther(userInfo[8])} MATIC`, 'success', 'userInfo');
       await loadTreeStructure(userId);
+      
+      // Check if user is owner
       const owner = await contract.owner().catch(()=>null);
-      if(owner && owner.toLowerCase() === userAddress.toLowerCase()){ isOwner = true; document.getElementById('adminTab').style.display = 'block'; }
+      if(owner && owner.toLowerCase() === userAddress.toLowerCase()){
+        isOwner = true; 
+        document.getElementById('adminTab').style.display = 'block';
+        // Show admin tab in mobile menu
+        const mobileAdminBtn = document.querySelector('.mobile-tab-btn:nth-child(5)');
+        if (mobileAdminBtn) mobileAdminBtn.style.display = 'block';
+      }
+      
+      // Check user registration status
+      checkUserRegistration();
     }
   }catch(e){ console.error('loadDashboard error', e); }
 }
 
-/* ================ Connect wallet (unchanged logic) ================ */
+function updateNetworkStatus(connected){
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('networkStatus');
+  if(connected){
+    dot.className = 'status-dot connected';
+    text.textContent = lang==='en' ? 'Connected' : 'متصل';
+  }else{
+    dot.className = 'status-dot';
+    text.textContent = lang==='en' ? 'Disconnected' : 'قطع';
+  }
+}
+
+/* ================ Connect wallet (MODIFIED to init mobile menu) ================ */
 async function connectWallet(){
   if(typeof window.ethereum === 'undefined'){ showStatus('❌ '+(lang==='en'?'Wallet (MetaMask) not found':'کیف پول (مثل MetaMask) یافت نشد'),'error'); return; }
   try{
@@ -878,6 +1382,13 @@ async function connectWallet(){
     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     document.getElementById('connectArea').innerHTML = `<div style="background:linear-gradient(90deg,#10b981,#34d399);color:#06281a;padding:10px;border-radius:8px;font-weight:700">✅ ${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}</div>`;
     updateNetworkStatus(true);
+    
+    // Update mobile menu with wallet address
+    const mobileWallet = document.getElementById('mobileWalletAddress');
+    if (mobileWallet) {
+      mobileWallet.textContent = userAddress;
+    }
+    
     await loadDashboard();
     showStatus('✅ '+(lang==='en'?'Wallet connected':'کیف پول متصل شد'), 'success');
     window.ethereum.on('accountsChanged', ()=> location.reload());
@@ -891,14 +1402,30 @@ function showTab(tabName){
   const tabs = ['dashboard','register','miner','actions','admin'];
   tabs.forEach(t => document.getElementById(t+'Tab').style.display = 'none');
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
+  
   document.getElementById(tabName + 'Tab').style.display = 'block';
+  
+  // Activate desktop tab
   document.querySelectorAll('.tab-btn').forEach(b=>{
     if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active');
   });
+  
+  // Activate mobile tab
+  document.querySelectorAll('.mobile-tab-btn').forEach(b=>{
+    if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active');
+  });
+  
   if(tabName === 'dashboard') loadDashboard();
+  
+  // Check if trying to access register tab when already registered
+  if(tabName === 'register' && userHasId) {
+    showTab('dashboard');
+    alert(lang==='en' ? 'You are already registered!' : 'شما قبلاً ثبت‌نام کرده‌اید!');
+  }
 }
 
-/* ================ Logo flip cycle (SPS <-> $) - robust via transform & opacity ================ */
+/* ================ Logo flip cycle ================ */
 const logoCard = document.getElementById('logoCard');
 const logoFront = document.getElementById('logoFront');
 const logoBack = document.getElementById('logoBack');
@@ -919,21 +1446,24 @@ function showBack(){
   logoCard.style.transform = 'rotateY(180deg)';
 }
 function startLogoCycle(){
-  // start with SPS visible
   showFront();
-  // flip every 3s: show back ($) for 2s, then back to front
   logoCycleInterval = setInterval(()=>{
     showBack();
     setTimeout(()=> showFront(), 2000);
   }, 3000);
 }
 
-/* ================ Init visuals & logo, and optional autorun connect ================ */
+/* ================ Init ================ */
 window.onload = function(){
   startVisuals();
   startLogoCycle();
   setLanguage();
+  initMobileMenu();
+  
   document.getElementById('connectBtn').onclick = connectWallet;
+  document.getElementById('hamburgerBtn').onclick = toggleMobileMenu;
+  document.getElementById('mobileOverlay').onclick = closeMobileMenu;
+  
   // auto-connect if previously authorized
   if(typeof window.ethereum !== 'undefined'){
     window.ethereum.request({ method:'eth_accounts' }).then(accounts=>{
@@ -943,6 +1473,9 @@ window.onload = function(){
 
   // resize canvases
   resizeNeon(); resizeConfetti();
+  
+  // Handle initial resize
+  handleResize();
 };
 </script>
 </body>
