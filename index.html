@@ -1,168 +1,130 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SPS DApp - Ultra Premium</title>
+<title>SPS Network - Advanced DApp</title>
 
-<!-- ethers.js (unchanged logic) -->
+<!-- ethers.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 
 <style>
-  /* ----------------- Theme (Premium Elegant) ----------------- */
-  :root{
-    --bg-1: #040615;
-    --bg-2: #071029;
+  /* ----------------- Premium AI Background Theme ----------------- */
+  :root {
+    --bg-1: #0a0a1a;
+    --bg-2: #15152b;
     --glass: rgba(255,255,255,0.03);
     --card: rgba(255,255,255,0.02);
-    --muted: #9fb3cf;
-    --primary: #3b82f6;
+    --muted: #8a9bb2;
+    --primary: #6366f1;
     --accent: #8b5cf6;
-    --neon: #00ffd5;
-    --neon-2: #7c3aed;
+    --neon: #00d9ff;
     --success: #10b981;
     --danger: #ef4444;
-    --glass-border: rgba(255,255,255,0.04);
+    --warning: #f59e0b;
+    --glass-border: rgba(255,255,255,0.06);
+    --gold: #ffd700;
   }
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  html[dir="rtl"]{ direction: rtl; }
-  html[dir="ltr"]{ direction: ltr; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-1);
+    color: #f0f4ff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
 
-  body{
-    font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
-    background:
-      radial-gradient(800px 320px at 10% 10%, rgba(139,92,246,0.04), transparent),
-      radial-gradient(700px 280px at 90% 90%, rgba(0,255,213,0.02), transparent),
+  /* AI Animated Background */
+  .ai-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
       linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
-    color: #e6eef8;
-    min-height:100vh;
-    padding:20px;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-x:hidden;
   }
 
-  /* ---------- Canvas layers (neural wave + particles + confetti) ---------- */
-  #neuralWave {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(40% 25% at 10% 20%, rgba(124,58,237,0.03), transparent),
-                radial-gradient(30% 20% at 90% 80%, rgba(0,255,213,0.02), transparent);
-    mix-blend-mode: screen;
-  }
-  #neonParticles, #confetti { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  #confetti { z-index: 10000; display:none; }
-
-  /* ---------- Container ---------- */
-  .container{ max-width:1200px; margin:0 auto; position:relative; z-index:5; }
-
-  /* ---------- Header ---------- */
-  .header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:12px; padding:14px; border:1px solid var(--glass-border);
-    box-shadow: 0 12px 40px rgba(11,26,43,0.6);
-    position:relative; overflow:hidden;
-    backdrop-filter: blur(6px) saturate(120%);
+  .ai-particles {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
   }
 
-  /* ---------- Logo: SVG + flip to $ ---------- */
-  .logo-3d{ width:96px; height:46px; perspective:1000px; display:flex; align-items:center; justify-content:center; }
-  .logo-card{
-    width:96px; height:46px; display:flex; align-items:center; justify-content:center;
-    border-radius:10px; position:relative; transform-style:preserve-3d;
-    transition: transform 0.7s cubic-bezier(.2,.9,.3,1);
-  }
-  .logo-face{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    transform-style: preserve-3d;
-  }
-  .logo-face.front svg { width:78px; height:28px; }
-  .logo-face.back { transform: rotateY(180deg); font-weight:900; font-size:20px; color:var(--neon); text-shadow: 0 0 12px rgba(0,255,213,0.18), 0 0 36px rgba(124,58,237,0.06); }
-
-  .logo-glow {
-    position:absolute; inset:-20%; z-index:-1; filter: blur(28px); opacity:0.6;
-    background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.12), transparent 20%),
-                radial-gradient(circle at 80% 70%, rgba(124,58,237,0.10), transparent 20%),
-                radial-gradient(circle at 50% 50%, rgba(0,255,213,0.06), transparent 30%);
-    border-radius:14px;
-  }
-  /* pulsing subtle glow */
-  @keyframes logoPulse { 0%{ transform:scale(0.985) } 50%{ transform:scale(1.02) } 100%{ transform:scale(0.985) } }
-  .logo-card.pulse { animation: logoPulse 3.6s ease-in-out infinite; }
-
-  /* ---------- Status / language ---------- */
-  .status-ind{ display:flex; gap:10px; align-items:center }
-  .status-dot{ width:12px; height:12px; border-radius:50%; background:var(--danger); box-shadow:0 0 10px rgba(239,68,68,0.2) }
-  .status-dot.connected{ background:var(--success); box-shadow:0 0 18px rgba(16,185,129,0.14) }
-  .network-text{ font-weight:700; color:var(--muted) }
-
-  .lang-switch{ display:flex; gap:8px; align-items:center }
-  .lang-btn{ padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); cursor:pointer; background:transparent; color:var(--muted); font-weight:700 }
-  .lang-btn.active{ background: linear-gradient(90deg,var(--primary),var(--accent)); color:#041426; box-shadow:0 8px 26px rgba(59,130,246,0.12) }
-
-  /* ---------- Tabs ---------- */
-  .tabs{ display:flex; gap:8px; margin:16px 0; flex-wrap:wrap; z-index:5; }
-  .tab-btn{ padding:10px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.02); color:var(--muted); cursor:pointer; font-weight:700 }
-  .tab-btn.active{ background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(139,92,246,0.06)); color:var(--primary); box-shadow: 0 10px 30px rgba(59,130,246,0.06) }
-
-  /* ---------- Contract Links ---------- */
-  .contract-links{
-    display:flex; gap:10px; margin:10px 0; flex-wrap:wrap; justify-content:center;
-  }
-  .contract-btn{
-    padding:8px 12px; border-radius:8px; background:rgba(59,130,246,0.08); 
-    border:1px solid rgba(59,130,246,0.15); color:var(--primary); 
-    text-decoration:none; font-size:13px; font-weight:700; display:flex; 
-    align-items:center; gap:6px; transition:all 0.3s;
-  }
-  .contract-btn:hover{
-    background:rgba(59,130,246,0.15); transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(59,130,246,0.1);
-  }
-  .contract-btn.ptoken{
-    background:rgba(139,92,246,0.08); border-color:rgba(139,92,246,0.15);
-    color:var(--accent);
-  }
-  .contract-btn.ptoken:hover{
-    background:rgba(139,92,246,0.15);
-    box-shadow:0 8px 20px rgba(139,92,246,0.1);
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
   }
 
-  /* ---------- Mobile Hamburger Menu ---------- */
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 18px 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    margin-bottom: 24px;
+  }
+
+  /* Logo */
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+  }
+
+  .logo-badge {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Hamburger Menu */
   .hamburger {
     display: none;
     flex-direction: column;
-    justify-content: space-between;
-    width: 32px;
-    height: 24px;
+    gap: 4px;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0;
-    z-index: 1000;
+    padding: 8px;
   }
 
   .hamburger span {
-    width: 100%;
+    width: 24px;
     height: 3px;
     background: var(--primary);
     border-radius: 2px;
-    transition: all 0.3s ease;
-    transform-origin: right;
-  }
-
-  .hamburger.active span:nth-child(1) {
-    transform: rotate(-45deg) translateY(5px);
-  }
-
-  .hamburger.active span:nth-child(2) {
-    opacity: 0;
-  }
-
-  .hamburger.active span:nth-child(3) {
-    transform: rotate(45deg) translateY(-5px);
+    transition: 0.3s;
   }
 
   .mobile-menu {
@@ -171,14 +133,13 @@
     right: -300px;
     width: 280px;
     height: 100vh;
-    background: var(--bg-2);
+    background: rgba(10,10,26,0.95);
     backdrop-filter: blur(20px);
-    box-shadow: -10px 0 40px rgba(0,0,0,0.5);
-    z-index: 999;
-    transition: right 0.3s ease;
-    padding: 80px 20px 20px;
-    overflow-y: auto;
+    z-index: 1000;
+    transition: 0.3s;
+    padding: 100px 24px 24px;
     border-left: 1px solid var(--glass-border);
+    box-shadow: -20px 0 40px rgba(0,0,0,0.5);
   }
 
   .mobile-menu.active {
@@ -193,8 +154,8 @@
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(3px);
-    z-index: 998;
+    backdrop-filter: blur(5px);
+    z-index: 999;
   }
 
   .mobile-overlay.active {
@@ -208,86 +169,261 @@
   }
 
   .mobile-tab-btn {
-    padding: 15px;
+    padding: 16px;
     background: rgba(255,255,255,0.05);
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--glass-border);
     color: var(--muted);
-    text-align: right;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
     font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.3s;
   }
 
   .mobile-tab-btn.active {
-    background: linear-gradient(90deg, rgba(59,130,246,0.15), rgba(139,92,246,0.1));
+    background: linear-gradient(90deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1));
     color: var(--primary);
-    box-shadow: 0 8px 20px rgba(59,130,246,0.1);
+    border-color: rgba(99,102,241,0.3);
   }
 
-  /* ---------- Transaction Hash Panel ---------- */
-  .tx-panel {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 500px;
-    background: var(--bg-2);
+  /* Status */
+  .status-ind {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--danger);
+  }
+
+  .status-dot.connected {
+    background: var(--success);
+    box-shadow: 0 0 20px var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Connect Button */
+  .connect-btn {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.3);
+  }
+
+  .connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(99,102,241,0.4);
+  }
+
+  /* Contract Links */
+  .contract-links {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+
+  .contract-btn {
+    padding: 10px 16px;
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 10px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+  }
+
+  .contract-btn:hover {
+    background: rgba(99,102,241,0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 12px 20px;
+    background: transparent;
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 15px;
-    z-index: 1000;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    color: var(--muted);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(90deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
+    color: var(--primary);
+    border-color: rgba(99,102,241,0.3);
+    box-shadow: 0 8px 25px rgba(99,102,241,0.15);
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .stat-box {
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: 0.3s;
+  }
+
+  .stat-box:hover {
+    transform: translateY(-5px);
+    border-color: rgba(99,102,241,0.3);
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+  }
+
+  /* Grid Layout */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  /* Points & Awards Display */
+  .points-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .points-card {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--glass-border);
+  }
+
+  .points-label {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .points-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  /* Transaction Hash Panel */
+  .tx-panel {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    width: 90%;
+    max-width: 500px;
+    background: rgba(21,21,43,0.95);
     backdrop-filter: blur(20px);
-    display: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 24px;
+    z-index: 2000;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .tx-panel.active {
-    display: block;
-    animation: slideUp 0.3s ease;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
   }
 
   .tx-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .tx-hash {
     font-family: monospace;
     background: rgba(0,0,0,0.3);
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     word-break: break-all;
-    font-size: 13px;
-    margin: 10px 0;
+    font-size: 14px;
+    margin: 12px 0;
     border: 1px solid var(--glass-border);
   }
 
   .tx-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 12px;
+    margin-top: 20px;
   }
 
   .tx-btn {
     flex: 1;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     border: none;
     font-weight: 700;
     cursor: pointer;
-    background: var(--glass);
-    color: var(--muted);
-    transition: all 0.3s;
+    transition: 0.3s;
   }
 
   .tx-btn.primary {
@@ -295,234 +431,217 @@
     color: white;
   }
 
-  /* ---------- Stats / Cards (Glassmorphism + cinematic shadows) ---------- */
-  .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:14px 0; z-index:5; }
-  .stat-box{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    padding:16px; border-radius:14px; border:1px solid var(--glass-border);
-    box-shadow: 0 12px 30px rgba(2,8,20,0.6), inset 0 1px 0 rgba(255,255,255,0.01);
-    position:relative; overflow:hidden; backdrop-filter: blur(6px) saturate(120%);
-    transition: transform .36s ease, box-shadow .36s ease;
-  }
-  .stat-box:hover { transform: translateY(-8px); box-shadow: 0 28px 60px rgba(11,26,43,0.7); }
-  .stat-label{ color:var(--muted); font-size:13px; margin-bottom:8px; }
-  .stat-value{ font-size:18px; font-weight:900; color:#dff5ff; text-shadow: 0 6px 18px rgba(59,130,246,0.06); }
-
-  /* fancy border accent */
-  .stat-box:after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background: linear-gradient(90deg, rgba(59,130,246,0.06), rgba(124,58,237,0.04));
-    mix-blend-mode: screen; border-radius:14px; opacity:0.3;
+  /* Buttons */
+  .btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s;
   }
 
-  /* ---------- Tree ---------- */
-  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:12px; z-index:5; }
-  .card{ padding:14px; border-radius:12px; border:1px solid var(--glass-border); background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); box-shadow: 0 12px 30px rgba(5,10,25,0.6); backdrop-filter: blur(6px) }
-  .tree-container{ max-height:540px; overflow:auto; padding:12px; border-radius:10px; }
-  .node{ padding:12px; border-radius:10px; margin-bottom:12px; background: rgba(12,16,28,0.6); border:1px solid rgba(59,130,246,0.06); display:flex; justify-content:space-between; align-items:center; gap:12px; transition: transform .28s, box-shadow .28s; }
-  .node:hover{ transform: translateY(-6px); box-shadow: 0 16px 40px rgba(44,95,227,0.06); }
-  .meta{ color:var(--muted); font-size:13px; }
-
-  .toggle-btn{ background:transparent;border:1px solid rgba(255,255,255,0.03); padding:6px 8px; border-radius:8px; color:var(--primary); cursor:pointer; font-weight:700 }
-
-  /* ---------- Buttons ---------- */
-  .btn{ padding:12px; border-radius:10px; border:none; cursor:pointer; font-weight:800 }
-  .btn-primary{ background: linear-gradient(90deg,var(--primary),var(--accent)); color:white; box-shadow: 0 12px 30px rgba(59,130,246,0.08); }
-  .btn-success{ background: linear-gradient(90deg,var(--success),#34d399); color:#031612; }
-  .btn-danger{ background: linear-gradient(90deg,var(--danger),#f87171); color:#2b0e0e; }
-  .btn.disabled{ opacity:0.45; pointer-events:none; filter:grayscale(0.4) }
-
-  .btn-group{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px }
-
-  /* ---------- Countdown (premium look) ---------- */
-  .countdown{ display:flex; align-items:center; gap:12px; justify-content:center; padding:12px; border-radius:12px; background: linear-gradient(90deg, rgba(59,130,246,0.04), rgba(124,58,237,0.03)); border:1px solid rgba(255,255,255,0.02); box-shadow: 0 12px 30px rgba(11,26,43,0.6); font-weight:900; }
-  .time-segment{ display:flex; flex-direction:column; align-items:center; padding:8px 12px; border-radius:8px; background: rgba(255,255,255,0.01); min-width:64px; }
-  .time-value{ font-size:18px; color:#e6f8ff; font-weight:900; text-shadow:0 8px 20px rgba(59,130,246,0.08) }
-  .time-label{ color:var(--muted); font-size:12px; }
-
-  /* ---------- Loading ---------- */
-  .loading{ display:none; position:fixed; inset:0; background: rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center }
-  .spinner{ width:80px; height:80px; border-radius:50%; border:6px solid rgba(255,255,255,0.04); border-top-color:var(--neon); animation: spin 1s linear infinite; }
-  @keyframes spin{ to{ transform: rotate(360deg) } }
-
-  /* ---------- Footer ---------- */
-  footer{ margin-top:20px; text-align:center; color:var(--muted); font-size:13px; z-index:5; position:relative; }
-
-  /* ---------- Form ---------- */
-  .form-group { margin-bottom: 16px; }
-  .form-label { display: block; margin-bottom: 6px; color: var(--muted); font-weight: 700; font-size: 14px; }
-  .form-input { width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: white; font-size: 16px; }
-  .form-input:focus { outline: none; border-color: var(--primary); }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 980px){ 
-    .grid-2{ grid-template-columns:1fr } 
-    .header{ flex-direction:column; align-items:flex-start } 
-    .logo-3d{ margin-bottom:8px } 
+  .btn-primary {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white;
+    box-shadow: 0 10px 30px rgba(99,102,241,0.3);
   }
 
-  @media (max-width: 768px){
-    .tabs { display: none; }
-    .hamburger { display: flex; }
-    .header { flex-direction: row; justify-content: space-between; }
-    .container { padding: 10px; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
+  .btn-success {
+    background: linear-gradient(90deg, var(--success), #34d399);
+    color: white;
   }
 
-  @media (max-width: 480px){
-    .stats-grid { grid-template-columns: 1fr; }
-    .btn-group { grid-template-columns: 1fr; }
-    .contract-links { flex-direction: column; }
-    .contract-btn { justify-content: center; }
+  .btn-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  /* Loading */
+  .loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: var(--primary);
+    animation: spin 1s linear infinite;
+  }
+
+  /* Form */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 40px;
+    padding: 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      padding: 12px;
+    }
+    
+    .header {
+      padding: 16px;
+    }
+    
+    .hamburger {
+      display: flex;
+    }
+    
+    .tabs {
+      display: none;
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
 <body>
-  <!-- Canvas layers -->
-  <div id="neuralWave"></div>
-  <canvas id="neonParticles"></canvas>
-  <canvas id="confetti"></canvas>
+  <!-- AI Background -->
+  <div class="ai-background"></div>
+  <canvas class="ai-particles" id="aiParticles"></canvas>
 
-  <!-- Transaction Hash Panel -->
+  <!-- Mobile Menu -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-tabs" id="mobileTabs"></div>
+  </div>
+
+  <!-- Transaction Panel -->
   <div class="tx-panel" id="txPanel">
     <div class="tx-header">
-      <h3 style="margin:0;color:var(--primary)">🎉 تراکنش موفق</h3>
-      <button onclick="closeTxPanel()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px">×</button>
+      <h3 style="margin:0;color:var(--primary)">🎉 Transaction Successful</h3>
+      <button onclick="closeTxPanel()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:24px">×</button>
     </div>
-    <div style="color:var(--muted);margin-bottom:8px">هش تراکنش:</div>
+    <div style="color:var(--muted);margin-bottom:8px">Transaction Hash:</div>
     <div class="tx-hash" id="txHashDisplay"></div>
     <div class="tx-actions">
-      <button class="tx-btn" onclick="copyTxHash()">📋 کپی هش</button>
-      <button class="tx-btn primary" onclick="viewOnPolygonscan()">🔍 مشاهده در Polygonscan</button>
+      <button class="tx-btn" onclick="copyTxHash()">📋 Copy Hash</button>
+      <button class="tx-btn primary" onclick="viewOnPolygonscan()">🔍 View on Polygonscan</button>
     </div>
   </div>
 
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <div style="display:flex;align-items:center;gap:14px">
-        <!-- Hamburger Menu Button (Mobile) -->
+      <div class="logo-container">
         <button class="hamburger" id="hamburgerBtn">
           <span></span>
           <span></span>
           <span></span>
         </button>
-
-        <div class="logo-3d" aria-hidden="true">
-          <div id="logoCard" class="logo-card pulse" role="img" aria-label="SPS">
-            <div class="logo-face front" id="logoFront">
-              <!-- SVG SPS logo (guaranteed render) -->
-              <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <defs>
-                  <linearGradient id="g1" x1="0" x2="1">
-                    <stop offset="0" stop-color="#3b82f6"/>
-                    <stop offset="1" stop-color="#8b5cf6"/>
-                  </linearGradient>
-                  <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="6" result="b"/>
-                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
-                </defs>
-                <g filter="url(#neon)">
-                  <!-- Big bold SPS text drawn as vector using <text> (safe fallback) -->
-                  <text x="50%" y="55%" text-anchor="middle" font-family="Inter, Tahoma, Arial" font-weight="800" font-size="36" fill="url(#g1)" style="letter-spacing:2px">SPS</text>
-                </g>
-              </svg>
-            </div>
-            <div class="logo-face back" id="logoBack" aria-hidden="true">
-              $ 
-            </div>
-            <div class="logo-glow" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <div class="status-ind" aria-hidden="true">
-          <div id="statusDot" class="status-dot"></div>
-          <div id="networkStatus" class="network-text">اتصال شبکه</div>
-        </div>
+        <div class="logo-text">SPS NETWORK</div>
+        <div class="logo-badge">v2.0</div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="lang-switch" role="tablist" aria-label="Language switch">
-          <button id="btn-fa" class="lang-btn">FA</button>
-          <button id="btn-en" class="lang-btn">EN</button>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="status-ind">
+          <div id="statusDot" class="status-dot"></div>
+          <div id="networkStatus">Network Status</div>
         </div>
         <div id="connectArea">
-          <button id="connectBtn" class="btn-primary btn">اتصال کیف پول</button>
+          <button id="connectBtn" class="connect-btn">Connect Wallet</button>
         </div>
       </div>
     </div>
 
     <!-- Contract Links -->
     <div class="contract-links">
-      <a href="https://polygonscan.com/address/0x7a7b06D49129B34976D07B3854d4D72D01588191" 
-         target="_blank" class="contract-btn">
-         📄 قرارداد SPS
+      <a href="https://polygonscan.com/address/0x7a7b06D49129B34976D07B3854d4D72D01588191" target="_blank" class="contract-btn">
+        📄 SPS Contract
       </a>
-      <a href="https://polygonscan.com/address/0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa#code" 
-         target="_blank" class="contract-btn ptoken">
-         💎 قرارداد P-Token
+      <a href="https://polygonscan.com/address/0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa" target="_blank" class="contract-btn">
+        💎 P-Token Contract
       </a>
     </div>
 
-    <!-- Mobile Menu Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-    
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-      <div class="mobile-tabs" id="mobileTabs"></div>
-      <div style="margin-top:30px;padding-top:20px;border-top:1px solid var(--glass-border)">
-        <div style="color:var(--muted);font-size:12px;margin-bottom:10px">آدرس کیف پول:</div>
-        <div id="mobileWalletAddress" style="word-break:break-all;font-size:13px;color:var(--primary);background:rgba(0,0,0,0.2);padding:8px;border-radius:6px"></div>
-      </div>
-    </div>
-
-    <!-- Tabs (Desktop) -->
+    <!-- Tabs -->
     <div class="tabs" id="tabsRow">
-      <button class="tab-btn active" onclick="showTab('dashboard')">داشبورد</button>
-      <button class="tab-btn" onclick="showTab('register')">ثبت‌نام</button>
-      <button class="tab-btn" onclick="showTab('miner')">ماینر</button>
-      <button class="tab-btn" onclick="showTab('actions')">عملیات</button>
-      <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display:none">مدیریت</button>
+      <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" id="registerTabBtn" onclick="showTab('register')">Register</button>
+      <button class="tab-btn" onclick="showTab('miner')">Miner</button>
+      <button class="tab-btn" onclick="showTab('actions')">Actions</button>
+      <button class="tab-btn" onclick="showTab('ptoken')">P-Token Market</button>
+      <button class="tab-btn" onclick="showTab('admin')" id="adminTabBtn" style="display:none">Admin</button>
     </div>
 
     <!-- Dashboard -->
     <div id="dashboardTab">
       <div class="stats-grid">
         <div class="stat-box">
-          <div class="stat-label" id="label-poolBalance">موجودی استخر</div>
+          <div class="stat-label">Pool Balance</div>
           <div class="stat-value" id="poolBalance">0 MATIC</div>
         </div>
-
         <div class="stat-box">
-          <div class="stat-label" id="label-minerPool">استخر ماینر</div>
+          <div class="stat-label">Miner Pool</div>
           <div class="stat-value" id="minerPool">0 pToken</div>
         </div>
-
         <div class="stat-box">
-          <div class="stat-label" id="label-specialPool">پاداش ویژه</div>
+          <div class="stat-label">Special Reward</div>
           <div class="stat-value" id="specialPool">0 MATIC</div>
         </div>
-
         <div class="stat-box">
-          <div class="stat-label" id="label-entryFee">کارمزد ورود</div>
+          <div class="stat-label">Entry Fee</div>
           <div class="stat-value" id="entryFeeDisplay">0 MATIC</div>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="card">
-          <h3 id="h-userinfo">👤 اطلاعات کاربری</h3>
-          <div id="userInfo" class="status info">کیف پول متصل نیست</div>
-          <div class="help" id="help-userinfo">پس از اتصال کیف پول، اطلاعات و لینک تراکنش‌ها در اینجا نشان داده می‌شوند.</div>
+          <h3>👤 User Information</h3>
+          <div id="userInfo">Wallet not connected</div>
         </div>
-
         <div class="card">
-          <h3 id="h-tree">🌳 ساختار درختی شما</h3>
+          <h3>🌳 Your Tree Structure</h3>
           <div class="tree-container" id="treeContainer">
-            <div class="node">🔄 ابتدا کیف پول را متصل کنید</div>
+            <div class="node">🔄 Connect wallet to view tree</div>
           </div>
-          <div class="help" id="help-tree">روی هر گره کلیک کن تا زیرمجموعه‌ها باز/بسته شوند — Left/Right IDs کنار هر گره نمایش داده می‌شود.</div>
         </div>
       </div>
     </div>
@@ -531,28 +650,31 @@
     <div id="registerTab" style="display:none">
       <div class="grid-2">
         <div class="card">
-          <h3 id="h-register">📝 ثبت‌نام</h3>
-          <div class="form-group">
-            <label class="form-label" id="label-upline">کد آپلاین</label>
-            <input id="uplineCode" class="form-input" type="number" placeholder="1"/>
+          <h3>📝 Registration</h3>
+          <div id="registerDisabled" style="display:none; padding:30px; text-align:center; color:var(--muted);">
+            <div style="font-size:48px; margin-bottom:16px">✅</div>
+            <div style="font-weight:800; margin-bottom:12px; font-size:20px">Already Registered!</div>
+            <div>You are already part of the network.</div>
           </div>
-          <div class="form-group">
-            <label class="form-label" id="label-position">موقعیت</label>
-            <select id="position" class="form-input">
-              <option value="true">چپ</option>
-              <option value="false">راست</option>
-            </select>
+          <div id="registerForm">
+            <div class="form-group">
+              <label class="form-label">Upline Code</label>
+              <input id="uplineCode" class="form-input" type="number" placeholder="1"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Position</label>
+              <select id="position" class="form-input">
+                <option value="true">Left</option>
+                <option value="false">Right</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="register()">Register (300 MATIC)</button>
           </div>
-          <button class="btn btn-primary" onclick="register()" id="btn-register">ثبت‌نام (300 MATIC)</button>
-          <div id="registerResult"></div>
-          <div id="registerDisabledMessage" style="display:none;margin-top:15px;padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;border:1px solid rgba(239,68,68,0.2);color:#fca5a5">
-            ⚠️ شما قبلاً ثبت‌نام کرده‌اید و نیازی به ثبت‌نام مجدد ندارید.
-          </div>
+          <div id="registerResult" style="margin-top:16px"></div>
         </div>
-
         <div class="card">
-          <h3 id="h-reginfo">📊 اطلاعات ثبت‌نام</h3>
-          <div id="registerInfo" class="status info">پس از اتصال کیف پول، اطلاعات نمایش داده می‌شود</div>
+          <h3>📊 Registration Info</h3>
+          <div id="registerInfo">Connect wallet to view registration info</div>
         </div>
       </div>
     </div>
@@ -561,55 +683,133 @@
     <div id="minerTab" style="display:none">
       <div class="grid-2">
         <div class="card">
-          <h3 id="h-miner">⛏️ عملیات ماینر</h3>
+          <h3>⛏️ Miner Operations</h3>
           <div class="form-group">
-            <label class="form-label" id="label-contribution">مقدار مشارکت (MATIC)</label>
+            <label class="form-label">Contribution Amount (MATIC)</label>
             <input id="contribution" class="form-input" placeholder="0.1"/>
           </div>
-
           <div class="btn-group">
-            <button class="btn btn-success" onclick="contribute()" id="btn-contrib">مشارکت</button>
-            <button class="btn btn-primary" onclick="buyTokens()" id="btn-buy">خرید توکن ماینر</button>
-            <button class="btn btn-success" onclick="distribute()" id="btn-distrib">توزیع توکن‌ها</button>
+            <button class="btn btn-success" onclick="contribute()">Contribute</button>
+            <button class="btn btn-primary" onclick="buyTokens()">Buy Miner Token</button>
+            <button class="btn btn-success" onclick="distribute()">Distribute Tokens</button>
           </div>
-
-          <div id="minerResult"></div>
+          <div id="minerResult" style="margin-top:16px"></div>
         </div>
-
         <div class="card">
-          <h3 id="h-minerinfo">📊 اطلاعات ماینر</h3>
-          <div id="minerInfo" class="status info">اطلاعات ماینر شما</div>
+          <h3>📊 Miner Information</h3>
+          <div id="minerInfo">Your miner information</div>
         </div>
       </div>
     </div>
 
-    <!-- Actions (timers moved here) -->
+    <!-- Actions (With Points & Awards) -->
     <div id="actionsTab" style="display:none">
       <div class="grid-2">
         <div class="card">
-          <h3 id="h-actions">💸 عملیات برداشت</h3>
+          <h3>💸 Withdraw Operations</h3>
+          
+          <!-- Points & Awards Display -->
+          <div class="points-grid">
+            <div class="points-card">
+              <div class="points-label">Commission Points</div>
+              <div class="points-value" id="commissionPoints">0</div>
+            </div>
+            <div class="points-card">
+              <div class="points-label">Special Awards</div>
+              <div class="points-value" id="specialAwards">0</div>
+            </div>
+            <div class="points-card">
+              <div class="points-label">Miner Rewards</div>
+              <div class="points-value" id="minerRewards">0 MATIC</div>
+            </div>
+            <div class="points-card">
+              <div class="points-label">Total Withdrawals</div>
+              <div class="points-value" id="totalWithdrawals">0</div>
+            </div>
+          </div>
 
-          <div class="countdown" style="margin-bottom:12px">
-            <div style="font-weight:700;margin-right:12px" id="poolTimerLabel">اخرین برداشت</div>
+          <div class="countdown" style="margin:20px 0; padding:16px; background:rgba(255,255,255,0.03); border-radius:12px">
+            <div style="font-weight:700; margin-right:12px">Last Withdraw:</div>
             <div id="poolTimerSegments" style="display:flex;gap:6px"></div>
           </div>
 
-          <div class="countdown" style="margin-bottom:12px">
-            <div style="font-weight:700;margin-right:12px" id="specialTimerLabel">برداشت ویژه بعدی</div>
-            <div id="specialTimerSegments" style="display:flex;gap:6px"></div>
+          <div class="btn-group" style="margin-top:20px">
+            <button id="withdrawMainBtn" class="btn btn-success" onclick="withdrawPool()">Withdraw Main Pool</button>
+            <button id="withdrawSpecialBtn" class="btn btn-primary" onclick="withdrawSpecial()">Withdraw Special</button>
           </div>
-
-          <div class="btn-group" style="margin-top:10px">
-            <button id="withdrawMainBtn" class="btn btn-success" onclick="withdrawPool()">برداشت از استخر اصلی</button>
-            <button id="withdrawSpecialBtn" class="btn btn-primary" onclick="withdrawSpecial()">برداشت پاداش ویژه</button>
-          </div>
-
-          <div id="withdrawResult" style="margin-top:12px"></div>
+          <div id="withdrawResult" style="margin-top:16px"></div>
         </div>
-
         <div class="card">
-          <h3 id="h-withdrawinfo">📈 وضعیت برداشت</h3>
-          <div id="withdrawInfo" class="status info">وضعیت برداشت‌های شما</div>
+          <h3>📈 Withdraw Status</h3>
+          <div id="withdrawInfo">Your withdrawal status</div>
+          <div style="margin-top:20px">
+            <h4>📊 Activity History</h4>
+            <div id="activityHistory" style="margin-top:12px">
+              <div style="padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:8px">
+                <div style="display:flex; justify-content:space-between">
+                  <span>Connect wallet to view history</span>
+                  <span style="color:var(--muted); font-size:12px">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-Token Market -->
+    <div id="ptokenTab" style="display:none">
+      <div class="grid-2">
+        <div class="card">
+          <h3>💰 P-Token Market</h3>
+          <div style="background:rgba(255,215,0,0.05); padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid rgba(255,215,0,0.2)">
+            <div style="color:var(--muted); font-size:14px">Current Price</div>
+            <div style="font-size:32px; font-weight:800; color:var(--gold)" id="ptokenPrice">0.00 MATIC</div>
+            <div style="color:var(--muted); font-size:12px; margin-top:4px" id="priceUpdate">Live</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your P-Token Balance</label>
+            <div style="font-size:24px; font-weight:800; color:var(--accent)" id="ptokenBalance">0 PTOKEN</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Amount to Sell</label>
+            <input id="sellAmount" class="form-input" placeholder="0.0"/>
+            <div style="font-size:12px; color:var(--muted); margin-top:8px">
+              You will receive: <span id="receiveAmount" style="color:var(--success); font-weight:700">0 MATIC</span>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn" onclick="setMaxPTokens()" style="background:rgba(255,255,255,0.05)">Max</button>
+            <button class="btn btn-primary" onclick="sellPTokens()">Sell P-Tokens</button>
+          </div>
+          <div id="sellResult" style="margin-top:16px"></div>
+        </div>
+        <div class="card">
+          <h3>📈 Market Information</h3>
+          <div style="margin-top:20px">
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--glass-border)">
+              <span style="color:var(--muted)">Total Supply</span>
+              <span style="font-weight:700" id="totalSupply">0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--glass-border)">
+              <span style="color:var(--muted)">Backing MATIC</span>
+              <span style="font-weight:700" id="backingMatic">0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--glass-border)">
+              <span style="color:var(--muted)">Contract Balance</span>
+              <span style="font-weight:700" id="contractBalance">0 MATIC</span>
+            </div>
+          </div>
+
+          <div style="margin-top:30px">
+            <h4>💡 How it works</h4>
+            <div style="font-size:14px; color:var(--muted); margin-top:12px; line-height:1.6">
+              P-Token price is backed by MATIC in the contract. Selling returns MATIC based on current backing ratio.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -618,80 +818,43 @@
     <div id="adminTab" style="display:none">
       <div class="grid-2">
         <div class="card">
-          <h3 id="h-admin">⚙️ تنظیمات قرارداد</h3>
+          <h3>⚙️ Contract Settings</h3>
           <div class="form-group">
-            <label class="form-label" id="label-newFee">کارمزد جدید (wei)</label>
+            <label class="form-label">New Entry Fee (wei)</label>
             <input id="newFee" class="form-input" placeholder="300000000000000000000"/>
           </div>
-          <button class="btn btn-danger" onclick="updateFee()">بروزرسانی کارمزد</button>
+          <button class="btn btn-danger" onclick="updateFee()">Update Entry Fee</button>
           <div id="adminResult"></div>
         </div>
-
         <div class="card">
-          <h3 id="h-admin2">🚫 مدیریت ماینرها</h3>
+          <h3>🚫 Miner Management</h3>
           <div class="form-group">
-            <label class="form-label" id="label-addresses">آدرس‌های حذف (با کاما جدا)</label>
+            <label class="form-label">Addresses to Remove (comma separated)</label>
             <textarea id="addresses" class="form-input" rows="4" placeholder="0x123...,0x456..."></textarea>
           </div>
-          <button class="btn btn-danger" onclick="removeMiners()">حذف ماینرها</button>
+          <button class="btn btn-danger" onclick="removeMiners()">Remove Miners</button>
         </div>
       </div>
     </div>
 
+    <!-- Loading -->
     <div class="loading" id="loading"><div class="spinner"></div></div>
 
-    <footer id="footerText">SPS Network • Contract: 0x7a7b06D49129B34976D07B3854d4D72D01588191 • Polygon Mainnet</footer>
+    <footer>SPS Network v2.0 • Advanced DApp • Powered by Polygon</footer>
   </div>
 
 <script>
-/* ================= TRANSLATIONS (Professional A) ================= */
-const translations = {
-  fa: { dashboard:"داشبورد", register:"ثبت‌نام", miner:"ماینر", actions:"عملیات", admin:"مدیریت",
-        connect_wallet:"اتصال کیف پول", pool_balance:"موجودی استخر", miner_pool:"استخر ماینر",
-        special_pool:"پاداش ویژه", entry_fee:"کارمزد ورود", user_info:"اطلاعات کاربری",
-        tree_title:"ساختار درختی شما", register_label:"کد آپلاین", position:"موقعیت",
-        contribution:"مقدار مشارکت (MATIC)", buy_miner:"خرید توکن ماینر", distribute:"توزیع توکن‌ها",
-        withdraw_pool:"برداشت از استخر اصلی", withdraw_special:"برداشت پاداش ویژه",
-        last_pool_label:"اخرین برداشت", special_label:"برداشت ویژه بعدی",
-        registration_fee_text:"ثبت‌نام (300 MATIC)", miner_info:"اطلاعات ماینر شما",
-        pool_timer_title:"زمان تا برداشت بعدی استخر اصلی" },
-  en: { dashboard:"Dashboard", register:"Register", miner:"Miner", actions:"Operations", admin:"Admin",
-        connect_wallet:"Connect Wallet", pool_balance:"Pool Balance", miner_pool:"Miner Pool",
-        special_pool:"Special Reward", entry_fee:"Entry Fee", user_info:"User Info",
-        tree_title:"Your Tree Structure", register_label:"Upline Code", position:"Position",
-        contribution:"Contribution (MATIC)", buy_miner:"Buy Miner Token", distribute:"Distribute Tokens",
-        withdraw_pool:"Withdraw Main Pool", withdraw_special:"Withdraw Special",
-        last_pool_label:"Last Withdraw", special_label:"Next Special Withdraw",
-        registration_fee_text:"Register (300 MATIC)", miner_info:"Your Miner Info",
-        pool_timer_title:"Time until next main-pool withdraw" }
-};
-let lang = localStorage.getItem('sps_lang') || 'fa';
-function t(k){ return translations[lang] && translations[lang][k] ? translations[lang][k] : k; }
-
-/* ================= CONSTANTS + ABI (NO LOGIC CHANGES) ================= */
-const CONTRACT_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
+/* ================= CONSTANTS ================= */
+const SPS_ADDRESS = "0x7a7b06D49129B34976D07B3854d4D72D01588191";
 const PTOKEN_ADDRESS = "0x82F7dBe1792436d15bdA22bB3340bD3f45D614Fa";
 const POLYGON_CHAIN_ID = "0x89";
 const ENTRY_FEE = "300000000000000000000"; // 300 MATIC
 
-const CONTRACT_ABI = [
-  /* ABI unchanged - same functions as before */
+// SPS Contract ABI (simplified - only essential functions)
+const SPS_ABI = [
   {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"DebugMessage","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"EntryFeeUpdated","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"poolType","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"ManualWithdraw","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"contributor","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"MinerPoolContribution","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"}],"name":"MinerRemoved","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}],"name":"MinerTokensBought","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"poolType","type":"string"}],"name":"NoEligibleUsers","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"address","name":"upline","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"Registered","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"id","type":"uint256"}],"name":"UserMigrated","type":"event"},
   {"inputs":[],"name":"CYCLE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"ENTRY_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"MAX_CYCLE_BALANCES","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"MINER_BUY_INTERVAL","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"PTOKEN_CONTRACT","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"_getSpecialUserInfoForMigrateToNewFork","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userAddress","type":"address"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"address","name":"upline","type":"address"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"address[]","name":"usersToRemove","type":"address[]"}],"name":"batchRemoveMiners","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[],"name":"buyMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},
@@ -699,83 +862,100 @@ const CONTRACT_ABI = [
   {"inputs":[],"name":"distributeMinerTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[],"name":"eligiblePoolUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"eligibleSpecialUserCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"eligibleSpecialUserCount","stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"getMinerStats","outputs":[{"internalType":"uint256","name":"checkedOutPaidCount","type":"uint256"},{"internalType":"uint256","name":"eligibleInProgressCount","type":"uint256"},{"internalType":"uint256","name":"totalRemain","type":"uint256"},{"internalType":"uint256","name":"networkerCount","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"percent","type":"uint256"}],"name":"getMinerStatsByPercent","outputs":[{"internalType":"uint256","name":"usersAbovePercent","type":"uint256"},{"internalType":"uint256","name":"totalRemaining","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"getSpecialPoolParticipants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"getTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"userId","type":"uint256"}],"name":"getUserDirects","outputs":[{"internalType":"uint256","name":"leftId","type":"uint256"},{"internalType":"uint256","name":"rightId","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserInfo","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"uint256","name":"leftCount","type":"uint256"},{"internalType":"uint256","name":"rightCount","type":"uint256"},{"internalType":"uint256","name":"saveLeft","type":"uint256"},{"internalType":"uint256","name":"saveRight","type":"uint256"},{"internalType":"uint256","name":"balanceCount","type":"uint256"},{"internalType":"uint256","name":"specialBalanceCount","type":"uint256"},{"internalType":"uint256","name":"totalMinerRewards","type":"uint256"},{"internalType":"uint256","name":"entryPrice","type":"uint256"},{"internalType":"bool","name":"isMiner","type":"bool"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint8","name":"day","type":"uint8"}],"name":"isCurrentTimeMatchToDay","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"isPoolWithdrawable","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"lastMinerBuyTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"lastPoolWithdrawTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"minerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"minerTokenPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"userWallet","type":"address"},{"internalType":"uint256","name":"uplineId","type":"uint256"},{"internalType":"address","name":"leftChildAddress","type":"address"},{"internalType":"address","name":"rightChildAddress","type":"address"},{"internalType":"uint256","name":"oldLeftCount","type":"uint256"},{"internalType":"uint256","name":"oldRightCount","type":"uint256"},{"internalType":"uint256","name":"oldLeftSave","type":"uint256"},{"internalType":"uint256","name":"oldRightSave","type":"uint256"}],"name":"mpu","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[],"name":"ownerPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"pendingMinerFunds","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"poolPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"poolPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"uint256","name":"uplineCode","type":"uint256"},{"internalType":"bool","name":"placeOnLeft","type":"bool"}],"name":"register","outputs":[],"stateMutability":"payable","type":"function"},
-  {"inputs":[],"name":"specialPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[],"name":"specialPointCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"specialPointCount","stateMutability":"view","type":"function"},
   {"inputs":[],"name":"specialRewardPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  {"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"totalUsers","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  {"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"uint256","name":"newFee","type":"uint256"}],"name":"updateEntryFee","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  {"inputs":[],"name":"userTokenPercentage","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[],"name":"withdrawPool","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[],"name":"withdrawSpecials","outputs":[],"stateMutability":"nonpayable","type":"function"}
 ];
 
+// P-Token Contract ABI (from your provided data)
+const PTOKEN_ABI = [{"inputs":[{"internalType":"address","name":"_projectWallet","type":"address"}],"stateMutability":"payable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"maticAmount","type":"uint256"}],"name":"BackingIncreased","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":false,"internalType":"uint256","name":"maticAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"pTokenAmount","type":"uint256"}],"name":"BuyPToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"donor","type":"address"},{"indexed":false,"internalType":"uint256","name":"maticAmount","type":"uint256"}],"name":"DonationAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"uint256","name":"pTokenAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"maticAmount","type":"uint256"}],"name":"SellPToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"BACKING_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"FEE_DENOMINATOR","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"FEE_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"INITIAL_BACKING","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"INITIAL_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PROJECT_FEE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"buyPToken","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"donateToBacking","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getContractMaticBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getPTokenPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getPTokenPriceInWei","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"lockedSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"minPTokenAmount","type":"uint256"}],"name":"safeBuyPToken","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"pTokenAmount","type":"uint256"}],"name":"sellPToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalBackingMatic","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}];
+
 /* ================= STATE ================= */
-let provider, signer, contract, userAddress, isOwner=false, currentTxHash=null, userHasId=false;
+let provider, signer, contractSPS, contractPToken, userAddress;
+let isOwner = false, userHasId = false, ptokenDecimals = 18;
+let currentTxHash = null;
 
-/* ================= NEW FEATURES ================= */
+/* ================= AI PARTICLES BACKGROUND ================= */
+const particlesCanvas = document.getElementById('aiParticles');
+let particlesCtx, particles = [];
 
-/* ================ Transaction Hash Panel ================ */
-function showTxPanel(txHash) {
-  currentTxHash = txHash;
-  const panel = document.getElementById('txPanel');
-  const hashDisplay = document.getElementById('txHashDisplay');
+function initParticles() {
+  if (!particlesCanvas) return;
   
-  hashDisplay.textContent = txHash;
-  panel.classList.add('active');
+  particlesCanvas.width = window.innerWidth;
+  particlesCanvas.height = window.innerHeight;
+  particlesCtx = particlesCanvas.getContext('2d');
   
-  // Auto-close after 30 seconds
-  setTimeout(() => {
-    if (panel.classList.contains('active')) {
-      closeTxPanel();
-    }
-  }, 30000);
+  // Create particles
+  particles = [];
+  const particleCount = Math.min(50, Math.floor(window.innerWidth * window.innerHeight / 20000));
+  
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * particlesCanvas.width,
+      y: Math.random() * particlesCanvas.height,
+      size: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      color: `rgba(${Math.floor(Math.random() * 100 + 100)}, ${Math.floor(Math.random() * 100 + 100)}, ${Math.floor(Math.random() * 255)}, ${Math.random() * 0.3 + 0.1})`
+    });
+  }
+  
+  animateParticles();
 }
 
-function closeTxPanel() {
-  document.getElementById('txPanel').classList.remove('active');
-  currentTxHash = null;
-}
-
-function copyTxHash() {
-  if (!currentTxHash) return;
+function animateParticles() {
+  if (!particlesCtx) return;
   
-  navigator.clipboard.writeText(currentTxHash).then(() => {
-    const btn = document.querySelector('.tx-btn');
-    const originalText = btn.textContent;
-    btn.textContent = '✅ کپی شد';
-    setTimeout(() => {
-      btn.textContent = originalText;
-    }, 2000);
+  // Clear with fade effect
+  particlesCtx.fillStyle = 'rgba(10, 10, 26, 0.05)';
+  particlesCtx.fillRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+  
+  // Update and draw particles
+  particles.forEach(particle => {
+    particle.x += particle.speedX;
+    particle.y += particle.speedY;
+    
+    // Boundary check
+    if (particle.x < 0 || particle.x > particlesCanvas.width) particle.speedX *= -1;
+    if (particle.y < 0 || particle.y > particlesCanvas.height) particle.speedY *= -1;
+    
+    // Draw particle
+    particlesCtx.beginPath();
+    particlesCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+    particlesCtx.fillStyle = particle.color;
+    particlesCtx.fill();
+    
+    // Draw connections
+    particles.forEach(otherParticle => {
+      const dx = particle.x - otherParticle.x;
+      const dy = particle.y - otherParticle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < 100) {
+        particlesCtx.beginPath();
+        particlesCtx.strokeStyle = `rgba(99, 102, 241, ${0.2 * (1 - distance / 100)})`;
+        particlesCtx.lineWidth = 0.5;
+        particlesCtx.moveTo(particle.x, particle.y);
+        particlesCtx.lineTo(otherParticle.x, otherParticle.y);
+        particlesCtx.stroke();
+      }
+    });
   });
-}
-
-function viewOnPolygonscan() {
-  if (!currentTxHash) return;
   
-  window.open(`https://polygonscan.com/tx/${currentTxHash}`, '_blank');
+  requestAnimationFrame(animateParticles);
 }
 
-/* ================ Mobile Menu Functions ================ */
+/* ================= MOBILE MENU ================= */
 function initMobileMenu() {
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const mobileOverlay = document.getElementById('mobileOverlay');
@@ -783,13 +963,15 @@ function initMobileMenu() {
   
   if (!hamburgerBtn || !mobileOverlay || !mobileMenu) return;
   
-  // Update mobile tabs on language change
+  // Create mobile tabs
   updateMobileTabs();
+  
+  // Event listeners
+  hamburgerBtn.addEventListener('click', toggleMobileMenu);
+  mobileOverlay.addEventListener('click', closeMobileMenu);
   
   // Handle resize
   window.addEventListener('resize', handleResize);
-  
-  // Initial check
   handleResize();
 }
 
@@ -818,11 +1000,12 @@ function updateMobileTabs() {
   if (!tabsContainer) return;
   
   const tabs = [
-    { id: 'dashboard', name: { fa: 'داشبورد', en: 'Dashboard' } },
-    { id: 'register', name: { fa: 'ثبت‌نام', en: 'Register' } },
-    { id: 'miner', name: { fa: 'ماینر', en: 'Miner' } },
-    { id: 'actions', name: { fa: 'عملیات', en: 'Operations' } },
-    { id: 'admin', name: { fa: 'مدیریت', en: 'Admin' } }
+    { id: 'dashboard', name: 'Dashboard' },
+    { id: 'register', name: 'Register' },
+    { id: 'miner', name: 'Miner' },
+    { id: 'actions', name: 'Actions' },
+    { id: 'ptoken', name: 'P-Token Market' },
+    { id: 'admin', name: 'Admin' }
   ];
   
   tabsContainer.innerHTML = '';
@@ -830,7 +1013,7 @@ function updateMobileTabs() {
   tabs.forEach(tab => {
     const btn = document.createElement('button');
     btn.className = 'mobile-tab-btn';
-    btn.textContent = lang === 'fa' ? tab.name.fa : tab.name.en;
+    btn.textContent = tab.name;
     
     // Hide admin tab if not owner
     if (tab.id === 'admin' && !isOwner) {
@@ -843,14 +1026,6 @@ function updateMobileTabs() {
     };
     tabsContainer.appendChild(btn);
   });
-  
-  // Update wallet address in mobile menu
-  if (userAddress) {
-    const mobileWallet = document.getElementById('mobileWalletAddress');
-    if (mobileWallet) {
-      mobileWallet.textContent = userAddress;
-    }
-  }
 }
 
 function handleResize() {
@@ -858,624 +1033,667 @@ function handleResize() {
   const desktopTabs = document.querySelector('.tabs');
   
   if (window.innerWidth <= 768) {
-    // Mobile view
     if (desktopTabs) desktopTabs.style.display = 'none';
     if (hamburgerBtn) hamburgerBtn.style.display = 'flex';
   } else {
-    // Desktop view
     if (desktopTabs) desktopTabs.style.display = 'flex';
     if (hamburgerBtn) hamburgerBtn.style.display = 'none';
-    
-    // Close mobile menu if open
     closeMobileMenu();
   }
 }
 
-/* ================ Register Tab Control ================ */
-function checkUserRegistration() {
-  if (!contract || !userAddress) return;
+/* ================= TRANSACTION PANEL ================= */
+function showTxPanel(txHash) {
+  currentTxHash = txHash;
+  const panel = document.getElementById('txPanel');
+  const hashDisplay = document.getElementById('txHashDisplay');
   
-  contract.getUserInfo(userAddress).then(userInfo => {
-    const userId = Number(userInfo[0]);
-    const registerBtn = document.getElementById('btn-register');
-    const registerDisabledMsg = document.getElementById('registerDisabledMessage');
-    const registerTab = document.getElementById('registerTab');
-    
-    if (userId > 0) {
-      // User has ID - disable registration
-      userHasId = true;
-      if (registerBtn) registerBtn.style.display = 'none';
-      if (registerDisabledMsg) registerDisabledMsg.style.display = 'block';
-      
-      // Also hide register tab in mobile menu
-      const mobileRegisterBtn = document.querySelector('.mobile-tab-btn:nth-child(2)');
-      if (mobileRegisterBtn) mobileRegisterBtn.style.display = 'none';
-      
-      // Hide register tab in desktop if we're on register tab
-      if (registerTab.style.display !== 'none') {
-        showTab('dashboard');
-      }
-    } else {
-      // User doesn't have ID - enable registration
-      userHasId = false;
-      if (registerBtn) registerBtn.style.display = 'block';
-      if (registerDisabledMsg) registerDisabledMsg.style.display = 'none';
-      
-      // Show register tab in mobile menu
-      const mobileRegisterBtn = document.querySelector('.mobile-tab-btn:nth-child(2)');
-      if (mobileRegisterBtn) mobileRegisterBtn.style.display = 'block';
+  hashDisplay.textContent = txHash;
+  panel.classList.add('active');
+  
+  // Auto-close after 30 seconds
+  setTimeout(() => {
+    if (panel.classList.contains('active')) {
+      closeTxPanel();
     }
-  }).catch(() => {
-    // Error getting user info - assume no ID
-    userHasId = false;
+  }, 30000);
+}
+
+function closeTxPanel() {
+  document.getElementById('txPanel').classList.remove('active');
+  currentTxHash = null;
+}
+
+function copyTxHash() {
+  if (!currentTxHash) return;
+  
+  navigator.clipboard.writeText(currentTxHash).then(() => {
+    const btn = document.querySelector('.tx-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 2000);
   });
+}
+
+function viewOnPolygonscan() {
+  if (!currentTxHash) return;
+  window.open(`https://polygonscan.com/tx/${currentTxHash}`, '_blank');
 }
 
 /* ================= UI HELPERS ================= */
-function showStatus(message, type='info', targetId='userInfo'){
+function showStatus(message, targetId = 'userInfo', type = 'info') {
   const el = document.getElementById(targetId);
-  if(!el) return console.log('missing target', targetId);
-  el.className = `status ${type}`;
-  el.innerHTML = message;
-  console.log(`[${type.toUpperCase()}] ${message.replace(/<[^>]*>/g,'')}`);
-}
-function showLoading(show){ const el = document.getElementById('loading'); if(el) el.style.display = show ? 'flex' : 'none'; }
-function showPending(txHash, targetId){
-  const link = `https://polygonscan.com/tx/${txHash}`;
-  const el = document.getElementById(targetId);
-  if(el) el.innerHTML = `<div class="status info">⏳ Transaction sent — pending...<div style="margin-top:8px"><a href="${link}" target="_blank" class="tx-link">View on Polygonscan</a></div></div>`;
-}
-function showTransactionLink(txHash, targetId){
-  const link = `https://polygonscan.com/tx/${txHash}`;
-  const el = document.getElementById(targetId);
-  if(el) el.innerHTML = `<div class="status success">✅ Transaction mined<div style="margin-top:8px"><a href="${link}" target="_blank" class="tx-link">View on Polygonscan</a></div></div>`;
-}
-
-/* ================= Confetti (visual) ================= */
-const confettiCanvas = document.getElementById('confetti');
-const confettiCtx = confettiCanvas.getContext ? confettiCanvas.getContext('2d') : null;
-let confettiPieces = [];
-function resizeConfetti(){ if(confettiCanvas){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; } }
-window.addEventListener('resize', resizeConfetti);
-function spawnConfetti(){
-  if(!confettiCtx) return;
-  confettiCanvas.style.display = 'block';
-  for(let i=0;i<120;i++){
-    confettiPieces.push({ x: Math.random()*confettiCanvas.width, y: -Math.random()*confettiCanvas.height, vx:(Math.random()-0.5)*6, vy:2+Math.random()*6, size:6+Math.random()*8, color:['#3b82f6','#8b5cf6','#00ffd5','#ffb86b'][Math.floor(Math.random()*4)], rot:Math.random()*360, rotV:(Math.random()-0.5)*10 });
-  }
-  let anim;
-  function draw(){
-    confettiCtx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-    confettiPieces.forEach((p,i)=>{
-      confettiCtx.save();
-      confettiCtx.translate(p.x,p.y);
-      confettiCtx.rotate(p.rot*Math.PI/180);
-      confettiCtx.fillStyle = p.color;
-      confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
-      confettiCtx.restore();
-      p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-      if(p.y > confettiCanvas.height+50){ confettiPieces.splice(i,1); }
-    });
-    if(confettiPieces.length>0) requestAnimationFrame(draw);
-    else { confettiCanvas.style.display='none'; }
-  }
-  draw();
-}
-
-/* ================= Neon Particles (premium, optimized) ================= */
-const neonCanvas = document.getElementById('neonParticles');
-const neonCtx = neonCanvas.getContext ? neonCanvas.getContext('2d') : null;
-let neonParticles = [];
-function resizeNeon(){ if(neonCanvas){ neonCanvas.width = window.innerWidth; neonCanvas.height = window.innerHeight; } }
-window.addEventListener('resize', resizeNeon);
-
-function initNeonParticles(count=70){
-  neonParticles = [];
-  for(let i=0;i<count;i++){
-    neonParticles.push({
-      x: Math.random()*window.innerWidth,
-      y: Math.random()*window.innerHeight,
-      r: 1 + Math.random()*3,
-      vx: (Math.random()-0.5)*0.25,
-      vy: (Math.random()-0.5)*0.45,
-      hue: 200 + Math.random()*120,
-      alpha: 0.06 + Math.random()*0.24,
-      pulse: Math.random()*2 + 0.8,
-      t: Math.random()*1000
-    });
-  }
-}
-function drawNeon(){
-  if(!neonCtx) return;
-  neonCtx.clearRect(0,0,neonCanvas.width, neonCanvas.height);
-  neonParticles.forEach(p=>{
-    p.t += 0.01;
-    p.x += p.vx + Math.sin(p.t*0.4)*0.15;
-    p.y += p.vy + Math.cos(p.t*0.3)*0.12;
-    if(p.x < -60) p.x = neonCanvas.width + 60;
-    if(p.x > neonCanvas.width + 60) p.x = -60;
-    if(p.y < -60) p.y = neonCanvas.height + 60;
-    if(p.y > neonCanvas.height + 60) p.y = -60;
-
-    const glowR = p.r*8 + Math.abs(Math.sin(p.t))*6;
-    const g = neonCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR*1.6);
-    g.addColorStop(0, `hsla(${p.hue},100%,65%,${p.alpha})`);
-    g.addColorStop(1, `hsla(${(p.hue+40)%360},80%,55%,${p.alpha*0.06})`);
-    neonCtx.fillStyle = g;
-    neonCtx.beginPath();
-    neonCtx.arc(p.x, p.y, glowR, 0, Math.PI*2);
-    neonCtx.fill();
-
-    neonCtx.fillStyle = `hsla(${p.hue},100%,70%,0.9)`;
-    neonCtx.beginPath();
-    neonCtx.arc(p.x, p.y, p.r*(1+Math.abs(Math.sin(p.t))*0.6), 0, Math.PI*2);
-    neonCtx.fill();
-  });
-  requestAnimationFrame(drawNeon);
-}
-
-/* initialize visuals */
-function startVisuals(){ resizeConfetti(); resizeNeon(); initNeonParticles(70); drawNeon(); }
-
-/* ================= Language switcher (full FA/EN) ================= */
-document.getElementById('btn-fa').onclick = ()=>{
-  lang = 'fa'; localStorage.setItem('sps_lang','fa');
-  document.getElementById('btn-fa').classList.add('active'); document.getElementById('btn-en').classList.remove('active');
-  setLanguage();
-};
-document.getElementById('btn-en').onclick = ()=>{
-  lang = 'en'; localStorage.setItem('sps_lang','en');
-  document.getElementById('btn-en').classList.add('active'); document.getElementById('btn-fa').classList.remove('active');
-  setLanguage();
-};
-if(lang==='fa') document.getElementById('btn-fa').classList.add('active'); else document.getElementById('btn-en').classList.add('active');
-
-function setLanguage(){
-  document.documentElement.setAttribute('dir', lang==='en' ? 'ltr' : 'rtl');
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  if(lang==='fa'){ tabBtns[0].textContent = translations.fa.dashboard; tabBtns[1].textContent = translations.fa.register; tabBtns[2].textContent = translations.fa.miner; tabBtns[3].textContent = translations.fa.actions; tabBtns[4].textContent = translations.fa.admin; }
-  else { tabBtns[0].textContent = translations.en.dashboard; tabBtns[1].textContent = translations.en.register; tabBtns[2].textContent = translations.en.miner; tabBtns[3].textContent = translations.en.actions; tabBtns[4].textContent = translations.en.admin; }
-  document.getElementById('connectBtn').textContent = t('connect_wallet');
-  document.getElementById('label-poolBalance').textContent = t('pool_balance');
-  document.getElementById('label-minerPool').textContent = t('miner_pool');
-  document.getElementById('label-specialPool').textContent = t('special_pool');
-  document.getElementById('label-entryFee').textContent = t('entry_fee');
-  document.getElementById('h-userinfo').textContent = t('user_info');
-  document.getElementById('h-tree').textContent = t('tree_title');
-  document.getElementById('label-upline').textContent = t('register_label');
-  document.getElementById('label-position').textContent = t('position');
-  document.getElementById('btn-register').textContent = t('registration_fee_text');
-  document.getElementById('label-contribution').textContent = t('contribution');
-  document.getElementById('btn-buy').textContent = t('buy_miner');
-  document.getElementById('btn-distrib').textContent = t('distribute');
-  document.getElementById('poolTimerLabel').textContent = `${t('last_pool_label')}:`;
-  document.getElementById('specialTimerLabel').textContent = t('special_label');
-  document.getElementById('h-actions').textContent = (lang==='en' ? 'Operations' : 'عملیات');
-  document.getElementById('footerText').textContent = lang==='en' ? `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet` : `SPS Network • Contract: ${CONTRACT_ADDRESS} • Polygon Mainnet`;
+  if (!el) return;
   
-  // Update mobile menu tabs
-  updateMobileTabs();
+  const color = type === 'error' ? 'var(--danger)' : 
+                type === 'success' ? 'var(--success)' : 
+                type === 'warning' ? 'var(--warning)' : 'white';
+  
+  el.innerHTML = `<div style="color:${color}">${message}</div>`;
 }
 
-/* ================= TX handler (MODIFIED to show tx panel) ================= */
-async function handleTx(txPromise, targetId){
-  try{
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'flex' : 'none';
+}
+
+async function handleTx(txPromise, targetId) {
+  try {
     showLoading(true);
     const tx = await txPromise;
-    showPending(tx.hash, targetId);
     
-    // Show transaction hash in panel
+    // Show transaction panel
     showTxPanel(tx.hash);
     
+    showStatus(`⏳ Transaction sent... <a href="https://polygonscan.com/tx/${tx.hash}" target="_blank" style="color:var(--primary)">View</a>`, targetId);
+    
     const receipt = await tx.wait();
-    showTransactionLink(tx.hash, targetId);
-    spawnConfetti();
-    return receipt;
-  }catch(err){
-    const el = document.getElementById(targetId);
-    if(el) el.innerHTML = `<div class="status error">❌ ${err.message}</div>`;
-    throw err;
-  }finally{ showLoading(false); }
-}
-
-/* ================= Tree: show Left/Right IDs + counts (unchanged logic) ================= */
-async function buildTreeHtml(nodeId, depth=0, maxDepth=6){
-  try{
-    if(depth > maxDepth) return '';
-    const info = await contract._getSpecialUserInfoForMigrateToNewFork(nodeId).catch(()=>null);
-    const directs = await contract.getUserDirects(nodeId).catch(()=>[0,0]);
-    const leftId = directs[0] ? Number(directs[0]) : 0;
-    const rightId = directs[1] ? Number(directs[1]) : 0;
-    let leftCount=0, rightCount=0;
-    if(info){ leftCount = info[2] ? Number(info[2]) : 0; rightCount = info[3] ? Number(info[3]) : 0; }
-    let html = `<div class="node" data-id="${nodeId}" style="margin-${document.documentElement.dir==='rtl'?'right':'left'}:${depth*12}px">`;
-    html += `<div style="display:flex;flex-direction:column;gap:6px"><div style="font-weight:800">${lang==='en'?'User #':'کاربر #'}${nodeId}</div>`;
-    html += `<div class="meta">${lang==='en'?'Left:':'چپ:'} ${leftId?('#'+leftId):'—'}  |  ${lang==='en'?'Right:':'راست:'} ${rightId?('#'+rightId):'—'}</div>`;
-    html += `<div class="meta">${lang==='en'?'L Count':'چپ'}: ${leftCount}  |  ${lang==='en'?'R Count':'راست'}: ${rightCount}  |  ${lang==='en'?'Total':'جمع'}: ${leftCount+rightCount}</div>`;
-    html += `</div>`;
-    if(leftId>0 || rightId>0) html += `<div><button class="toggle-btn" data-target="${nodeId}">${lang==='en'?'[toggle]':'[باز/بسته]'}</button></div>`;
-    html += `</div>`;
-    if(leftId>0 || rightId>0){
-      html += `<div class="children" id="children-${nodeId}" style="display:none">`;
-      if(leftId>0) html += await buildTreeHtml(leftId, depth+1, maxDepth);
-      if(rightId>0) html += await buildTreeHtml(rightId, depth+1, maxDepth);
-      html += `</div>`;
+    showStatus(`✅ Transaction confirmed! <a href="https://polygonscan.com/tx/${tx.hash}" target="_blank" style="color:var(--success)">View</a>`, targetId, 'success');
+    
+    // Reload data
+    await loadDashboardData();
+    if (document.getElementById('ptokenTab').style.display !== 'none') {
+      await loadPTokenMarket();
     }
-    return html;
-  }catch(e){
-    console.error('buildTreeHtml error', e);
-    return `<div class="node">⚠️ ${lang==='en'?'Error loading node':'خطا در بارگذاری گره'} ${nodeId}</div>`;
+    
+    return receipt;
+  } catch (error) {
+    showStatus(`❌ Error: ${error.message || 'Transaction failed'}`, targetId, 'error');
+    throw error;
+  } finally {
+    showLoading(false);
   }
 }
-async function loadTreeStructure(userId){
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = `<div class="node">🔄 ${lang==='en'?'Loading tree...':'در حال بارگذاری ساختار...'}</div>`;
-  try{
-    const html = await buildTreeHtml(userId);
-    container.innerHTML = html || `<div class="node">📭 ${lang==='en'?'No descendants':'هیچ زیرمجموعه‌ای وجود ندارد'}</div>`;
-    container.querySelectorAll('.toggle-btn').forEach(btn=>{
-      btn.onclick = ()=>{
-        const id = btn.getAttribute('data-target');
-        const el = document.getElementById('children-'+id);
-        if(!el) return;
-        el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
-      };
-    });
-  }catch(err){ console.error('loadTreeStructure error', err); container.innerHTML = `<div class="node">⚠️ ${lang==='en'?'Tree load error':'خطا در بارگذاری ساختار'}</div>`; }
+
+/* ================= POINTS & AWARDS ================= */
+async function loadPointsAndAwards() {
+  if (!contractSPS || !userAddress) return;
+  
+  try {
+    const userInfo = await contractSPS.getUserInfo(userAddress);
+    
+    // Update points display
+    document.getElementById('commissionPoints').textContent = Number(userInfo[6]); // balanceCount
+    document.getElementById('specialAwards').textContent = Number(userInfo[7]); // specialBalanceCount
+    document.getElementById('minerRewards').textContent = ethers.formatEther(userInfo[8]).substring(0, 10) + ' MATIC'; // totalMinerRewards
+    
+    // Calculate total withdrawals (approximate)
+    const totalWithdrawals = Number(userInfo[6]) + Number(userInfo[7]);
+    document.getElementById('totalWithdrawals').textContent = totalWithdrawals;
+    
+  } catch (error) {
+    console.error('Error loading points:', error);
+  }
 }
 
-/* ================ PRE-CHECKS BEFORE WITHDRAW ================ */
-async function canWithdrawPool(){
-  try{
-    if(!contract) return {ok:false, reason: lang==='en' ? 'Contract not initialized' : 'قرارداد آماده نیست'};
-    const withdrawable = await contract.isPoolWithdrawable().catch(()=>false);
-    if(!withdrawable) return {ok:false, reason: lang==='en' ? 'Pool is not withdrawable now' : 'در این زمان برداشت از استخر امکان‌پذیر نیست'};
-    const poolBal = await contract.poolBalance().catch(()=>0);
-    if(Number(poolBal) === 0) return {ok:false, reason: lang==='en' ? 'Pool balance is zero' : 'موجودی استخر صفر است'};
-    const eligibleCount = await contract.eligiblePoolUserCount().catch(()=>0);
-    if(Number(eligibleCount) === 0) return {ok:false, reason: lang==='en' ? 'No eligible users in this pool' : 'در این دوره کاربری واجد شرایط نیست'};
-    return {ok:true, reason: ''};
-  }catch(e){ console.error('canWithdrawPool error', e); return {ok:false, reason: lang==='en' ? 'Pre-check failed' : 'بررسی پیش از ارسال ناموفق بود'}; }
+/* ================= REGISTRATION CONTROL ================= */
+async function checkUserRegistration() {
+  if (!contractSPS || !userAddress) return;
+  
+  try {
+    const userInfo = await contractSPS.getUserInfo(userAddress);
+    const userId = Number(userInfo[0]);
+    
+    userHasId = userId > 0;
+    const registerTabBtn = document.getElementById('registerTabBtn');
+    const registerForm = document.getElementById('registerForm');
+    const registerDisabled = document.getElementById('registerDisabled');
+    
+    if (userHasId) {
+      registerTabBtn.style.display = 'none';
+      if (registerForm) registerForm.style.display = 'none';
+      if (registerDisabled) registerDisabled.style.display = 'block';
+      
+      if (document.getElementById('registerTab').style.display !== 'none') {
+        showTab('dashboard');
+      }
+    } else {
+      registerTabBtn.style.display = 'block';
+      if (registerForm) registerForm.style.display = 'block';
+      if (registerDisabled) registerDisabled.style.display = 'none';
+    }
+  } catch (error) {
+    userHasId = false;
+  }
 }
 
-/* ================ CORE ACTIONS (MODIFIED to check registration) ================ */
-async function register(){ 
-  // Check if user already has ID
-  if (userHasId) {
-    showStatus('⚠️ ' + (lang==='en'?'You are already registered':'شما قبلاً ثبت‌نام کرده‌اید'), 'error', 'registerResult');
+/* ================= P-TOKEN MARKET ================= */
+async function initPTokenContract() {
+  if (!signer) return;
+  
+  try {
+    contractPToken = new ethers.Contract(PTOKEN_ADDRESS, PTOKEN_ABI, signer);
+    
+    // Get decimals
+    const decimals = await contractPToken.decimals().catch(() => 18);
+    ptokenDecimals = Number(decimals);
+    
+    console.log('✅ P-Token contract initialized');
+  } catch (error) {
+    console.error('Error initializing P-Token contract:', error);
+  }
+}
+
+async function loadPTokenMarket() {
+  if (!contractPToken || !userAddress) return;
+  
+  try {
+    // Get all data in parallel
+    const [price, balance, totalSupply, backingMatic, contractBalance] = await Promise.all([
+      contractPToken.getPTokenPrice().catch(() => 0),
+      contractPToken.balanceOf(userAddress).catch(() => 0),
+      contractPToken.totalSupply().catch(() => 0),
+      contractPToken.totalBackingMatic().catch(() => 0),
+      contractPToken.getContractMaticBalance().catch(() => 0)
+    ]);
+    
+    // Format data
+    const priceFormatted = ethers.formatEther(price);
+    const balanceFormatted = ethers.formatUnits(balance, ptokenDecimals);
+    const totalSupplyFormatted = ethers.formatUnits(totalSupply, ptokenDecimals);
+    const backingMaticFormatted = ethers.formatEther(backingMatic);
+    const contractBalanceFormatted = ethers.formatEther(contractBalance);
+    
+    // Update UI
+    document.getElementById('ptokenPrice').textContent = 
+      `${parseFloat(priceFormatted).toFixed(6)} MATIC`;
+    
+    document.getElementById('ptokenBalance').textContent = 
+      `${parseFloat(balanceFormatted).toFixed(2)} PTOKEN`;
+    
+    document.getElementById('totalSupply').textContent = 
+      `${parseFloat(totalSupplyFormatted).toFixed(0)}`;
+    
+    document.getElementById('backingMatic').textContent = 
+      `${parseFloat(backingMaticFormatted).toFixed(2)} MATIC`;
+    
+    document.getElementById('contractBalance').textContent = 
+      `${parseFloat(contractBalanceFormatted).substring(0, 10)} MATIC`;
+    
+    // Update price timestamp
+    document.getElementById('priceUpdate').textContent = 
+      `Updated: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    
+    // Update sell preview
+    updateSellPreview();
+    
+  } catch (error) {
+    console.error('Error loading P-Token market:', error);
+    showStatus('Error loading P-Token data', 'sellResult', 'error');
+  }
+}
+
+function updateSellPreview() {
+  const sellInput = document.getElementById('sellAmount');
+  if (!sellInput || !sellInput.value) return;
+  
+  const sellAmount = parseFloat(sellInput.value) || 0;
+  const priceText = document.getElementById('ptokenPrice').textContent;
+  const price = parseFloat(priceText) || 0;
+  
+  const receiveAmount = sellAmount * price;
+  document.getElementById('receiveAmount').textContent = 
+    `${receiveAmount.toFixed(6)} MATIC`;
+}
+
+function setMaxPTokens() {
+  const balanceText = document.getElementById('ptokenBalance').textContent;
+  const balance = parseFloat(balanceText) || 0;
+  
+  if (balance > 0) {
+    document.getElementById('sellAmount').value = balance.toFixed(2);
+    updateSellPreview();
+  }
+}
+
+async function sellPTokens() {
+  if (!contractPToken || !userAddress) {
+    showStatus('P-Token contract not loaded', 'sellResult', 'error');
     return;
   }
   
-  const uplineCode = document.getElementById('uplineCode').value; 
-  const position = document.getElementById('position').value === 'true'; 
-  if(!uplineCode){ alert(lang==='en'?'Please enter upline code':'لطفاً کد آپلاین را وارد کنید'); return; } 
-  try{ showStatus('🔄 '+(lang==='en'?'Registering...':'در حال ثبت‌نام...'), 'info', 'registerResult'); 
-    const txPromise = contract.register(uplineCode, position, { value: ENTRY_FEE }); 
-    const receipt = await handleTx(txPromise, 'registerResult'); 
-    showStatus('✅ '+(lang==='en'?'Registration successful':'ثبت‌نام موفق'), 'success', 'registerResult'); 
-    await loadDashboard(); 
-    // Re-check user registration status
-    checkUserRegistration();
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'registerResult'); } 
-}
-
-async function contribute(){ 
-  const amount = document.getElementById('contribution').value; 
-  if(!amount || amount <= 0){ alert(lang==='en'?'Enter valid amount':'لطفاً مقدار معتبر وارد کنید'); return; } 
-  try{ showStatus('🔄 '+(lang==='en'?'Sending contribution...':'در حال ارسال مشارکت...'), 'info', 'minerResult'); 
-    const txPromise = contract.contributeToMinerPool({ value: ethers.parseEther(amount) }); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Contribution success':'مشارکت با موفقیت انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
-}
-
-async function buyTokens(){ 
-  try{ showStatus('🔄 '+(lang==='en'?'Buying tokens...':'در حال خرید توکن...'), 'info', 'minerResult'); 
-    const txPromise = contract.buyMinerTokens(); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Purchase successful':'خرید توکن با موفقیت انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
-}
-
-async function distribute(){ 
-  try{ showStatus('🔄 '+(lang==='en'?'Distributing tokens...':'در حال توزیع توکن‌ها...'), 'info', 'minerResult'); 
-    const txPromise = contract.distributeMinerTokens(); 
-    await handleTx(txPromise, 'minerResult'); 
-    showStatus('✅ '+(lang==='en'?'Distributed':'توزیع توکن‌ها انجام شد'), 'success', 'minerResult'); 
-    await loadDashboard(); 
-  }catch(err){ showStatus('❌ '+err.message, 'error', 'minerResult'); } 
-}
-
-/* ================ Withdraw (pre-checks) ================ */
-async function withdrawPool(){
-  try{
-    showStatus('🔄 '+(lang==='en'?'Checking pool withdraw conditions...':'در حال بررسی شرایط برداشت...'), 'info', 'withdrawResult');
-    const check = await canWithdrawPool();
-    if(!check.ok){
-      showStatus(`⛔ ${check.reason}`, 'error', 'withdrawResult');
-      const btn = document.getElementById('withdrawMainBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'), 4000);
-      return;
-    }
-    showStatus('🔄 '+(lang==='en'?'Withdrawing main pool...':'در حال برداشت از استخر...'), 'info', 'withdrawResult');
-    const txPromise = contract.withdrawPool();
-    await handleTx(txPromise, 'withdrawResult');
-    showStatus('✅ '+(lang==='en'?'Withdraw success':'برداشت با موفقیت انجام شد'), 'success', 'withdrawResult');
-    await loadDashboard();
-  }catch(err){
-    console.error('withdrawPool error', err);
-    showStatus('❌ '+(err && err.message ? err.message : (lang==='en'?'Withdraw failed':'برداشت ناموفق')) , 'error', 'withdrawResult');
+  const sellAmount = document.getElementById('sellAmount').value;
+  if (!sellAmount || parseFloat(sellAmount) <= 0) {
+    showStatus('Please enter valid amount', 'sellResult', 'error');
+    return;
   }
-}
-
-async function withdrawSpecial(){
-  try{
-    const eligible = await contract.eligibleSpecialUserCount().catch(()=>0);
-    if(Number(eligible) === 0){
-      showStatus((lang==='en'?'No eligible special rewards for you at this time':'در این زمان پاداش ویژه‌ای برای شما وجود ندارد'), 'error', 'withdrawResult');
-      const btn = document.getElementById('withdrawSpecialBtn'); btn.classList.add('disabled'); setTimeout(()=>btn.classList.remove('disabled'), 4000);
-      return;
-    }
-    showStatus('🔄 '+(lang==='en'?'Withdrawing special...':'در حال برداشت پاداش ویژه...'), 'info', 'withdrawResult');
-    const txPromise = contract.withdrawSpecials();
-    await handleTx(txPromise, 'withdrawResult');
-    showStatus('✅ '+(lang==='en'?'Special withdrawn':'پاداش ویژه برداشت شد'), 'success', 'withdrawResult');
-    await loadDashboard();
-  }catch(err){ console.error('withdrawSpecial error', err); showStatus('❌ '+(err.message || (lang==='en'?'Special withdraw failed':'برداشت ویژه ناموفق')), 'error', 'withdrawResult'); }
-}
-
-/* ================ Admin Functions ================ */
-async function updateFee(){
-  const newFee = document.getElementById('newFee').value;
-  if(!newFee){ alert('لطفاً کارمزد جدید را وارد کنید'); return; }
-  try{
-    showStatus('🔄 در حال بروزرسانی کارمزد...', 'info', 'adminResult');
-    const txPromise = contract.updateEntryFee(newFee);
-    await handleTx(txPromise, 'adminResult');
-    showStatus('✅ کارمزد با موفقیت بروزرسانی شد', 'success', 'adminResult');
-  }catch(err){ showStatus('❌ ' + err.message, 'error', 'adminResult'); }
-}
-
-async function removeMiners(){
-  const addressesText = document.getElementById('addresses').value;
-  if(!addressesText){ alert('لطفاً آدرس‌ها را وارد کنید'); return; }
-  const addresses = addressesText.split(',').map(addr => addr.trim()).filter(addr => addr.length > 0);
-  if(addresses.length === 0){ alert('آدرس معتبری وارد نشده است'); return; }
-  try{
-    showStatus('🔄 در حال حذف ماینرها...', 'info', 'adminResult');
-    const txPromise = contract.batchRemoveMiners(addresses);
-    await handleTx(txPromise, 'adminResult');
-    showStatus('✅ ماینرها با موفقیت حذف شدند', 'success', 'adminResult');
-  }catch(err){ showStatus('❌ ' + err.message, 'error', 'adminResult'); }
-}
-
-/* ================ Timers (in Actions tab) ================ */
-let poolTimerInterval = null;
-function startPoolTimer(lastWithdrawUnix = 0, cycleDurationSec = 0){
-  if(poolTimerInterval) clearInterval(poolTimerInterval);
-  function render(){
-    const now = Math.floor(Date.now()/1000);
-    const nextUnlock = (lastWithdrawUnix && cycleDurationSec) ? (lastWithdrawUnix + cycleDurationSec) : 0;
-    let remaining = nextUnlock > now ? nextUnlock - now : 0;
-    const lastDate = lastWithdrawUnix ? new Date(lastWithdrawUnix*1000).toUTCString() : '—';
-    document.getElementById('poolTimerLabel').textContent = `${t('last_pool_label')}: ${ lastWithdrawUnix ? lastDate : '—' }`;
-    const segContainer = document.getElementById('poolTimerSegments');
-    const withdrawBtn = document.getElementById('withdrawMainBtn');
-    if(remaining === 0){
-      segContainer.innerHTML = `<div style="font-weight:700;color:var(--success)">${lang==='en'?'Withdrawable Now':'قابل برداشت اکنون'}</div>`;
-      withdrawBtn.classList.remove('disabled');
-    } else {
-      const days = Math.floor(remaining / 86400); remaining %= 86400;
-      const hours = Math.floor(remaining / 3600); remaining %= 3600;
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
-      segContainer.innerHTML = `<div class="time-segment"><div class="time-value">${String(days).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Days':'روز'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
-                                <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
-      withdrawBtn.classList.add('disabled');
-    }
-  }
-  render();
-  poolTimerInterval = setInterval(render, 1000);
-}
-
-let specialTimerInterval = null;
-function startSpecialTimer(){
-  if(specialTimerInterval) clearInterval(specialTimerInterval);
-  function renderSpecial(){
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const day = now.getUTCDate();
-    let target;
-    if(day < 3 || (day === 3 && now.getUTCHours() < 24)) target = new Date(Date.UTC(year, month, 3, 0, 0, 0));
-    else target = new Date(Date.UTC(year, month+1, 3, 0, 0, 0));
-    let diff = Math.floor((target - now) / 1000);
-    if(diff < 0) diff = 0;
-    const days = Math.floor(diff / 86400); diff %= 86400;
-    const hours = Math.floor(diff / 3600); diff %= 3600;
-    const minutes = Math.floor(diff / 60); const seconds = diff % 60;
-    const seg = document.getElementById('specialTimerSegments');
-    seg.innerHTML = `<div class="time-segment"><div class="time-value">${String(days).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Days':'روز'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(hours).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Hours':'ساعت'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(minutes).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Min':'دقیقه'}</div></div>
-                     <div class="time-segment"><div class="time-value">${String(seconds).padStart(2,'0')}</div><div class="time-label">${lang==='en'?'Sec':'ثانیه'}</div></div>`;
-  }
-  renderSpecial();
-  specialTimerInterval = setInterval(renderSpecial, 1000);
-}
-
-/* ================ Dashboard loader (MODIFIED to check registration) ================ */
-async function loadDashboard(){
-  if(!contract) return;
-  try{
-    const [poolBalance, minerPool, specialPool, entryFee, lastPoolWithdrawTime, cycleDuration] = await Promise.all([
-      contract.poolBalance().catch(()=>0),
-      contract.minerTokenPool().catch(()=>0),
-      contract.specialRewardPool().catch(()=>0),
-      contract.ENTRY_FEE().catch(()=>ENTRY_FEE),
-      contract.lastPoolWithdrawTime().catch(()=>0),
-      contract.CYCLE_DURATION().catch(()=>0)
-    ]);
-
-    document.getElementById('poolBalance').textContent = (ethers.formatEther(poolBalance).substring(0,12) || '0') + ' MATIC';
-    document.getElementById('minerPool').textContent = (ethers.formatEther(minerPool).substring(0,12) || '0') + ' pToken';
-    document.getElementById('specialPool').textContent = (ethers.formatEther(specialPool).substring(0,12) || '0') + ' MATIC';
-    document.getElementById('entryFeeDisplay').textContent = (ethers.formatEther(entryFee) || '0') + ' MATIC';
-
-    // timers (actions tab)
-    startPoolTimer(Number(lastPoolWithdrawTime), Number(cycleDuration));
-    startSpecialTimer();
-
-    const userInfo = await contract.getUserInfo(userAddress).catch(()=>null);
-    if(userInfo){
-      const userId = Number(userInfo[0]);
-      showStatus(`<strong>👤 ${lang==='en'?'User #':'کاربر #'}${userId}</strong><br>📊 ${lang==='en'?'Balance':'موجودی'}: ${userInfo[6]}<br>🎁 ${lang==='en'?'Specials':'پاداش ویژه'}: ${userInfo[7]}<br>⛏️ ${userInfo[10] ? '✅':'❌'}<br>💰 ${lang==='en'?'Total rewards':'مجموع پاداش‌ها'}: ${ethers.formatEther(userInfo[8])} MATIC`, 'success', 'userInfo');
-      await loadTreeStructure(userId);
-      
-      // Check if user is owner
-      const owner = await contract.owner().catch(()=>null);
-      if(owner && owner.toLowerCase() === userAddress.toLowerCase()){
-        isOwner = true; 
-        document.getElementById('adminTab').style.display = 'block';
-        // Show admin tab in mobile menu
-        const mobileAdminBtn = document.querySelector('.mobile-tab-btn:nth-child(5)');
-        if (mobileAdminBtn) mobileAdminBtn.style.display = 'block';
-      }
-      
-      // Check user registration status
-      checkUserRegistration();
-    }
-  }catch(e){ console.error('loadDashboard error', e); }
-}
-
-function updateNetworkStatus(connected){
-  const dot = document.getElementById('statusDot');
-  const text = document.getElementById('networkStatus');
-  if(connected){
-    dot.className = 'status-dot connected';
-    text.textContent = lang==='en' ? 'Connected' : 'متصل';
-  }else{
-    dot.className = 'status-dot';
-    text.textContent = lang==='en' ? 'Disconnected' : 'قطع';
-  }
-}
-
-/* ================ Connect wallet (MODIFIED to init mobile menu) ================ */
-async function connectWallet(){
-  if(typeof window.ethereum === 'undefined'){ showStatus('❌ '+(lang==='en'?'Wallet (MetaMask) not found':'کیف پول (مثل MetaMask) یافت نشد'),'error'); return; }
-  try{
+  
+  try {
     showLoading(true);
-    showStatus('🔗 '+(lang==='en'?'Connecting...':'در حال اتصال...'), 'info');
-    const accounts = await window.ethereum.request({ method:'eth_requestAccounts' });
-    userAddress = accounts[0];
-    const chainId = await window.ethereum.request({ method:'eth_chainId' });
-    if(chainId !== POLYGON_CHAIN_ID){
-      showStatus('🔄 '+(lang==='en'?'Switching to Polygon...':'تغییر به شبکه Polygon...'),'info');
-      try{ await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: POLYGON_CHAIN_ID }]}); }catch(e){ if(e.code === 4902){ await window.ethereum.request({ method:'wallet_addEthereumChain', params:[{ chainId: POLYGON_CHAIN_ID, chainName:'Polygon Mainnet', nativeCurrency:{ name:'MATIC', symbol:'MATIC', decimals:18 }, rpcUrls:['https://polygon-rpc.com'], blockExplorerUrls:['https://polygonscan.com'] }]}); } }
-      await new Promise(r=>setTimeout(r,1200));
+    
+    // Convert to correct units
+    const amountInUnits = ethers.parseUnits(sellAmount, ptokenDecimals);
+    
+    // Check balance
+    const balance = await contractPToken.balanceOf(userAddress);
+    if (amountInUnits > balance) {
+      showStatus('Insufficient P-Token balance', 'sellResult', 'error');
+      showLoading(false);
+      return;
     }
+    
+    // Execute sell
+    const tx = await contractPToken.sellPToken(amountInUnits);
+    
+    // Handle transaction
+    await handleTx(Promise.resolve(tx), 'sellResult');
+    
+    // Reload market data
+    await loadPTokenMarket();
+    
+  } catch (error) {
+    console.error('Error selling P-Tokens:', error);
+    showStatus(`Error: ${error.message || 'Sell failed'}`, 'sellResult', 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+/* ================= TIMERS ================= */
+let poolTimerInterval = null;
+let specialTimerInterval = null;
+
+function startPoolTimer(lastWithdrawUnix = 0, cycleDuration = 0) {
+  if (poolTimerInterval) clearInterval(poolTimerInterval);
+  
+  function updateTimer() {
+    const now = Math.floor(Date.now() / 1000);
+    const nextTime = lastWithdrawUnix + cycleDuration;
+    const remaining = Math.max(0, nextTime - now);
+    
+    const container = document.getElementById('poolTimerSegments');
+    if (!container) return;
+    
+    if (remaining === 0) {
+      container.innerHTML = '<div style="color:var(--success);font-weight:700">Ready to Withdraw!</div>';
+      const btn = document.getElementById('withdrawMainBtn');
+      if (btn) btn.classList.remove('disabled');
+    } else {
+      const days = Math.floor(remaining / 86400);
+      const hours = Math.floor((remaining % 86400) / 3600);
+      const minutes = Math.floor((remaining % 3600) / 60);
+      
+      container.innerHTML = `
+        <div style="padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:8px; min-width:60px">
+          <div style="font-size:18px; font-weight:800">${String(days).padStart(2,'0')}</div>
+          <div style="font-size:11px; color:var(--muted)">Days</div>
+        </div>
+        <div style="padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:8px; min-width:60px">
+          <div style="font-size:18px; font-weight:800">${String(hours).padStart(2,'0')}</div>
+          <div style="font-size:11px; color:var(--muted)">Hours</div>
+        </div>
+        <div style="padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:8px; min-width:60px">
+          <div style="font-size:18px; font-weight:800">${String(minutes).padStart(2,'0')}</div>
+          <div style="font-size:11px; color:var(--muted)">Minutes</div>
+        </div>
+      `;
+      const btn = document.getElementById('withdrawMainBtn');
+      if (btn) btn.classList.add('disabled');
+    }
+  }
+  
+  updateTimer();
+  poolTimerInterval = setInterval(updateTimer, 60000); // Update every minute
+}
+
+function startSpecialTimer() {
+  if (specialTimerInterval) clearInterval(specialTimerInterval);
+  
+  function updateSpecialTimer() {
+    const now = new Date();
+    const target = new Date(now);
+    target.setUTCDate(3);
+    target.setUTCHours(0, 0, 0, 0);
+    
+    if (now.getUTCDate() >= 3) {
+      target.setUTCMonth(target.getUTCMonth() + 1);
+    }
+    
+    const diff = Math.max(0, Math.floor((target - now) / 1000));
+    const days = Math.floor(diff / 86400);
+    const hours = Math.floor((diff % 86400) / 3600);
+    
+    document.getElementById('specialTimerSegments').innerHTML = `
+      <div style="font-weight:800; color:var(--accent)">${days}d ${hours}h</div>
+    `;
+  }
+  
+  updateSpecialTimer();
+  specialTimerInterval = setInterval(updateSpecialTimer, 60000);
+}
+
+/* ================= DASHBOARD LOADER ================= */
+async function loadDashboardData() {
+  if (!contractSPS) return;
+  
+  try {
+    const [poolBal, minerBal, specialBal, entryFee, lastWithdraw, cycleDuration] = await Promise.all([
+      contractSPS.poolBalance().catch(() => 0),
+      contractSPS.minerTokenPool().catch(() => 0),
+      contractSPS.specialRewardPool().catch(() => 0),
+      contractSPS.ENTRY_FEE().catch(() => ENTRY_FEE),
+      contractSPS.lastPoolWithdrawTime().catch(() => 0),
+      contractSPS.CYCLE_DURATION().catch(() => 0)
+    ]);
+    
+    // Update stats
+    document.getElementById('poolBalance').textContent = ethers.formatEther(poolBal).substring(0, 10) + ' MATIC';
+    document.getElementById('minerPool').textContent = ethers.formatEther(minerBal).substring(0, 10) + ' pToken';
+    document.getElementById('specialPool').textContent = ethers.formatEther(specialBal).substring(0, 10) + ' MATIC';
+    document.getElementById('entryFeeDisplay').textContent = ethers.formatEther(entryFee) + ' MATIC';
+    
+    // Start timers
+    startPoolTimer(Number(lastWithdraw), Number(cycleDuration));
+    startSpecialTimer();
+    
+    // Load user info
+    if (userAddress) {
+      const userInfo = await contractSPS.getUserInfo(userAddress).catch(() => null);
+      if (userInfo) {
+        const userId = Number(userInfo[0]);
+        const isMiner = userInfo[10];
+        const totalRewards = ethers.formatEther(userInfo[8]);
+        
+        showStatus(`
+          <div style="font-size:18px; font-weight:800; margin-bottom:8px">👤 User #${userId}</div>
+          <div style="margin-bottom:4px">📊 Balance: ${userInfo[6]}</div>
+          <div style="margin-bottom:4px">🎁 Special Awards: ${userInfo[7]}</div>
+          <div style="margin-bottom:4px">⛏️ Miner: ${isMiner ? '✅' : '❌'}</div>
+          <div style="margin-bottom:4px">💰 Total Rewards: ${totalRewards} MATIC</div>
+        `, 'userInfo', 'success');
+        
+        // Check if owner
+        const owner = await contractSPS.owner().catch(() => null);
+        if (owner && owner.toLowerCase() === userAddress.toLowerCase()) {
+          isOwner = true;
+          document.getElementById('adminTabBtn').style.display = 'block';
+          updateMobileTabs();
+        }
+        
+        // Load points and awards
+        await loadPointsAndAwards();
+        
+        // Check registration
+        await checkUserRegistration();
+      }
+    }
+    
+  } catch (error) {
+    console.error('Load dashboard error:', error);
+  }
+}
+
+/* ================= CONNECT WALLET ================= */
+async function connectWallet() {
+  if (typeof window.ethereum === 'undefined') {
+    showStatus('❌ Wallet (MetaMask) not found', 'userInfo', 'error');
+    return;
+  }
+  
+  try {
+    showLoading(true);
+    showStatus('🔗 Connecting...', 'userInfo');
+    
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    userAddress = accounts[0];
+    
+    // Check chain
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== POLYGON_CHAIN_ID) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: POLYGON_CHAIN_ID }]
+        });
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: POLYGON_CHAIN_ID,
+              chainName: 'Polygon Mainnet',
+              nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+              rpcUrls: ['https://polygon-rpc.com'],
+              blockExplorerUrls: ['https://polygonscan.com']
+            }]
+          });
+        }
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    // Initialize provider and contracts
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
-    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-    document.getElementById('connectArea').innerHTML = `<div style="background:linear-gradient(90deg,#10b981,#34d399);color:#06281a;padding:10px;border-radius:8px;font-weight:700">✅ ${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}</div>`;
-    updateNetworkStatus(true);
+    contractSPS = new ethers.Contract(SPS_ADDRESS, SPS_ABI, signer);
     
-    // Update mobile menu with wallet address
-    const mobileWallet = document.getElementById('mobileWalletAddress');
-    if (mobileWallet) {
-      mobileWallet.textContent = userAddress;
-    }
+    // Initialize P-Token contract
+    await initPTokenContract();
     
-    await loadDashboard();
-    showStatus('✅ '+(lang==='en'?'Wallet connected':'کیف پول متصل شد'), 'success');
-    window.ethereum.on('accountsChanged', ()=> location.reload());
-    window.ethereum.on('chainChanged', ()=> location.reload());
-  }catch(err){ showStatus('❌ '+err.message, 'error'); }finally{ showLoading(false); }
+    // Update UI
+    document.getElementById('connectArea').innerHTML = `
+      <div style="background:rgba(99,102,241,0.1); color:var(--primary); padding:10px 16px; border-radius:10px; font-weight:800; border:1px solid rgba(99,102,241,0.3)">
+        ✅ ${userAddress.substring(0,6)}...${userAddress.substring(userAddress.length-4)}
+      </div>
+    `;
+    
+    // Update status
+    document.getElementById('statusDot').classList.add('connected');
+    document.getElementById('networkStatus').textContent = 'Connected';
+    
+    // Load data
+    await loadDashboardData();
+    
+    showStatus('✅ Wallet connected successfully', 'userInfo', 'success');
+    
+    // Listen for changes
+    window.ethereum.on('accountsChanged', () => window.location.reload());
+    window.ethereum.on('chainChanged', () => window.location.reload());
+    
+  } catch (error) {
+    showStatus(`❌ Error: ${error.message}`, 'userInfo', 'error');
+  } finally {
+    showLoading(false);
+  }
 }
-document.getElementById('connectBtn').onclick = connectWallet;
 
-/* ================ Tabs ================ */
-function showTab(tabName){
-  const tabs = ['dashboard','register','miner','actions','admin'];
-  tabs.forEach(t => document.getElementById(t+'Tab').style.display = 'none');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
+/* ================= CORE FUNCTIONS ================= */
+async function register() {
+  if (userHasId) {
+    alert('You are already registered!');
+    return;
+  }
   
+  const uplineCode = document.getElementById('uplineCode').value;
+  const position = document.getElementById('position').value === 'true';
+  
+  if (!uplineCode) {
+    alert('Please enter upline code');
+    return;
+  }
+  
+  try {
+    const txPromise = contractSPS.register(uplineCode, position, { value: ENTRY_FEE });
+    await handleTx(txPromise, 'registerResult');
+    await checkUserRegistration();
+  } catch (error) {
+    console.error('Register error:', error);
+  }
+}
+
+async function contribute() {
+  const amount = document.getElementById('contribution').value;
+  if (!amount || parseFloat(amount) <= 0) {
+    alert('Please enter valid amount');
+    return;
+  }
+  
+  try {
+    const txPromise = contractSPS.contributeToMinerPool({ value: ethers.parseEther(amount) });
+    await handleTx(txPromise, 'minerResult');
+  } catch (error) {
+    console.error('Contribute error:', error);
+  }
+}
+
+async function buyTokens() {
+  try {
+    const txPromise = contractSPS.buyMinerTokens();
+    await handleTx(txPromise, 'minerResult');
+  } catch (error) {
+    console.error('Buy tokens error:', error);
+  }
+}
+
+async function distribute() {
+  try {
+    const txPromise = contractSPS.distributeMinerTokens();
+    await handleTx(txPromise, 'minerResult');
+  } catch (error) {
+    console.error('Distribute error:', error);
+  }
+}
+
+async function withdrawPool() {
+  try {
+    const txPromise = contractSPS.withdrawPool();
+    await handleTx(txPromise, 'withdrawResult');
+  } catch (error) {
+    console.error('Withdraw pool error:', error);
+  }
+}
+
+async function withdrawSpecial() {
+  try {
+    const txPromise = contractSPS.withdrawSpecials();
+    await handleTx(txPromise, 'withdrawResult');
+  } catch (error) {
+    console.error('Withdraw special error:', error);
+  }
+}
+
+async function updateFee() {
+  const newFee = document.getElementById('newFee').value;
+  if (!newFee) {
+    alert('Please enter new fee');
+    return;
+  }
+  
+  try {
+    const txPromise = contractSPS.updateEntryFee(newFee);
+    await handleTx(txPromise, 'adminResult');
+  } catch (error) {
+    console.error('Update fee error:', error);
+  }
+}
+
+async function removeMiners() {
+  const addressesText = document.getElementById('addresses').value;
+  if (!addressesText) {
+    alert('Please enter addresses');
+    return;
+  }
+  
+  const addresses = addressesText.split(',').map(addr => addr.trim()).filter(addr => addr.length > 0);
+  if (addresses.length === 0) {
+    alert('No valid addresses entered');
+    return;
+  }
+  
+  try {
+    const txPromise = contractSPS.batchRemoveMiners(addresses);
+    await handleTx(txPromise, 'adminResult');
+  } catch (error) {
+    console.error('Remove miners error:', error);
+  }
+}
+
+/* ================= TAB MANAGEMENT ================= */
+function showTab(tabName) {
+  // Hide all tabs
+  ['dashboard', 'register', 'miner', 'actions', 'ptoken', 'admin'].forEach(tab => {
+    document.getElementById(tab + 'Tab').style.display = 'none';
+  });
+  
+  // Remove active class
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.mobile-tab-btn').forEach(btn => btn.classList.remove('active'));
+  
+  // Show selected tab
   document.getElementById(tabName + 'Tab').style.display = 'block';
   
-  // Activate desktop tab
-  document.querySelectorAll('.tab-btn').forEach(b=>{
-    if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active');
+  // Add active class
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.textContent.trim().toLowerCase().includes(tabName.toLowerCase())) {
+      btn.classList.add('active');
+    }
   });
   
-  // Activate mobile tab
-  document.querySelectorAll('.mobile-tab-btn').forEach(b=>{
-    if(b.textContent.trim() === (lang==='en'? translations.en[tabName] : translations.fa[tabName])) b.classList.add('active');
+  document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+    if (btn.textContent.trim().toLowerCase().includes(tabName.toLowerCase())) {
+      btn.classList.add('active');
+    }
   });
   
-  if(tabName === 'dashboard') loadDashboard();
-  
-  // Check if trying to access register tab when already registered
-  if(tabName === 'register' && userHasId) {
+  // Special handling
+  if (tabName === 'register' && userHasId) {
     showTab('dashboard');
-    alert(lang==='en' ? 'You are already registered!' : 'شما قبلاً ثبت‌نام کرده‌اید!');
+    alert('You are already registered!');
+    return;
+  }
+  
+  // Load data
+  if (tabName === 'dashboard') {
+    loadDashboardData();
+  } else if (tabName === 'ptoken') {
+    loadPTokenMarket();
   }
 }
 
-/* ================ Logo flip cycle ================ */
-const logoCard = document.getElementById('logoCard');
-const logoFront = document.getElementById('logoFront');
-const logoBack = document.getElementById('logoBack');
-
-let logoCycleInterval = null;
-function showFront(){
-  logoFront.style.transform = 'rotateY(0deg) translateZ(0)';
-  logoFront.style.opacity = '1';
-  logoBack.style.transform = 'rotateY(180deg) translateZ(0)';
-  logoBack.style.opacity = '0';
-  logoCard.style.transform = 'rotateY(0deg)';
-}
-function showBack(){
-  logoFront.style.transform = 'rotateY(-180deg) translateZ(0)';
-  logoFront.style.opacity = '0';
-  logoBack.style.transform = 'rotateY(0deg) translateZ(0)';
-  logoBack.style.opacity = '1';
-  logoCard.style.transform = 'rotateY(180deg)';
-}
-function startLogoCycle(){
-  showFront();
-  logoCycleInterval = setInterval(()=>{
-    showBack();
-    setTimeout(()=> showFront(), 2000);
-  }, 3000);
-}
-
-/* ================ Init ================ */
-window.onload = function(){
-  startVisuals();
-  startLogoCycle();
-  setLanguage();
+/* ================= INITIALIZATION ================= */
+window.onload = function() {
+  // Initialize AI background
+  initParticles();
+  window.addEventListener('resize', initParticles);
+  
+  // Initialize mobile menu
   initMobileMenu();
   
+  // Set up connect button
   document.getElementById('connectBtn').onclick = connectWallet;
-  document.getElementById('hamburgerBtn').onclick = toggleMobileMenu;
-  document.getElementById('mobileOverlay').onclick = closeMobileMenu;
   
-  // auto-connect if previously authorized
-  if(typeof window.ethereum !== 'undefined'){
-    window.ethereum.request({ method:'eth_accounts' }).then(accounts=>{
-      if(accounts.length > 0) setTimeout(()=> connectWallet(), 800);
+  // Auto-connect if previously connected
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+      if (accounts.length > 0) {
+        setTimeout(() => connectWallet(), 1000);
+      }
     });
   }
-
-  // resize canvases
-  resizeNeon(); resizeConfetti();
   
-  // Handle initial resize
-  handleResize();
+  // Start with dashboard
+  showTab('dashboard');
 };
 </script>
 </body>
